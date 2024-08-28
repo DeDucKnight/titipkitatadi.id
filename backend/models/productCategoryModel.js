@@ -33,6 +33,12 @@ const ProductCategory = sequelize.define('ProductCategory', {
 });
 
 // Establish associations
+Product.hasMany(ProductCategory, { foreignKey: 'productid' });
+ProductCategory.belongsTo(Product, { foreignKey: 'productid' });
+
+CategoryDetail.hasMany(ProductCategory, { foreignKey: 'categorydetailid' });
+ProductCategory.belongsTo(CategoryDetail, { foreignKey: 'categorydetailid' });
+
 Product.belongsToMany(CategoryDetail, { through: ProductCategory, foreignKey: 'productid' });
 CategoryDetail.belongsToMany(Product, { through: ProductCategory, foreignKey: 'categorydetailid' });
 
