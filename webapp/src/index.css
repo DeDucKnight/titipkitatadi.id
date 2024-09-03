@@ -1,0 +1,15 @@
+@import './assets/css/fonts.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    .btn-link .btn-text {
+        @apply relative after:absolute after:-bottom-2px after:left-1/2 after:block after:h-px after:w-0 after:bg-primary-500 after:transition-all after:content-[''] after:hover:left-0 after:hover:w-full;
+    }
+}
+
+:root {
+    font-family: 'Inter', sans-serif;
+}

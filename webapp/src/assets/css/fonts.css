@@ -1,0 +1,251 @@
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter28pt-Black.eot");
+  src:
+    url("../fonts/Inter28pt-Black.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Inter28pt-Black.woff2") format("woff2"),
+    url("../fonts/Inter28pt-Black.woff") format("woff"),
+    url("../fonts/Inter28pt-Black.ttf") format("truetype"),
+    url("../fonts/Inter28pt-Black.svg#Inter28pt-Black") format("svg");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter28pt-Bold.eot");
+  src:
+    url("../fonts/Inter28pt-Bold.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Inter28pt-Bold.woff2") format("woff2"),
+    url("../fonts/Inter28pt-Bold.woff") format("woff"),
+    url("../fonts/Inter28pt-Bold.ttf") format("truetype"),
+    url("../fonts/Inter28pt-Bold.svg#Inter28pt-Bold") format("svg");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter28pt-ExtraLight.eot");
+  src:
+    url("../fonts/Inter28pt-ExtraLight.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Inter28pt-ExtraLight.woff2") format("woff2"),
+    url("../fonts/Inter28pt-ExtraLight.woff") format("woff"),
+    url("../fonts/Inter28pt-ExtraLight.ttf") format("truetype"),
+    url("../fonts/Inter28pt-ExtraLight.svg#Inter28pt-ExtraLight") format("svg");
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter28pt-ExtraBold.eot");
+  src:
+    url("../fonts/Inter28pt-ExtraBold.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Inter28pt-ExtraBold.woff2") format("woff2"),
+    url("../fonts/Inter28pt-ExtraBold.woff") format("woff"),
+    url("../fonts/Inter28pt-ExtraBold.ttf") format("truetype"),
+    url("../fonts/Inter28pt-ExtraBold.svg#Inter28pt-ExtraBold") format("svg");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter28pt-Regular.eot");
+  src:
+    url("../fonts/Inter28pt-Regular.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Inter28pt-Regular.woff2") format("woff2"),
+    url("../fonts/Inter28pt-Regular.woff") format("woff"),
+    url("../fonts/Inter28pt-Regular.ttf") format("truetype"),
+    url("../fonts/Inter28pt-Regular.svg#Inter28pt-Regular") format("svg");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter28pt-Light.eot");
+  src:
+    url("../fonts/Inter28pt-Light.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Inter28pt-Light.woff2") format("woff2"),
+    url("../fonts/Inter28pt-Light.woff") format("woff"),
+    url("../fonts/Inter28pt-Light.ttf") format("truetype"),
+    url("../fonts/Inter28pt-Light.svg#Inter28pt-Light") format("svg");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter28pt-Medium.eot");
+  src:
+    url("../fonts/Inter28pt-Medium.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Inter28pt-Medium.woff2") format("woff2"),
+    url("../fonts/Inter28pt-Medium.woff") format("woff"),
+    url("../fonts/Inter28pt-Medium.ttf") format("truetype"),
+    url("../fonts/Inter28pt-Medium.svg#Inter28pt-Medium") format("svg");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter28pt-SemiBold.eot");
+  src:
+    url("../fonts/Inter28pt-SemiBold.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Inter28pt-SemiBold.woff2") format("woff2"),
+    url("../fonts/Inter28pt-SemiBold.woff") format("woff"),
+    url("../fonts/Inter28pt-SemiBold.ttf") format("truetype"),
+    url("../fonts/Inter28pt-SemiBold.svg#Inter28pt-SemiBold") format("svg");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter28pt-Thin.eot");
+  src:
+    url("../fonts/Inter28pt-Thin.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Inter28pt-Thin.woff2") format("woff2"),
+    url("../fonts/Inter28pt-Thin.woff") format("woff"),
+    url("../fonts/Inter28pt-Thin.ttf") format("truetype"),
+    url("../fonts/Inter28pt-Thin.svg#Inter28pt-Thin") format("svg");
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter28pt-Black.eot");
+  src:
+    url("../fonts/Inter28pt-Black.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Inter28pt-Black.woff2") format("woff2"),
+    url("../fonts/Inter28pt-Black.woff") format("woff"),
+    url("../fonts/Inter28pt-Black.ttf") format("truetype"),
+    url("../fonts/Inter28pt-Black.svg#Inter28pt-Black") format("svg");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter28pt-Bold.eot");
+  src:
+    url("../fonts/Inter28pt-Bold.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Inter28pt-Bold.woff2") format("woff2"),
+    url("../fonts/Inter28pt-Bold.woff") format("woff"),
+    url("../fonts/Inter28pt-Bold.ttf") format("truetype"),
+    url("../fonts/Inter28pt-Bold.svg#Inter28pt-Bold") format("svg");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter28pt-ExtraLight.eot");
+  src:
+    url("../fonts/Inter28pt-ExtraLight.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Inter28pt-ExtraLight.woff2") format("woff2"),
+    url("../fonts/Inter28pt-ExtraLight.woff") format("woff"),
+    url("../fonts/Inter28pt-ExtraLight.ttf") format("truetype"),
+    url("../fonts/Inter28pt-ExtraLight.svg#Inter28pt-ExtraLight") format("svg");
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter28pt-ExtraBold.eot");
+  src:
+    url("../fonts/Inter28pt-ExtraBold.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Inter28pt-ExtraBold.woff2") format("woff2"),
+    url("../fonts/Inter28pt-ExtraBold.woff") format("woff"),
+    url("../fonts/Inter28pt-ExtraBold.ttf") format("truetype"),
+    url("../fonts/Inter28pt-ExtraBold.svg#Inter28pt-ExtraBold") format("svg");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter28pt-Regular.eot");
+  src:
+    url("../fonts/Inter28pt-Regular.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Inter28pt-Regular.woff2") format("woff2"),
+    url("../fonts/Inter28pt-Regular.woff") format("woff"),
+    url("../fonts/Inter28pt-Regular.ttf") format("truetype"),
+    url("../fonts/Inter28pt-Regular.svg#Inter28pt-Regular") format("svg");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter28pt-Light.eot");
+  src:
+    url("../fonts/Inter28pt-Light.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Inter28pt-Light.woff2") format("woff2"),
+    url("../fonts/Inter28pt-Light.woff") format("woff"),
+    url("../fonts/Inter28pt-Light.ttf") format("truetype"),
+    url("../fonts/Inter28pt-Light.svg#Inter28pt-Light") format("svg");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter28pt-Medium.eot");
+  src:
+    url("../fonts/Inter28pt-Medium.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Inter28pt-Medium.woff2") format("woff2"),
+    url("../fonts/Inter28pt-Medium.woff") format("woff"),
+    url("../fonts/Inter28pt-Medium.ttf") format("truetype"),
+    url("../fonts/Inter28pt-Medium.svg#Inter28pt-Medium") format("svg");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter28pt-SemiBold.eot");
+  src:
+    url("../fonts/Inter28pt-SemiBold.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Inter28pt-SemiBold.woff2") format("woff2"),
+    url("../fonts/Inter28pt-SemiBold.woff") format("woff"),
+    url("../fonts/Inter28pt-SemiBold.ttf") format("truetype"),
+    url("../fonts/Inter28pt-SemiBold.svg#Inter28pt-SemiBold") format("svg");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter28pt-Thin.eot");
+  src:
+    url("../fonts/Inter28pt-Thin.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/Inter28pt-Thin.woff2") format("woff2"),
+    url("../fonts/Inter28pt-Thin.woff") format("woff"),
+    url("../fonts/Inter28pt-Thin.ttf") format("truetype"),
+    url("../fonts/Inter28pt-Thin.svg#Inter28pt-Thin") format("svg");
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
