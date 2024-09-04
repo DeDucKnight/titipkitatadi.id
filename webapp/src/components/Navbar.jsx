@@ -19,21 +19,21 @@ const Navbar = forwardRef((props, ref) => {
                 <ul className="mt-3">
                     <Link
                         to={'/products'}
-                        className="flex items-center gap-4 rounded px-4 py-3 text-sm text-primary-500 transition-all hover:bg-blue-50 hover:text-blue-600"
+                        className="hover:bg-primary-50 hover:text-primary-600 flex items-center gap-4 rounded px-4 py-3 text-sm text-primary-500 transition-all"
                     >
                         <Icon name="products" />
                         <span>Products</span>
                     </Link>
                     <Link
                         to={'/categories'}
-                        className="flex items-center gap-4 rounded px-4 py-3 text-sm text-primary-500 transition-all hover:bg-blue-50 hover:text-blue-600"
+                        className="hover:bg-primary-50 hover:text-primary-600 flex items-center gap-4 rounded px-4 py-3 text-sm text-primary-500 transition-all"
                     >
                         <Icon name="categories" />
                         <span>Categories</span>
                     </Link>
                     <Link
                         to={'/images'}
-                        className="flex items-center gap-4 rounded px-4 py-3 text-sm text-primary-500 transition-all hover:bg-blue-50 hover:text-blue-600"
+                        className="hover:bg-primary-50 hover:text-primary-600 flex items-center gap-4 rounded px-4 py-3 text-sm text-primary-500 transition-all"
                     >
                         <Icon name="images" />
                         <span>Images</span>

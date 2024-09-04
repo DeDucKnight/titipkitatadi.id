@@ -1,6 +1,10 @@
-import React from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import Switch from '../components/Switch'
 import Button from '../components/Button'
+import Icon from '../components/Icons'
+import Input from '../components/Input'
+
 export const categories = [
     {
         categoryId: '883ff002-1310-4043-a927-a5bd55562d81',
@@ -213,57 +217,137 @@ export const categories = [
         ],
     },
 ]
-const Categories = () => {
-    const handleOnChange = () => {}
+function generateGUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(
+        /[xy]/g,
+        function (c) {
+            var r = (Math.random() * 16) | 0,
+                v = c === 'x' ? r : (r & 0x3) | 0x8
+            return v.toString(16)
+        }
+    )
+}
+
+const Category = () => {
+    const { guid } = useParams()
+    const location = useLocation()
+    const pathnames = location.pathname.split('/').filter((el) => el)
+    const [formData, setFormData] = useState([])
+    const [categoryParent, setCategoryParent] = useState('')
+
+    useEffect(() => {
+        setFormData(() => {
+            return categories.find((category) => category.categoryId == guid)
+                .categoryDetails
+        })
+
+        setCategoryParent(
+            categories.find((category) => category.categoryId == guid)
+                .categoryName
+        )
+    }, [guid])
+    const handleSubmit = (event) => {
+        event.preventDefault()
+        const jsonData = JSON.stringify(formData)
+        console.log('Form Data as JSON:', jsonData)
+    }
+    const handleAddCategories = (e) => {
+        e.preventDefault()
+        const { value } = document.querySelector('#categories')
+        if (value) {
+            const category = {
+                categoryDetailId: generateGUID(),
+                categoryId: guid,
+                categoryDetailName: value,
+                status: true,
+                createdDate: new Date(),
+            }
+
+            setFormData((prevFormData) => [...prevFormData, category])
+        }
+    }
     return (
-        <div className="relative mx-4 w-full">
-            <table className="top-0 z-10 min-w-full bg-white">
-                <thead className="top-0 z-10 whitespace-nowrap bg-gray-100">
-                    <tr className="top-0 z-10">
-                        <th className="top-0 z-10 p-4 text-left text-xs font-semibold text-gray-800">
-                            Category Name
-                        </th>
-                        <th className="top-0 z-10 p-4 text-left text-xs font-semibold text-gray-800">
-                            Last Edited
-                        </th>
-                        <th className="top-0 z-10 w-[1%] p-4 text-end text-xs font-semibold text-gray-800">
-                            Actions
-                        </th>
-                    </tr>
-                </thead>
-                <tbody className="max-h-40 overflow-auto whitespace-nowrap">
-                    {categories.map((item, index) => (
-                        <tr className="hover:bg-gray-50" key={item.categoryId}>
-                            <td className="p-4 text-gray-800">
-                                <Button
-                                    isLink={true}
-                                    type={'link'}
-                                    urlTarget={`/categories/${item.categoryId}`}
-                                    text={item.categoryName}
-                                    className="!justify-start"
-                                />
-                            </td>
-                            <td className="p-4 text-gray-800">
-                                {new Intl.DateTimeFormat('en-US', {
-                                    year: 'numeric',
-                                    month: '2-digit',
-                                    day: '2-digit',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    second: '2-digit',
-                                }).format(new Date(item.createdDate))}
-                            </td>
-                            <td className="w-[1%] p-4">
-                                <div className="inline-flex w-full items-center justify-end gap-4">
-                                    <Switch isChecked={item.status} />
-                                </div>
-                            </td>
+        <div className="mx-4 w-full overflow-x-hidden px-4">
+            <div className="mb-7 border-b pb-4">
+                <div className="flex items-center justify-between">
+                    <ol className="inline-flex items-center space-x-1 md:space-x-2">
+                        {pathnames.map((value, index) => {
+                            let to = `/${pathnames.slice(0, index + 1).join('/')}`
+
+                            return (
+                                <li key={index} className="flex items-center">
+                                    {index === pathnames.length - 1 ? (
+                                        <span className="text-sm font-medium capitalize text-gray-400">
+                                            {categoryParent}
+                                        </span>
+                                    ) : (
+                                        <>
+                                            <Link
+                                                to={to}
+                                                className="text-sm font-medium capitalize text-gray-700 hover:text-gray-900"
+                                            >
+                                                {decodeURI(value)}
+                                            </Link>
+                                            <Icon
+                                                className="h-6 w-6 text-gray-400"
+                                                name="chevron-right"
+                                                width={20}
+                                                fill={'#374151'}
+                                            />
+                                        </>
+                                    )}
+                                </li>
+                            )
+                        })}
+                    </ol>
+                </div>
+            </div>
+            <form
+                className="space-y-4 md:space-y-6"
+                action="#"
+                onSubmit={handleSubmit}
+            >
+                <div className="flex justify-between">
+                    <h1 className="text-3xl font-bold">{categoryParent}</h1>
+
+                    <Button text={'Save'} btnType={'submit'} />
+                </div>
+                <Input
+                    id="categories"
+                    labelText="Categories"
+                    btnText={'Add'}
+                    btnOnClick={handleAddCategories}
+                />
+                <table className="min-w-full bg-white">
+                    <thead className="whitespace-nowrap bg-gray-100">
+                        <tr className="">
+                            <th className="p-4 text-left text-sm font-semibold text-gray-800">
+                                Categories
+                            </th>
+                            <th className="w-[1%] p-4 text-end text-sm font-semibold text-gray-800">
+                                Actions
+                            </th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody className="max-h-40 overflow-auto whitespace-nowrap">
+                        {formData.map((data, index) => (
+                            <tr className="hover:bg-gray-50" key={index}>
+                                <td className="p-4 align-top text-sm text-gray-800">
+                                    {data.categoryDetailName}
+                                </td>
+
+                                <td className="w-[1%] p-4">
+                                    <div className="inline-flex w-full items-center justify-end gap-4">
+                                        <Switch isChecked={data.status} />
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </form>
         </div>
     )
 }
 
-export default Categories
+export default Category
