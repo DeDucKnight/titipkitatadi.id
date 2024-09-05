@@ -19,6 +19,7 @@ const Input = ({
     btnText,
     handleChange,
     btnOnClick,
+    imgUploadContainerClassName,
 }) => {
     const [showPassword, setShowPassword] = useState(false)
     const [showColorPicker, setShowColorPicker] = useState(false)
@@ -57,7 +58,7 @@ const Input = ({
                                 name={id}
                                 id={id}
                                 placeholder={placeholder}
-                                className={`${inputClassName} focus:ring-primary-600 focus:border-primary-600 block w-full border border-gray-300 p-2.5 text-sm text-gray-900`}
+                                className={`${inputClassName} block w-full border border-gray-300 p-2.5 text-sm text-gray-900 focus:border-primary-600 focus:ring-primary-600`}
                                 required={required}
                                 onFocus={handleOnFocus}
                                 onBlur={handleOnFocus}
@@ -74,7 +75,7 @@ const Input = ({
                                 name={id}
                                 id={id}
                                 placeholder={placeholder}
-                                className={`${inputClassName} focus:ring-primary-600 focus:border-primary-600 block w-full border border-gray-300 p-2.5 text-sm text-gray-900`}
+                                className={`${inputClassName} block w-full border border-gray-300 p-2.5 text-sm text-gray-900 focus:border-primary-600 focus:ring-primary-600`}
                                 required={required}
                             />
                         )}
@@ -113,7 +114,7 @@ const Input = ({
                 <>
                     <label
                         htmlFor={id}
-                        className="flex aspect-card h-48 cursor-pointer flex-col items-center justify-center border-2 border-dashed border-gray-300 bg-gray-50 p-4 hover:bg-gray-100"
+                        className={`flex aspect-card h-48 cursor-pointer flex-col items-center justify-center border-2 border-dashed border-gray-300 bg-gray-50 p-4 hover:bg-gray-100 ${imgUploadContainerClassName}`}
                     >
                         <div className="flex flex-col items-center justify-center">
                             <svg

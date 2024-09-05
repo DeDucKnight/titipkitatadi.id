@@ -4,6 +4,7 @@ import Switch from '../components/Switch'
 import Button from '../components/Button'
 import Icon from '../components/Icons'
 import Input from '../components/Input'
+import Image from '../components/Image'
 
 export const categories = [
     {
@@ -266,6 +267,12 @@ const Category = () => {
             setFormData((prevFormData) => [...prevFormData, category])
         }
     }
+    const handleImgChange = (e) => {
+        let imgFile = ''
+        if (e.target.type === 'file') {
+            imgFile = e.target.files[0]
+        }
+    }
     return (
         <div className="mx-4 w-full overflow-x-hidden px-4">
             <div className="mb-7 border-b pb-4">
@@ -324,6 +331,9 @@ const Category = () => {
                             <th className="p-4 text-left text-sm font-semibold text-gray-800">
                                 Categories
                             </th>
+                            <th className="p-4 text-left text-sm font-semibold text-gray-800">
+                                Images
+                            </th>
                             <th className="w-[1%] p-4 text-end text-sm font-semibold text-gray-800">
                                 Actions
                             </th>
@@ -335,8 +345,25 @@ const Category = () => {
                                 <td className="p-4 align-top text-sm text-gray-800">
                                     {data.categoryDetailName}
                                 </td>
-
-                                <td className="w-[1%] p-4">
+                                <td className="p-4 align-top text-sm text-gray-800">
+                                    <div className="flex w-full flex-wrap gap-3">
+                                        {/* <Image
+                                            key={image.imageId}
+                                            imgSrc={image.imagePath}
+                                            ratio="aspect-card"
+                                            className="h-48"
+                                        /> */}
+                                        <Input
+                                            handleChange={handleImgChange}
+                                            id={`img_${data.categoryDetailName}`}
+                                            isUploadImage={true}
+                                            imgUploadContainerClassName={
+                                                '!aspect-20x9 !h-full'
+                                            }
+                                        />
+                                    </div>
+                                </td>
+                                <td className="w-[1%] p-4 align-top">
                                     <div className="inline-flex w-full items-center justify-end gap-4">
                                         <Switch isChecked={data.status} />
                                     </div>

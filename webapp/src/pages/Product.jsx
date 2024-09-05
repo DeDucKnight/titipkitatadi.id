@@ -17,7 +17,7 @@ const productDetail = {
     Brand: 'Mihel',
     colors: ['#FF0000', '#008000', '#0000FF'],
     size: ['xs', 's', 'm', 'l'],
-    material: 'wool',
+    materials: ['wool', 'wool2'],
     sizeMetric: 'shirt',
     onlineStores: [
         {
@@ -407,7 +407,7 @@ const Product = () => {
         Brand: '',
         colors: [],
         size: [],
-        material: '',
+        materials: [],
         sizeMetric: '',
         productImages: [],
         status: '',
@@ -445,7 +445,7 @@ const Product = () => {
             Brand: productDetail.Brand || '',
             colors: productDetail.colors || [],
             size: productDetail.size || [],
-            material: productDetail.material || '',
+            materials: productDetail.materials || [],
             status: productDetail.status || '',
             sizeMetric: productDetail.sizeMetric || '',
             onlineStores: productDetail.onlineStores || [],
@@ -471,6 +471,16 @@ const Product = () => {
             setFormData((prevFormData) => ({
                 ...prevFormData,
                 size: [...prevFormData.size, value],
+            }))
+        }
+    }
+    const handleAddMaterial = (e) => {
+        e.preventDefault()
+        const { value } = document.querySelector('#material')
+        if (value) {
+            setFormData((prevFormData) => ({
+                ...prevFormData,
+                materials: [...prevFormData.materials, value],
             }))
         }
     }
@@ -715,12 +725,44 @@ const Product = () => {
                         />
                     </div>
                     <Input
-                        handleChange={handleChange}
                         id="material"
-                        labelText="Material"
-                        required={true}
-                        value={formData.material}
+                        labelText="Materials"
+                        btnText={'Add'}
+                        btnOnClick={handleAddMaterial}
                     />
+                    <table className="min-w-full bg-white">
+                        <thead className="whitespace-nowrap bg-gray-100">
+                            <tr className="">
+                                <th className="p-4 text-left text-xs font-semibold text-gray-800">
+                                    Materials
+                                </th>
+                                <th className="w-[1%] p-4 text-end text-xs font-semibold text-gray-800">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="max-h-40 overflow-auto whitespace-nowrap">
+                            {formData.materials.map((material, index) => (
+                                <tr className="hover:bg-gray-50" key={index}>
+                                    <td className="p-4 text-sm text-gray-800">
+                                        {material}
+                                    </td>
+                                    <td className="w-[1%] p-4 text-sm">
+                                        <div className="inline-flex w-full items-center justify-end gap-4 text-sm">
+                                            <Button
+                                                iconName={'edit'}
+                                                type={'link'}
+                                            />
+                                            <Button
+                                                iconName={'trash'}
+                                                type={'link'}
+                                            />
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                     <div className="flex flex-col gap-2">
                         <p className="block text-sm font-medium text-gray-900">
                             Online Stores
