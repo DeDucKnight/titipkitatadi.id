@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import Icon from '../components/Icons'
 import Input from '../components/Input'
 import Image from '../components/Image'
+import Button from '../components/Button'
 
 const Images = () => {
     const location = useLocation()
@@ -40,6 +41,11 @@ const Images = () => {
                 action="#"
                 onSubmit={handleSubmit}
             >
+                <div className="flex justify-between">
+                    <h1 className="text-3xl font-bold">Images</h1>
+
+                    <Button text={'Save'} btnType={'submit'} />
+                </div>
                 <div className="space-y-7">
                     <div className="flex flex-col gap-2">
                         <p className="text-lg font-semibold">
