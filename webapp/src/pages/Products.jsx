@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import placeholderImg from '../assets/images/placeholder-image.jpg'
 import Switch from '../components/Switch'
 import Button from '../components/Button'
 import { Link } from 'react-router-dom'
+import axios from 'axios';
 
 const productItems = [
     {
@@ -844,7 +845,26 @@ const productItems = [
 ]
 
 const Products = () => {
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
     const handleOnChange = () => {}
+
+    const fetchProducts = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get('http://localhost:5000/api/products'); 
+            setProducts(response.data.products);
+        } catch (error) {
+            console.error('Error fetching products:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchProducts();
+    }, []);
+    
     return (
         <div className="relative mx-4 w-full">
             <table className="top-0 z-10 min-w-full bg-white">
@@ -868,7 +888,7 @@ const Products = () => {
                     </tr>
                 </thead>
                 <tbody className="max-h-40 overflow-auto whitespace-nowrap">
-                    {productItems.map((item, index) => (
+                    {products.map((item, index) => (
                         <tr className="hover:bg-gray-50" key={item.productid}>
                             <td className="table-cell size-24 p-4 text-gray-800">
                                 <Link to={`/products/${item.productid}`}>

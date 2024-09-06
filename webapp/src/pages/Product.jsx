@@ -7,6 +7,7 @@ import Switch from '../components/Switch'
 import Image from '../components/Image'
 import CategorySelection from '../components/CategorySelection'
 import Dropdown from '../components/Dropdown'
+import axios from 'axios';
 
 const productDetail = {
     productId: '5e84b303-208c-4576-a494-072ebb9ecfca',
@@ -398,60 +399,72 @@ const categories = [
 ]
 
 const Product = () => {
+    // const [formData2, setFormData] = useState({
+    //     productId: '',
+    //     productName: '',
+    //     shipping: '',
+    //     price: '',
+    //     discountPrice: '',
+    //     Brand: '',
+    //     colors: [],
+    //     size: [],
+    //     materials: [],
+    //     sizeMetric: '',
+    //     productImages: [],
+    //     status: '',
+    //     categories: [],
+    //     onlineStores: [],
+    // });
+
     const [formData, setFormData] = useState({
-        productId: '',
-        productName: '',
-        shipping: '',
-        price: '',
-        discountPrice: '',
-        Brand: '',
+        productname: "",
+        description: "",
+        price: "",
+        discountprice: "",
+        brand: "",
         colors: [],
-        size: [],
-        materials: [],
-        sizeMetric: '',
-        productImages: [],
-        status: '',
-        categories: [],
-        onlineStores: [],
-    })
+        sizes: [],
+        material: "",
+        onlinestores: [],
+        status: true,
+        productimages: [],
+        productcategories: []
+    });
+    const [loading, setLoading] = useState(true);
 
     const { guid } = useParams()
     const location = useLocation()
     const pathnames = location.pathname.split('/').filter((el) => el)
 
     useEffect(() => {
-        // const fetchData = async () => {
-        //     try {
-        //         const response = await axios.get('/api/user') // Replace with your API endpoint
-        //         const data = response.data
+        const fetchProduct = async () => {
+            try {
+                setLoading(true);
+                const response = await axios.get(`http://localhost:5000/api/products/${guid}`); 
+                setFormData(response.data);
+            } catch (error) {
+                console.error('Error fetching products:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-        //         // Assuming the data structure matches your formData keys
-        //         setFormData({
-        //             name: data.name || '',
-        //             email: data.email || '',
-        //             phone: data.phone || '',
-        //         })
-        //     } catch (error) {
-        //         console.error('Error fetching data:', error)
-        //     }
-        // }
-
-        // fetchData()
-        setFormData({
-            productName: productDetail.productName || '',
-            shipping: productDetail.shipping || '',
-            price: productDetail.price || '',
-            discountPrice: productDetail.discountPrice || '',
-            Brand: productDetail.Brand || '',
-            colors: productDetail.colors || [],
-            size: productDetail.size || [],
-            materials: productDetail.materials || [],
-            status: productDetail.status || '',
-            sizeMetric: productDetail.sizeMetric || '',
-            onlineStores: productDetail.onlineStores || [],
-            categoryDetails: productDetail.categoryDetails || [],
-            productImages: productDetail.productImages || [],
-        })
+        fetchProduct()
+        // setFormData({
+        //     productName: productDetail.productName || '',
+        //     shipping: productDetail.shipping || '',
+        //     price: productDetail.price || '',
+        //     discountPrice: productDetail.discountPrice || '',
+        //     Brand: productDetail.Brand || '',
+        //     colors: productDetail.colors || [],
+        //     size: productDetail.size || [],
+        //     materials: productDetail.materials || [],
+        //     status: productDetail.status || '',
+        //     sizeMetric: productDetail.sizeMetric || '',
+        //     onlineStores: productDetail.onlineStores || [],
+        //     categoryDetails: productDetail.categoryDetails || [],
+        //     productImages: productDetail.productImages || [],
+        // })
     }, [])
 
     const handleAddColor = (e) => {
@@ -560,14 +573,14 @@ const Product = () => {
                             id="productName"
                             labelText="Product Name"
                             required={true}
-                            value={formData.productName}
+                            value={formData.productname}
                             containerClassName="flex-grow"
                         />
                         <Dropdown
                             handleChange={handleChange}
                             id={'status'}
                             labelText={'Status'}
-                            options={['Active', 'Pre-Order', 'Out of Stok']}
+                            options={['Active', 'Pre-Order', 'Out of Stock']}
                             value={formData.status}
                         />
                     </div>
@@ -591,13 +604,13 @@ const Product = () => {
                         id="discountPrice"
                         type="number"
                         labelText="Discount Price"
-                        value={formData.discountPrice}
+                        value={formData.discountprice}
                     />
                     <Input
                         handleChange={handleChange}
                         id="brand"
                         labelText="Brand"
-                        value={formData.Brand}
+                        value={formData.brand}
                     />
                     <Input
                         id="colors"
@@ -628,7 +641,7 @@ const Product = () => {
                                     </td>
                                     <td className="p-4 align-top text-sm text-gray-800">
                                         <div className="flex w-full flex-wrap gap-3">
-                                            {formData.productImages.map(
+                                            {formData.ProductImages.map(
                                                 (image, index) =>
                                                     image.color === color && (
                                                         <Image
@@ -682,7 +695,7 @@ const Product = () => {
                             </tr>
                         </thead>
                         <tbody className="max-h-40 overflow-auto whitespace-nowrap">
-                            {formData.size.map((size, index) => (
+                            {formData.sizes.map((size, index) => (
                                 <tr className="hover:bg-gray-50" key={index}>
                                     <td className="p-4 text-sm text-gray-800">
                                         {size}
@@ -724,13 +737,13 @@ const Product = () => {
                             value={formData.sizeMetric}
                         />
                     </div>
-                    <Input
+                    {/* <Input
                         id="material"
                         labelText="Materials"
                         btnText={'Add'}
                         btnOnClick={handleAddMaterial}
-                    />
-                    <table className="min-w-full bg-white">
+                    /> */}
+                    {/* <table className="min-w-full bg-white">
                         <thead className="whitespace-nowrap bg-gray-100">
                             <tr className="">
                                 <th className="p-4 text-left text-xs font-semibold text-gray-800">
@@ -742,7 +755,7 @@ const Product = () => {
                             </tr>
                         </thead>
                         <tbody className="max-h-40 overflow-auto whitespace-nowrap">
-                            {formData.materials.map((material, index) => (
+                            {formData.material.map((material, index) => (
                                 <tr className="hover:bg-gray-50" key={index}>
                                     <td className="p-4 text-sm text-gray-800">
                                         {material}
@@ -762,7 +775,14 @@ const Product = () => {
                                 </tr>
                             ))}
                         </tbody>
-                    </table>
+                    </table> */}
+                    <Input
+                        handleChange={handleChange}
+                        id="material"
+                        labelText="Material"
+                        value={formData.material}
+                        isResizeable={true}
+                    />
                     <div className="flex flex-col gap-2">
                         <p className="block text-sm font-medium text-gray-900">
                             Online Stores
@@ -779,7 +799,7 @@ const Product = () => {
                                 </tr>
                             </thead>
                             <tbody className="max-h-40 overflow-auto whitespace-nowrap">
-                                {formData.onlineStores.map((store, index) => (
+                                {formData.onlinestores.map((store, index) => (
                                     <tr
                                         className="hover:bg-gray-50"
                                         key={index}
@@ -806,7 +826,7 @@ const Product = () => {
                                 <li className="mb-2 list-none" key={index}>
                                     <CategorySelection
                                         category={category}
-                                        formData={formData.categoryDetails}
+                                        formData={formData.ProductCategories}
                                     />
                                 </li>
                             ))}
