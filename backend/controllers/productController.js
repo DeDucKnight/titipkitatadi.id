@@ -93,12 +93,11 @@ exports.get_product_detail = async (req, res) => {
 
 // Create a New Product with Images
 exports.create_product = async (req, res) => {
-    const { ProductName, Description, Price, DiscountPrice, Brand, Colors, Sizes, Material, OnlineStores, Status, Images } = req.body;
+    const { ProductName, Price, DiscountPrice, Brand, Colors, Sizes, Material, OnlineStores, Shipping, Status, Images } = req.body;
 
     try {
         const product = await Product.create({
             productname: ProductName,
-            description: Description,
             price: Price,
             discountprice: DiscountPrice,
             brand: Brand,
@@ -106,6 +105,7 @@ exports.create_product = async (req, res) => {
             sizes: Sizes,
             material: Material,
             onlinestores: OnlineStores,
+            shipping: Shipping,
             status: Status,
         });
 

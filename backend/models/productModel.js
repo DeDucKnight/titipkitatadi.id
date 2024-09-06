@@ -11,9 +11,6 @@ const Product = sequelize.define('Product', {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    description: {
-        type: DataTypes.TEXT,
-    },
     price: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
@@ -37,9 +34,12 @@ const Product = sequelize.define('Product', {
         type: DataTypes.JSONB,
         allowNull: true,
     },
+    shipping: {
+        type: DataTypes.TEXT,
+    },
     status: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: true,
+        type: DataTypes.TEXT,
+        defaultValue: 'Active',
     },
     createddate: {
         type: DataTypes.DATE,

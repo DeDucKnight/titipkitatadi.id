@@ -26,8 +26,7 @@ const Product = () => {
         productcategories: [],
     })
     const [formData, setFormData] = useState({
-        productname: '',
-        description: '',
+        productname: '',        
         price: '',
         discountprice: '',
         brand: '',
@@ -35,7 +34,8 @@ const Product = () => {
         sizes: [],
         material: '',
         onlinestores: [],
-        status: true,
+        shipping: '',
+        status: '',
         productimages: [],
         productcategories: [],
     })
@@ -126,8 +126,8 @@ const Product = () => {
 
         try {
             console.log(formData)
-            const response = await axios.post(
-                `http://localhost:5000/api/products`,
+            const response = await axios.put(
+                `http://localhost:5000/api/products/${guid}`,
                 formData
             )
         } catch (error) {
