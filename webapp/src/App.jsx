@@ -10,11 +10,13 @@ import Product from './pages/Product'
 import Category from './pages/Category'
 
 const App = () => {
+    const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [navbarWidth, setNavbarWidth] = useState(0)
     const navbarRef = useRef(null)
     const location = useLocation()
     const [currLocation, setCurrentLocation] = useState('')
+    const [heightNavbar, setHeightNavbar] = useState(0)
 
     useEffect(() => {
         setIsLoggedIn(() => localStorage.getItem('isLoggedIn') === 'true')
@@ -26,12 +28,15 @@ const App = () => {
                 ? '/'
                 : location.pathname
         setCurrentLocation(loc)
+        setMobileDrawerOpen(false)
     }, [location.pathname, isLoggedIn])
 
     useEffect(() => {
-        const element = navbarRef.current
-        if (element) {
-            setNavbarWidth(element.offsetWidth)
+        if (window.innerWidth >= 768) {
+            const element = navbarRef.current
+            if (element) {
+                setNavbarWidth(element.offsetWidth)
+            }
         }
     }, [isLoggedIn])
 
@@ -40,12 +45,65 @@ const App = () => {
         setIsLoggedIn(true)
         Navigate('/')
     }
+    const toggleNavbar = (e) => {
+        e.stopPropagation()
+        setMobileDrawerOpen(!mobileDrawerOpen)
+    }
+
+    useEffect(() => {
+        var navbar = document.querySelector('#navbar')
+        const updateHeight = () => {
+            if (navbar) {
+                if (window.innerWidth <= 768) {
+                    setHeightNavbar(navbar.offsetHeight)
+                } else {
+                    setHeightNavbar(
+                        navbar.offsetHeight + navbar.getClientRects()[0].top + 4
+                    )
+                }
+            }
+        }
+
+        setTimeout(() => {
+            updateHeight()
+        }, 500)
+
+        window.addEventListener('resize', updateHeight)
+
+        return () => {
+            window.removeEventListener('resize', updateHeight)
+        }
+    })
 
     return (
-        <div className="overflow-x-hidden">
-            {isLoggedIn && <Navbar ref={navbarRef} />}
+        <div
+            className={`relative h-screen overflow-x-hidden ${mobileDrawerOpen ? 'overflow-y-hidden' : ''} `}
+        >
+            {isLoggedIn && (
+                <Navbar
+                    ref={navbarRef}
+                    mobileDrawerOpen={mobileDrawerOpen}
+                    setMobileDrawerOpen={setMobileDrawerOpen}
+                    toggleNavbar={toggleNavbar}
+                    heightNavbar={heightNavbar}
+                />
+            )}
+            {mobileDrawerOpen && (
+                <div
+                    id="drawer_overlay"
+                    className={`fixed inset-0 bg-black pt-20 transition-opacity duration-300 ${
+                        mobileDrawerOpen
+                            ? 'z-30 opacity-50'
+                            : 'pointer-events-none opacity-0'
+                    }`}
+                    onClick={toggleNavbar}
+                    style={{
+                        marginTop: `${heightNavbar}px`,
+                    }}
+                ></div>
+            )}
             <div
-                className={`${isLoggedIn && 'flex justify-center'} container mx-auto w-full overflow-x-hidden py-6`}
+                className={`${isLoggedIn ? 'flex h-screen justify-center' : ''} container mx-auto w-full lg:overflow-x-hidden`}
                 style={{
                     maxWidth: `calc(100vw - ${navbarWidth}px)`,
                     marginLeft: `${navbarWidth}px`,
@@ -55,7 +113,11 @@ const App = () => {
                     <Route
                         path="/"
                         element={
-                            isLoggedIn ? <Home /> : <Navigate to="/login" />
+                            isLoggedIn ? (
+                                <Navigate to="/products" />
+                            ) : (
+                                <Navigate to="/login" />
+                            )
                         }
                     />
                     <Route
