@@ -43,6 +43,28 @@ exports.get_categories = async (req, res) => {
     }
 };
 
+// Get Category by Id
+exports.get_category = async (req, res) => {
+    const { categoryId } = req.params;
+
+    try {
+        const category = await Category.findByPk(categoryId, {
+            include: {
+                model: CategoryDetail
+            }
+        });
+
+        if (!category) {
+            return res.status(404).json({ message: 'Category not found' });
+        }
+
+        res.status(200).json(category);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch category' });
+    }
+};
+
 // Update a Category by ID
 exports.update_category = async (req, res) => {
     const { categoryId } = req.params;
