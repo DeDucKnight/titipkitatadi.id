@@ -65,13 +65,16 @@ exports.get_product_detail = async (req, res) => {
                     model: ProductCategory,
                     include: [
                         {
-                            model: Category,
-                            attributes: ['categoryid', 'categoryname']
-                        },
-                        {
                             model: CategoryDetail,
-                            attributes: ['categorydetailid', 'categorydetailname']
-                        }
+                            attributes: ['categorydetailid', 'categorydetailname'],
+                            include: [
+                                {
+                                    model: Category,
+                                    attributes: ['categoryid', 'categoryname']
+                                }
+                            ]
+                        }                        
+                        
                     ]
                 }
             ]
