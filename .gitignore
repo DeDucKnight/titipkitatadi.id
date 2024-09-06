@@ -3,3 +3,6 @@ node_modules
 sample-data
 *.pdf
 *.jpg
+.vscode
+*.txt
+*.png
