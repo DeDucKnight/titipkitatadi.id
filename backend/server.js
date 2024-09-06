@@ -1,10 +1,12 @@
 const express = require('express');
+const cors = require('cors');
 const productRoutes = require('./routes/productRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const imageRoutes = require('./routes/imageRoutes');
 const errorHandler = require('./middlewares/errorHandler.js');
 
 const app = express();
+app.use(cors());
 
 app.use(express.json());
 app.use('/api', productRoutes);
