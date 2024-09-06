@@ -25,14 +25,14 @@ const decodeBase64Image = (dataString) => {
 
 // Upload banner image
 exports.upload_image = async (req, res) => {
-    const { image } = req.body;
+    const { base64, imageType } = req.body;
 
-    if (!image) {
+    if (!base64) {
         return res.status(400).json({ error: 'Image data is required' });
     }
 
     try {
-        const decodedImage = decodeBase64Image(image);
+        const decodedImage = decodeBase64Image(base64);
         const tempFilePath = path.join(__dirname, '../uploads', `${Date.now()}.jpg`);
 
         // Save the image as a temporary file
@@ -58,11 +58,11 @@ exports.upload_image = async (req, res) => {
         fs.unlinkSync(tempFilePath);
 
         // Create image 
-        const variantPath = response.data.result.variants[0];
+        const path = response.data.result.variants[0];
 
         const image = await Image.create({
-            imagepath: variantPath,
-            imagetype: 'banner',
+            imagepath: path,
+            imagetype: imageType,
         });
 
 
@@ -77,14 +77,14 @@ exports.upload_image = async (req, res) => {
 // Upload product image
 exports.upload_product_image = async (req, res) => {
     const { productId } = req.params;
-    const { image, color, isDefault } = req.body;
+    const { base64, color, isDefault } = req.body;
 
-    if (!image) {
+    if (!base64) {
         return res.status(400).json({ error: 'Image data is required' });
     }
 
     try {
-        const decodedImage = decodeBase64Image(image);
+        const decodedImage = decodeBase64Image(base64);
         const tempFilePath = path.join(__dirname, '../uploads', `${Date.now()}.jpg`);
 
         // Save the image as a temporary file
@@ -110,10 +110,10 @@ exports.upload_product_image = async (req, res) => {
         fs.unlinkSync(tempFilePath);
 
         // Create image & productImage 
-        const variantPath = response.data.result.variants[0];
+        const path = response.data.result.variants[0];
 
         const image = await Image.create({
-            imagepath: variantPath,
+            imagepath: path,
             imagetype: 'product',
         });
 
@@ -132,9 +132,10 @@ exports.upload_product_image = async (req, res) => {
     }
 };
 
-// Create image test
+// Upload image test
 exports.upload_image_test = async (req, res) => {
-    const { productId } = req.params;
+    // const { productId } = req.params;
+    const { test } = req.body;
 
     try {
         const image = fs.readFileSync('./sample-data/test_image_1.jpg');
