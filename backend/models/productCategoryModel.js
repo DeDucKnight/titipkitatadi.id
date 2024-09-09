@@ -33,7 +33,10 @@ const ProductCategory = sequelize.define('ProductCategory', {
 });
 
 // Establish associations
-Product.hasMany(ProductCategory, { foreignKey: 'productid' });
+Product.hasMany(ProductCategory, {
+    foreignKey: 'productid',
+    onDelete: 'CASCADE'
+});
 ProductCategory.belongsTo(Product, { foreignKey: 'productid' });
 
 CategoryDetail.hasMany(ProductCategory, { foreignKey: 'categorydetailid' });

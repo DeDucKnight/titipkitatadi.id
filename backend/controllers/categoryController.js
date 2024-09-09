@@ -1,29 +1,33 @@
-const { Category, CategoryDetail } = require('../models');
+const { Category, CategoryDetail, sequelize } = require('../models');
 
 // Create a New Category & Category Details
 exports.create_category = async (req, res) => {
     const { CategoryName, IsStandard, CategoryDetails } = req.body;
-
+    
+    const t = await sequelize.transaction();
     try {
-        const category = await Category.create(
-            { 
-                categoryname: CategoryName, 
-                isstandard: IsStandard,
-            });
-        
+        // Create Category
+        const category = await Category.create({
+            categoryname: CategoryName, 
+            isstandard: IsStandard,
+        }, { transaction: t });
+
+        // Bulk Create CategoryDetails
         if (CategoryDetails && CategoryDetails.length > 0) {
-            for (const x of CategoryDetails) {
-                await CategoryDetail.create(
-                    {
-                        categoryid: category.categoryid,
-                        categorydetailname: x.CategoryDetailName,
-                    }
-                )
-            }
+            const categoryDetailsToInsert = CategoryDetails.map(detail => ({
+                categoryid: category.categoryid,
+                categorydetailname: detail.CategoryDetailName,
+            }));
+
+            await CategoryDetail.bulkCreate(categoryDetailsToInsert, { transaction: t });
         }
+
+        await t.commit();
         res.status(201).json({ message: 'Category created successfully', category });
+
     } catch (err) {
-        console.error(err);
+        await t.rollback();
+        console.error('Error creating category:', err);
         res.status(500).json({ error: 'Failed to create category' });
     }
 };
@@ -33,8 +37,10 @@ exports.get_categories = async (req, res) => {
     try {
         const categories = await Category.findAll({
             include: {
-                model: CategoryDetail                
-            }
+                model: CategoryDetail,
+                attributes: ['categorydetailid', 'categorydetailname'],
+            },
+            order: [['createdAt', 'ASC']]
         });
         res.status(200).json(categories);
     } catch (err) {
@@ -50,7 +56,8 @@ exports.get_category = async (req, res) => {
     try {
         const category = await Category.findByPk(categoryId, {
             include: {
-                model: CategoryDetail
+                model: CategoryDetail,
+                attributes: ['categorydetailid', 'categorydetailname'],
             }
         });
 
@@ -60,7 +67,7 @@ exports.get_category = async (req, res) => {
 
         res.status(200).json(category);
     } catch (err) {
-        console.error(err);
+        console.error('Error fetching category:', err);
         res.status(500).json({ error: 'Failed to fetch category' });
     }
 };
@@ -70,18 +77,116 @@ exports.update_category = async (req, res) => {
     const { categoryId } = req.params;
     const updates = req.body;
 
+    const t = await sequelize.transaction();
     try {
-        const category = await Category.findByPk(categoryId);
+        // Update Category
+        const category = await Category.findByPk(categoryId, { transaction: t });
 
         if (!category) {
+            await t.rollback();
             return res.status(404).json({ message: 'Category not found' });
         }
 
-        await category.update(updates);
+        await category.update(updates, { transaction: t });
+
+        // Update Category Details
+        if (updates.CategoryDetails && updates.CategoryDetails.length > 0) {
+            // Fetch existing CategoryDetails related to this category
+            const existingCategoryDetails = await CategoryDetail.findAll({
+                where: { categoryid: categoryId },
+                transaction: t
+            });
+
+            const existingCategoryDetailIds = existingCategoryDetails.map(detail => detail.categorydetailid);
+            const newCategoryDetails = updates.CategoryDetails.map(detail => detail.categorydetailid);
+
+            // Bulk Update or Create Category Details
+            const updatesToApply = [];
+            const newDetailsToCreate = [];
+
+            for (const detail of updates.CategoryDetails) {
+                const categoryDetailId = detail.categorydetailid;
+
+                if (existingCategoryDetailIds.includes(categoryDetailId)) {
+                    // Add to update list
+                    updatesToApply.push({
+                        categorydetailid: categoryDetailId,
+                        categorydetailname: detail.categorydetailname,
+                        categoryid: categoryId
+                    });
+                } else {
+                    // Add to create list
+                    newDetailsToCreate.push({
+                        categorydetailid: categoryDetailId,
+                        categorydetailname: detail.categorydetailname,
+                        categoryid: categoryId
+                    });
+                }
+            }
+
+            // Apply bulk updates
+            if (updatesToApply.length > 0) {
+                await Promise.all(updatesToApply.map(detail => 
+                    CategoryDetail.update(detail, {
+                        where: { categorydetailid: detail.categorydetailid },
+                        transaction: t
+                    })
+                ));
+            }
+
+            // Apply bulk creates
+            if (newDetailsToCreate.length > 0) {
+                await CategoryDetail.bulkCreate(newDetailsToCreate, { transaction: t });
+            }
+
+            // Remove CategoryDetails that are no longer in the request
+            const detailsToRemove = existingCategoryDetails.filter(
+                detail => !newCategoryDetails.includes(detail.categorydetailid)
+            );
+
+            if (detailsToRemove.length > 0) {
+                await CategoryDetail.destroy({
+                    where: {
+                        categorydetailid: detailsToRemove.map(detail => detail.categorydetailid)
+                    },
+                    transaction: t
+                });
+            }
+        }
+
+        await t.commit();
         res.status(200).json({ message: 'Category updated successfully', category });
+
     } catch (err) {
-        console.error(err);
+        await t.rollback();
+        console.error('Error updating category:', err);
         res.status(500).json({ error: 'Failed to update category' });
+    }
+};
+
+// Delete a Category by ID
+exports.delete_category = async (req, res) => {
+    const { categoryId } = req.params;
+
+    const t = await sequelize.transaction();
+    try {
+        // Find the category by primary key
+        const category = await Category.findByPk(categoryId, { transaction: t });
+
+        if (!category) {
+            await t.rollback();
+            return res.status(404).json({ message: 'Category not found' });
+        }
+
+        // Delete the category
+        await category.destroy({ transaction: t });
+
+        await t.commit();
+        res.status(200).json({ message: 'Category deleted successfully' });
+    } catch (err) {
+        await t.rollback();
+        console.error('Error deleting category:', err);
+        res.status(500).json({ error: 'Failed to delete category' });
     }
 };
 
@@ -102,25 +207,6 @@ exports.update_category_detail = async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to update category detail' });
-    }
-};
-
-// Delete a Category by ID
-exports.delete_category = async (req, res) => {
-    const { categoryId } = req.params;
-
-    try {
-        const category = await Category.findByPk(categoryId);
-
-        if (!category) {
-            return res.status(404).json({ message: 'Category not found' });
-        }
-
-        await category.destroy();
-        res.status(200).json({ message: 'Category deleted successfully' });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Failed to delete category' });
     }
 };
 

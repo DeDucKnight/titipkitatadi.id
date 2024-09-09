@@ -35,7 +35,7 @@ const CategoryDetail = sequelize.define('CategoryDetail', {
 });
 
 // Establish associations
-Category.hasMany(CategoryDetail, { foreignKey: 'categoryid' });
+Category.hasMany(CategoryDetail, { foreignKey: 'categoryid', onDelete: 'CASCADE' });
 CategoryDetail.belongsTo(Category, { foreignKey: 'categoryid' });
 
 module.exports = CategoryDetail;

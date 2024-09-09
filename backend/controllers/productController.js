@@ -1,4 +1,4 @@
-const { Product, ProductImage, ProductCategory, Category, CategoryDetail, Image } = require('../models');
+const { Product, ProductImage, ProductCategory, Category, CategoryDetail, Image, sequelize } = require('../models');
 
 // Get Product List with Pagination
 exports.get_product_list = async (req, res) => {
@@ -16,7 +16,8 @@ exports.get_product_list = async (req, res) => {
                     include: {
                         model: Image,
                         attributes: ['imagepath']
-                    }
+                    },
+                    required: false
                 },
                 {
                     model: ProductCategory,
@@ -35,13 +36,24 @@ exports.get_product_list = async (req, res) => {
             offset: offset
         });
 
+        // If no products found
+        if (!products || products.length === 0) {
+            return res.status(200).json({
+                message: 'No products found',
+                products: [],
+                currentPage: parseInt(page, 10),
+                nextPage: null,
+            });
+        }
+
+        // Send response with product data and pagination info
         res.status(200).json({
             products: products,
             currentPage: parseInt(page, 10),
             nextPage: products.length === limit ? parseInt(page, 10) + 1 : null,
         });
     } catch (err) {
-        console.error(err);
+        console.error('Error fetching product list:', err);
         res.status(500).json({ error: 'Failed to fetch products' });
     }
 };
@@ -51,8 +63,7 @@ exports.get_product_detail = async (req, res) => {
     const { productId } = req.params;
 
     try {
-        const product = await Product.findOne({
-            where: { productid: productId },
+        const product = await Product.findByPk(productId, {
             include: [
                 {
                     model: ProductImage,
@@ -74,7 +85,6 @@ exports.get_product_detail = async (req, res) => {
                                 }
                             ]
                         }                        
-                        
                     ]
                 }
             ]
@@ -86,50 +96,64 @@ exports.get_product_detail = async (req, res) => {
 
         res.status(200).json(product);
     } catch (err) {
-        console.error(err);
+        console.error('Error fetching product details:', err);
         res.status(500).json({ error: 'Failed to fetch product details' });
     }
 };
 
-// Create a New Product with Images
+
+// Create a New Product
 exports.create_product = async (req, res) => {
-    const { ProductName, Price, DiscountPrice, Brand, Colors, Sizes, Material, OnlineStores, Shipping, Status, Images } = req.body;
+    const { 
+        productname, price, discountprice, brand, colors, sizes, material, onlinestores, shipping, status, 
+        ProductImages, ProductCategories 
+    } = req.body;
+
+    const t = await sequelize.transaction();
 
     try {
+        // Create Product
         const product = await Product.create({
-            productname: ProductName,
-            price: Price,
-            discountprice: DiscountPrice,
-            brand: Brand,
-            colors: Colors,
-            sizes: Sizes,
-            material: Material,
-            onlinestores: OnlineStores,
-            shipping: Shipping,
-            status: Status,
-        });
+            productname,
+            price,
+            discountprice,
+            brand,
+            colors,
+            sizes,
+            material,
+            onlinestores,
+            shipping,
+            status
+        }, { transaction: t });
 
-        if (Images && Images.length > 0) {
-            for (const x of Images) {
-                const image = await Image.create({
-                    imagepath: x.ImagePath,
-                    imagetype: x.ImageType,
-                    status: true
-                });
+        // Bulk Create Product Images
+        if (ProductImages && ProductImages.length > 0) {
+            const imagesToInsert = ProductImages.map(image => ({
+                productid: product.productid,
+                imageid: image.imageid,
+                color: image.color,
+                isdefault: image.isdefault
+            }));
 
-                await ProductImage.create({
-                    productid: product.productid,
-                    imageid: image.imageid,
-                    color: x.Color,
-                    isdefault: x.IsDefault,
-                    status: true
-                });
-            }
+            await ProductImage.bulkCreate(imagesToInsert, { transaction: t });
         }
 
+        // Bulk Create Product Categories
+        if (ProductCategories && ProductCategories.length > 0) {
+            const categoriesToInsert = ProductCategories.map(category => ({
+                productid: product.productid,
+                categorydetailid: category.categorydetailid
+            }));
+
+            await ProductCategory.bulkCreate(categoriesToInsert, { transaction: t });
+        }
+
+        await t.commit();
         res.status(201).json({ message: 'Product created successfully', product });
     } catch (err) {
-        console.error(err);
+        // Rollback transaction in case of an error
+        await t.rollback();
+        console.error('Error creating product:', err);
         res.status(500).json({ error: 'Failed to create product' });
     }
 };
@@ -139,36 +163,85 @@ exports.update_product = async (req, res) => {
     const { productId } = req.params;
     const updates = req.body;
 
+    const t = await sequelize.transaction();
     try {
-        const product = await Product.findByPk(productId);
+        // Find the product by ID
+        const product = await Product.findByPk(productId, { transaction: t });
 
         if (!product) {
+            await t.rollback();
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        await product.update(updates);
+        // Update the product
+        await product.update(updates, { transaction: t });
+
+        // Handle Product Categories
+        if (updates.CategoryDetails) {
+            // Fetch existing product categories
+            const existingProductCategories = await ProductCategory.findAll({
+                where: { productid: productId },
+                transaction: t
+            });
+
+            // Map existing category IDs and new category IDs
+            const existingCategoryIds = existingProductCategories.map(cat => cat.categorydetailid);
+            const newCategoryIds = updates.CategoryDetails.map(cat => cat.categorydetailid);
+
+            // Add new categories
+            for (const category of updates.CategoryDetails) {
+                const categoryId = category.categorydetailid;
+                const exists = existingCategoryIds.includes(categoryId);
+
+                if (!exists) {
+                    await ProductCategory.create({
+                        productid: productId,
+                        categorydetailid: categoryId
+                    }, { transaction: t });
+                }
+            }
+
+            // Remove categories that are no longer present
+            for (const existingCategory of existingProductCategories) {
+                if (!newCategoryIds.includes(existingCategory.categorydetailid)) {
+                    await ProductCategory.destroy({
+                        where: { productcategoryid: existingCategory.productcategoryid },
+                        transaction: t
+                    });
+                }
+            }
+        }
+
+        await t.commit();
         res.status(200).json({ message: 'Product updated successfully', product });
     } catch (err) {
-        console.error(err);
+        await t.rollback();
+        console.error('Error updating product:', err);
         res.status(500).json({ error: 'Failed to update product' });
     }
 };
 
-// Delete a Product by ID
+// Delete a Product
 exports.delete_product = async (req, res) => {
     const { productId } = req.params;
-
+    
+    const t = await sequelize.transaction();
     try {
-        const product = await Product.findByPk(productId);
+        const product = await Product.findByPk(productId, { transaction: t });
 
         if (!product) {
+            await t.rollback();
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        await product.destroy();
+        await product.destroy({ transaction: t }); // Ensure it's part of the transaction
+
+        await t.commit();
         res.status(200).json({ message: 'Product deleted successfully' });
+
     } catch (err) {
-        console.error(err);
+        await t.rollback();
+        console.error('Error deleting product:', err);
         res.status(500).json({ error: 'Failed to delete product' });
     }
 };

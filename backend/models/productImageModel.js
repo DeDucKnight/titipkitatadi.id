@@ -51,10 +51,16 @@ const ProductImage = sequelize.define('ProductImage', {
 });
 
 // Establish associations
-Product.hasMany(ProductImage, { foreignKey: 'productid' });
+Product.hasMany(ProductImage, {
+    foreignKey: 'productid',
+    onDelete: 'CASCADE'
+});
 ProductImage.belongsTo(Product, { foreignKey: 'productid' });
 
-Image.hasMany(ProductImage, { foreignKey: 'imageid' });
+Image.hasOne(ProductImage, {
+    foreignKey: 'imageid',
+    onDelete: 'CASCADE'
+});
 ProductImage.belongsTo(Image, { foreignKey: 'imageid' });
 
 module.exports = ProductImage;
