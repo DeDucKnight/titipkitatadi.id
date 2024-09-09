@@ -57,7 +57,17 @@ const Products = () => {
                 </div>
             ) : (
                 <>
-                    <h1 className="mx-4 mb-4 text-3xl font-bold">Products</h1>
+                    <div className="sticky top-[60px] z-20 flex items-center justify-between bg-white py-4 lg:top-0">
+                        <h1 className="mx-4 mb-4 text-3xl font-bold">
+                            Products
+                        </h1>
+
+                        <Button
+                            text={'Add Product'}
+                            isLink={true}
+                            urlTarget={'./product'}
+                        />
+                    </div>
                     <table className="top-0 z-10 min-w-full bg-white">
                         <thead className="sticky top-0 z-10 whitespace-nowrap bg-gray-100">
                             <tr className="top-0 z-10">

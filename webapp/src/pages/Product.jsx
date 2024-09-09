@@ -26,7 +26,7 @@ const Product = () => {
         productcategories: [],
     })
     const [formData, setFormData] = useState({
-        productname: '',        
+        productname: '',
         price: '',
         discountprice: '',
         brand: '',
@@ -75,7 +75,9 @@ const Product = () => {
                 setIsLoading(false)
             }
         }
-        fetchProduct()
+        if (guid !== 'product') {
+            fetchProduct()
+        }
         fetchCategories()
     }, [guid])
 
@@ -101,7 +103,7 @@ const Product = () => {
         if (value) {
             setFormData((prevFormData) => ({
                 ...prevFormData,
-                size: [...prevFormData.size, value],
+                sizes: [...prevFormData.sizes, value],
             }))
         }
     }
@@ -121,15 +123,34 @@ const Product = () => {
         }
     }
 
+    const handleDeleteColor = (color) => {
+        setFormData((prevData) => ({
+            ...prevData,
+            colors: prevData.colors.filter((item) => item !== color),
+        }))
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault()
 
         try {
-            console.log(formData)
-            const response = await axios.put(
-                `http://localhost:5000/api/products/${guid}`,
-                formData
-            )
+            if (guid !== 'product') {
+                const response = await axios.put(
+                    `http://localhost:5000/api/products/${guid}`,
+                    formData
+                )
+                if (response.status >= 200 && response.status < 300) {
+                    setInitialData(response.data.product)
+                }
+            } else {
+                const response = await axios.post(
+                    `http://localhost:5000/api/products`,
+                    formData
+                )
+                if (response.status >= 200 && response.status < 300) {
+                    setInitialData(response.data.product)
+                }
+            }
         } catch (error) {
             console.error(error)
         }
@@ -196,7 +217,9 @@ const Product = () => {
                         >
                             <div className="sticky top-[60px] z-20 flex items-center justify-between bg-white py-4 lg:top-0">
                                 <h1 className="text-3xl font-bold">
-                                    {formData.productname}
+                                    {guid !== 'product'
+                                        ? formData.productname
+                                        : 'Add Product'}
                                 </h1>
 
                                 <Button
@@ -226,13 +249,6 @@ const Product = () => {
                                     value={formData.status}
                                 />
                             </div>
-                            <Input
-                                handleChange={handleChange}
-                                id="description"
-                                labelText="Description"
-                                value={formData.description}
-                                isResizeable={true}
-                            />
                             <Input
                                 handleChange={handleChange}
                                 id="price"
@@ -286,7 +302,7 @@ const Product = () => {
                                             </td>
                                             <td className="p-4 align-top text-sm text-gray-800">
                                                 <div className="flex w-full flex-wrap gap-3">
-                                                    {formData.ProductImages.map(
+                                                    {formData.ProductImages?.map(
                                                         (image, index) =>
                                                             image.color ===
                                                                 color && (
@@ -314,12 +330,13 @@ const Product = () => {
                                             <td className="w-[1%] p-4 align-top text-sm">
                                                 <div className="inline-flex w-full items-center justify-end gap-4 text-sm">
                                                     <Button
-                                                        iconName={'edit'}
-                                                        type={'link'}
-                                                    />
-                                                    <Button
                                                         iconName={'trash'}
                                                         type={'link'}
+                                                        onClick={() =>
+                                                            handleDeleteColor(
+                                                                color
+                                                            )
+                                                        }
                                                     />
                                                 </div>
                                             </td>
