@@ -64,8 +64,8 @@ const Input = ({
                                 onBlur={handleOnFocus}
                                 onChange={handleChange}
                                 readOnly={isColorPicker}
-                                defaultValue={inputvalue}
-                                // value={isColorPicker ? hex : null}
+                                // defaultValue={inputvalue}
+                                value={inputvalue}
                             />
                         )}
                         {isResizeable && (

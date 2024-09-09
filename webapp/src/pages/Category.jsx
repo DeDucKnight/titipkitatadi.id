@@ -7,6 +7,7 @@ import Icon from '../components/Icons'
 import Input from '../components/Input'
 import Image from '../components/Image'
 import Skeleton from '../components/Skeleton'
+import Dropdown from '../components/Dropdown'
 
 function generateGUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(
@@ -25,7 +26,15 @@ const Category = () => {
     const location = useLocation()
     const pathnames = location.pathname.split('/').filter((el) => el)
     const [initialData, setInitialData] = useState([])
-    const [formData, setFormData] = useState([])
+    const [inputValue, setInputValue] = useState('')
+    const [formData, setFormData] = useState({
+        categoryid: '',
+        categoryname: '',
+        isstandard: true,
+        status: true,
+        createddate: '',
+        CategoryDetails: [],
+    })
     const [categoryParent, setCategoryParent] = useState('')
     const [isChanged, setIsChanged] = useState(false)
     useEffect(() => {
@@ -43,7 +52,11 @@ const Category = () => {
                 setIsLoading(false)
             }
         }
-        fetchCategory()
+        if (guid !== 'category') {
+            fetchCategory()
+        } else {
+            setIsLoading(false)
+        }
     }, [guid])
 
     useEffect(() => {
@@ -52,33 +65,84 @@ const Category = () => {
         setIsChanged(isFormChanged)
     }, [formData, initialData])
 
+    const handleChange = (e) => {
+        const { type, name, value } = e.target
+
+        if (type === 'checkbox') {
+            setFormData({
+                ...formData,
+                [name]: e.target.checked,
+            })
+        } else {
+            setFormData({
+                ...formData,
+                [name]: value,
+            })
+        }
+    }
+
+    const handleChangeTable = (e) => {
+        const { name, value, checked } = e.target
+        const currentId = name.split('_')[1]
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            CategoryDetails: prevFormData.CategoryDetails.map(
+                (cat) =>
+                    cat.categorydetailid === currentId
+                        ? { ...cat, status: checked }
+                        : cat // ,
+            ),
+        }))
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault()
 
         try {
-            console.log(formData)
-            const response = await axios.post(
-                `http://localhost:5000/api/categories`,
-                formData
-            )
+            if (guid !== 'category') {
+                const response = await axios.put(
+                    `http://localhost:5000/api/categories/${guid}`,
+                    formData
+                )
+                if (response.status >= 200 && response.status < 300) {
+                    setInitialData(response.data.category)
+                    // setFormData(response.data.category)
+                }
+            } else {
+                const response = await axios.post(
+                    `http://localhost:5000/api/categories`,
+                    formData
+                )
+                if (response.status >= 200 && response.status < 300) {
+                    setInitialData(response.data.category)
+                    // setFormData(response.data.category)
+                }
+            }
         } catch (error) {
             console.error(error)
         }
     }
 
+    const handleInputChange = (e) => {
+        setInputValue(e.target.value)
+    }
+
     const handleAddCategories = (e) => {
         e.preventDefault()
-        const { value } = document.querySelector('#categories')
-        if (value) {
+        if (inputValue) {
             const category = {
-                categoryDetailId: generateGUID(),
-                categoryId: guid,
-                categoryDetailName: value,
+                categorydetailid: generateGUID(),
+                categoryid: guid,
+                categorydetailname: inputValue,
                 status: true,
-                createdDate: new Date(),
+                createddate: new Date(),
             }
 
-            setFormData((prevFormData) => [...prevFormData, category])
+            setFormData((prevFormData) => ({
+                ...prevFormData,
+                CategoryDetails: [...prevFormData.CategoryDetails, category],
+            }))
+            setInputValue('')
         }
     }
     const handleImgChange = (e) => {
@@ -165,7 +229,9 @@ const Category = () => {
                         >
                             <div className="sticky top-[60px] z-20 flex items-center justify-between bg-white py-4 lg:top-0">
                                 <h1 className="text-3xl font-bold">
-                                    {categoryParent}
+                                    {guid !== 'category'
+                                        ? formData.categoryname
+                                        : 'Add Category'}
                                 </h1>
 
                                 <Button
@@ -174,11 +240,30 @@ const Category = () => {
                                     disabled={!isChanged}
                                 />
                             </div>
+                            <div className="flex w-full items-center gap-4">
+                                <Input
+                                    id="categoryname"
+                                    labelText="Category Group Name"
+                                    handleChange={handleChange}
+                                    value={formData.categoryname}
+                                    required={true}
+                                    containerClassName="flex-grow"
+                                />
+
+                                <Switch
+                                    handleChange={handleChange}
+                                    isChecked={formData.status}
+                                    text={'Status'}
+                                    id="status"
+                                />
+                            </div>
                             <Input
                                 id="categories"
                                 labelText="Categories"
                                 btnText={'Add'}
                                 btnOnClick={handleAddCategories}
+                                value={inputValue}
+                                handleChange={handleInputChange}
                             />
                             <table className="min-w-full bg-white">
                                 <thead className="whitespace-nowrap bg-gray-100">
@@ -195,43 +280,53 @@ const Category = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="max-h-40 overflow-auto whitespace-nowrap">
-                                    {formData.map((data, index) => (
-                                        <tr
-                                            className="hover:bg-gray-50"
-                                            key={index}
-                                        >
-                                            <td className="p-4 align-top text-sm text-gray-800">
-                                                {data.categoryDetailName}
-                                            </td>
-                                            <td className="p-4 align-top text-sm text-gray-800">
-                                                <div className="flex w-full flex-wrap gap-3">
-                                                    {/* <Image
-                                            key={image.imageId}
-                                            imgSrc={image.imagePath}
-                                            ratio="aspect-card"
-                                            className="h-48"
-                                        /> */}
-                                                    <Input
-                                                        handleChange={
-                                                            handleImgChange
-                                                        }
-                                                        id={`img_${data.categoryDetailName}`}
-                                                        isUploadImage={true}
-                                                        imgUploadContainerClassName={
-                                                            '!aspect-20x9 !h-full'
-                                                        }
-                                                    />
-                                                </div>
-                                            </td>
-                                            <td className="w-[1%] p-4 align-top">
-                                                <div className="inline-flex w-full items-center justify-end gap-4">
-                                                    <Switch
-                                                        isChecked={data.status}
-                                                    />
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {formData.CategoryDetails.map(
+                                        (data, index) => (
+                                            <tr
+                                                className="hover:bg-gray-50"
+                                                key={index}
+                                            >
+                                                <td className="p-4 align-top text-sm text-gray-800">
+                                                    {data.categorydetailname}
+                                                </td>
+                                                <td className="p-4 align-top text-sm text-gray-800">
+                                                    <div className="flex w-full flex-wrap gap-3">
+                                                        {/* <Image
+                                                            key={image.imageId}
+                                                            imgSrc={
+                                                                image.imagePath
+                                                            }
+                                                            ratio="aspect-card"
+                                                            className="h-48"
+                                                        /> */}
+                                                        <Input
+                                                            handleChange={
+                                                                handleImgChange
+                                                            }
+                                                            id={`img_${data.categorydetailid}`}
+                                                            isUploadImage={true}
+                                                            imgUploadContainerClassName={
+                                                                '!aspect-20x9 !h-full'
+                                                            }
+                                                        />
+                                                    </div>
+                                                </td>
+                                                <td className="w-[1%] p-4 align-top">
+                                                    <div className="inline-flex w-full items-center justify-end gap-4">
+                                                        <Switch
+                                                            id={`status_${data.categorydetailid}`}
+                                                            isChecked={
+                                                                data.status
+                                                            }
+                                                            handleChange={
+                                                                handleChangeTable
+                                                            }
+                                                        />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )
+                                    )}
                                 </tbody>
                             </table>
                         </form>
