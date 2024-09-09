@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const FormData = require('form-data');
 const { log } = require('console');
-const { json } = require('sequelize');
+const { Op, json } = require('sequelize');
 require('dotenv').config();
 
 // Create temp file
@@ -25,24 +25,18 @@ const decodeBase64Image = (dataString) => {
 
 // Upload banner image
 exports.upload_image = async (req, res) => {
-    const { base64, imageType } = req.body;
-
-    if (!base64) {
-        return res.status(400).json({ error: 'Image data is required' });
-    }
-
+    const { productId } = req.params;
+    const file = req.file;
     try {
-        const decodedImage = decodeBase64Image(base64);
-        const tempFilePath = path.join(__dirname, '../uploads', `${Date.now()}.jpg`);
-
-        // Save the image as a temporary file
-        fs.writeFileSync(tempFilePath, decodedImage.data);
+        if (!file) {
+            return res.status(400).json({ error: 'Image file is required' });
+        }
 
         // Create a FormData object to send the image to Cloudflare
         const formData = new FormData();
-        formData.append('file', fs.createReadStream(tempFilePath));
+        formData.append('file', fs.createReadStream(file.path));
 
-        // Upload to Cloudflare Images
+        // Upload the image to Cloudflare
         const response = await axios.post(
             `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ID}/images/v1`,
             formData,
@@ -55,19 +49,19 @@ exports.upload_image = async (req, res) => {
         );
 
         // Delete the temporary local file after uploading
-        fs.unlinkSync(tempFilePath);
+        fs.unlinkSync(file.path);
 
-        // Create image 
+        // Create image
+        const id = response.data.result.id; 
         const path = response.data.result.variants[0];
-
+        
         const image = await Image.create({
+            cdnid: id,
             imagepath: path,
-            imagetype: imageType,
+            imagetype: req.body.imagetype || 'banner',
         });
 
-
-        // Send back the Cloudflare image URL or ID
-        res.status(200).json(response.data);
+        res.status(200).json({ message: 'Image created successfully', image });
     } catch (error) {
         console.error('Error uploading image:', error);
         res.status(500).json({ error: 'Failed to upload image' });
@@ -110,22 +104,17 @@ exports.upload_product_image = async (req, res) => {
         fs.unlinkSync(tempFilePath);
 
         // Create image & productImage 
+        const id = response.data.result.id;
         const path = response.data.result.variants[0];
 
         const image = await Image.create({
+            cdnid: id,
             imagepath: path,
             imagetype: 'product',
         });
 
-        const productImage = await ProductImage.create({
-            productid: productId,
-            imageid: image.imageid,
-            color: color,
-            isdefault: isDefault
-        })
-
         // Send back the Cloudflare image URL or ID
-        res.status(200).json(response.data);
+        res.status(200).json({ message: 'Image created successfully', image });
     } catch (error) {
         console.error('Error uploading image:', error);
         res.status(500).json({ error: 'Failed to upload image' });
@@ -138,7 +127,7 @@ exports.upload_image_test = async (req, res) => {
     const { test } = req.body;
 
     try {
-        const image = fs.readFileSync('./sample-data/test_image_1.jpg');
+        const image = fs.readFileSync('./test_image_1.jpg');
 
         // Create a FormData object to send the image to Cloudflare
         const formData = new FormData();
@@ -156,25 +145,41 @@ exports.upload_image_test = async (req, res) => {
             }
         );
 
-        const variantPath = response.data.result.variants[0];
-
-        const product = await ProductImage.create({
-
+        const id = response.data.result.id;
+        const path = response.data.result.variants[0];
+        const newImage = await Image.create({
+            cdnid: id,
+            imagepath: path,
+            imagetype: 'product',
         });
 
         // Send back the Cloudflare image URL or ID
         console.log(await json(response));
-        res.status(200).json(response);
+        res.status(200).json({ message: 'Image created successfully', newImage });
     } catch (error) {
         console.error('Error uploading image:', error);
         res.status(500).json({ error: 'Failed to upload image' });
     }
 };
 
+// Get image
+exports.get_images = async (req, res) => {
+    try {
+        const images = await Image.findAll({
+            where: {
+                imagetype: { [Op.ne]: 'product' }
+            }
+        });
+
+        res.status(200).json(images);
+    } catch (error) {
+        console.error('Error fetching images:', error);
+        res.status(500).json({ error: 'Failed to fetch images' });
+    }
+}
+
 // Get image test
 exports.get_image_test = async (req, res) => {
-    const apiToken = 'rot7C1YxhAf3IUc4KmE4EJrGDa_1x7jVJiKimLi8'; 
-    const accountId = '8c38baf0067f9ddd3e408e6702ad02bd'; 
     const imageId = 'b9e7d8b1-9125-4734-35a8-d8a5764c5500';
 
     const url = `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ID}/images/v1/${imageId}`;

@@ -30,7 +30,7 @@ const Images = () => {
         try {
             setIsLoading(true)
             const response = await axios.get(
-                'http://localhost:5000/api/get-image-test'
+                'http://localhost:5000/api/images'
             )
             setFormData(response.data)
         } catch (error) {
@@ -45,23 +45,32 @@ const Images = () => {
     }, [])
 
     const handleImgChange = async (e) => {
-        e.preventDefault()
-
-        let imgFile = ''
+        e.preventDefault();
+    
         if (e.target.type === 'file') {
-            imgFile = e.target.files[0]
-
+            const file = e.target.files[0];
+            const formData = new FormData();
+    
+            // Append the file to the FormData object
+            formData.append('file', file);
+            formData.append('imagetype', 'banner'); // hardcoded - change to proper banner type
+    
             try {
-                console.log(imgFile)
                 const response = await axios.post(
-                    `http://localhost:5000/api/upload-image`,
-                    imgFile
-                )
+                    'http://localhost:5000/api/upload-image',
+                    formData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    }
+                );
+                console.log('Image Uploaded:', response.data);
             } catch (error) {
-                console.error(error)
+                console.error('Error uploading image:', error);
             }
         }
-    }
+    };
 
     return (
         <div className="mx-4 w-full overflow-x-hidden px-4">

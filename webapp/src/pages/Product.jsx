@@ -116,12 +116,35 @@ const Product = () => {
         })
     }
 
-    const handleImgChange = (e) => {
-        let imgFile = ''
+    const handleImgChange = async (e) => {
+        e.preventDefault();
+    
         if (e.target.type === 'file') {
-            imgFile = e.target.files[0]
+            const file = e.target.files[0];
+            const formData = new FormData();
+    
+            // Append the file to the FormData object
+            formData.append('file', file);
+            formData.append('imagetype', 'product'); // hardcoded
+    
+            try {
+                const response = await axios.post(
+                    `http://localhost:5000/api/upload-image/`,
+                    formData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    }
+                );
+                console.log('Image Uploaded:', response.data);
+
+                // append imageId to ProductImages
+            } catch (error) {
+                console.error('Error uploading image:', error);
+            }
         }
-    }
+    };
 
     const handleDeleteColor = (color) => {
         setFormData((prevData) => ({

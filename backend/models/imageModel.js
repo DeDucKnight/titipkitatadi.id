@@ -7,6 +7,10 @@ const Image = sequelize.define('Image', {
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4,
     },
+    cdnid: {
+        type: DataTypes.UUID,
+        allowNull: false,        
+    },
     imagepath: {
         type: DataTypes.STRING,
         allowNull: false,
