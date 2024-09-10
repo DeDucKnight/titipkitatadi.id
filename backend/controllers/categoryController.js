@@ -2,21 +2,21 @@ const { Category, CategoryDetail, sequelize } = require('../models');
 
 // Create a New Category & Category Details
 exports.create_category = async (req, res) => {
-    const { CategoryName, IsStandard, CategoryDetails } = req.body;
+    const { categoryname, isstandard, categorydetails } = req.body;
     
     const t = await sequelize.transaction();
     try {
         // Create Category
         const category = await Category.create({
-            categoryname: CategoryName, 
-            isstandard: IsStandard,
+            categoryname,
+            isstandard,
         }, { transaction: t });
 
         // Bulk Create CategoryDetails
-        if (CategoryDetails && CategoryDetails.length > 0) {
-            const categoryDetailsToInsert = CategoryDetails.map(detail => ({
+        if (categorydetails && categorydetails.length > 0) {
+            const categoryDetailsToInsert = categorydetails.map(detail => ({
                 categoryid: category.categoryid,
-                categorydetailname: detail.CategoryDetailName,
+                categorydetailname: detail.categorydetailname,
             }));
 
             await CategoryDetail.bulkCreate(categoryDetailsToInsert, { transaction: t });
@@ -51,10 +51,10 @@ exports.get_categories = async (req, res) => {
 
 // Get Category by Id
 exports.get_category = async (req, res) => {
-    const { categoryId } = req.params;
+    const { categorid } = req.params;
 
     try {
-        const category = await Category.findByPk(categoryId, {
+        const category = await Category.findByPk(categorid, {
             include: {
                 model: CategoryDetail,
                 attributes: ['categorydetailid', 'categorydetailname'],
@@ -74,13 +74,13 @@ exports.get_category = async (req, res) => {
 
 // Update a Category by ID
 exports.update_category = async (req, res) => {
-    const { categoryId } = req.params;
+    const { categoryid } = req.params;
     const updates = req.body;
 
     const t = await sequelize.transaction();
     try {
         // Update Category
-        const category = await Category.findByPk(categoryId, { transaction: t });
+        const category = await Category.findByPk(categoryid, { transaction: t });
 
         if (!category) {
             await t.rollback();
@@ -93,7 +93,7 @@ exports.update_category = async (req, res) => {
         if (updates.CategoryDetails && updates.CategoryDetails.length > 0) {
             // Fetch existing CategoryDetails related to this category
             const existingCategoryDetails = await CategoryDetail.findAll({
-                where: { categoryid: categoryId },
+                where: { categoryid },
                 transaction: t
             });
 
@@ -105,21 +105,21 @@ exports.update_category = async (req, res) => {
             const newDetailsToCreate = [];
 
             for (const detail of updates.CategoryDetails) {
-                const categoryDetailId = detail.categorydetailid;
+                const categorydetailid = detail.categorydetailid;
 
-                if (existingCategoryDetailIds.includes(categoryDetailId)) {
+                if (existingCategoryDetailIds.includes(categorydetailid)) {
                     // Add to update list
                     updatesToApply.push({
-                        categorydetailid: categoryDetailId,
+                        categorydetailid: categorydetailid,
                         categorydetailname: detail.categorydetailname,
-                        categoryid: categoryId
+                        categoryid: categoryid
                     });
                 } else {
                     // Add to create list
                     newDetailsToCreate.push({
-                        categorydetailid: categoryDetailId,
+                        categorydetailid: categorydetailid,
                         categorydetailname: detail.categorydetailname,
-                        categoryid: categoryId
+                        categoryid: categoryid
                     });
                 }
             }
@@ -166,12 +166,12 @@ exports.update_category = async (req, res) => {
 
 // Delete a Category by ID
 exports.delete_category = async (req, res) => {
-    const { categoryId } = req.params;
+    const { categoryid } = req.params;
 
     const t = await sequelize.transaction();
     try {
         // Find the category by primary key
-        const category = await Category.findByPk(categoryId, { transaction: t });
+        const category = await Category.findByPk(categoryid, { transaction: t });
 
         if (!category) {
             await t.rollback();
@@ -192,11 +192,11 @@ exports.delete_category = async (req, res) => {
 
 // Update a Category Detail by ID
 exports.update_category_detail = async (req, res) => {
-    const { categoryDetailId } = req.params;
+    const { categorydetailid } = req.params;
     const updates = req.body;
 
     try {
-        const categoryDetail = await CategoryDetail.findByPk(categoryDetailId);
+        const categoryDetail = await CategoryDetail.findByPk(categorydetailid);
 
         if (!categoryDetail) {
             return res.status(404).json({ message: 'Category Detail not found' });
@@ -212,10 +212,10 @@ exports.update_category_detail = async (req, res) => {
 
 // Delete a Category Detail by ID
 exports.delete_category_detail = async (req, res) => {
-    const { categoryDetailId } = req.params;
+    const { categorydetailid } = req.params;
 
     try {
-        const categoryDetail = await CategoryDetail.findByPk(categoryDetailId);
+        const categoryDetail = await CategoryDetail.findByPk(categorydetailid);
 
         if (!categoryDetail) {
             return res.status(404).json({ message: 'Category detail not found' });

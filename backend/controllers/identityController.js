@@ -21,7 +21,7 @@ exports.admin_login = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { userId: user.id, email: user.email },
+            { userId: user.userid, username: user.username  },
             process.env.JWT_SECRET,
             { expiresIn: '12h' }
         );
@@ -71,11 +71,11 @@ exports.create_user_admin = async (req, res) => {
 
 // Customer login
 exports.customer_login = async (req, res) => {
-    const { email } = req.body;
+    const { customeremail } = req.body;
 
     try {
         // Find customer by email
-        const customer = await Customer.findOne({ where: { customeremail: email } });
+        const customer = await Customer.findOne({ where: { customeremail } });
 
         if (!customer) {
             return res.status(404).json({ error: 'Customer not found' });
@@ -128,11 +128,11 @@ exports.create_customer = async (req, res) => {
 
 // Delete a Customer by Email
 exports.delete_customer_by_email = async (req, res) => {
-    const { email } = req.params;
+    const { customeremail } = req.params;
 
     try {
         // Check if customer exists
-        const customer = await Customer.findOne({ where: { customeremail: email } });
+        const customer = await Customer.findOne({ where: { customeremail } });
 
         if (!customer) {
             return res.status(404).json({ message: 'Customer not found' });
