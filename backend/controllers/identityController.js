@@ -95,3 +95,55 @@ exports.customer_login = async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 };
+
+// Create customer
+exports.create_customer = async (req, res) => {
+    const { customeremail, customername } = req.body;
+
+    try {
+        // Check if required fields are provided
+        if (!customeremail || !customername) {
+            return res.status(400).json({ error: 'CustomerEmail and CustomerName are required' });
+        }
+
+        // Check if customer already exists
+        const existingCustomer = await Customer.findOne({ where: { customeremail } });
+
+        if (existingCustomer) {
+            return res.status(400).json({ error: 'Customer with this email already exists' });
+        }
+
+        // Create new customer
+        const customer = await Customer.create({
+            customeremail,
+            customername,
+        });
+
+        res.status(201).json({ message: 'Customer created successfully', customer });
+    } catch (err) {
+        console.error('Error creating customer:', err);
+        res.status(500).json({ error: 'Failed to create customer' });
+    }
+};
+
+// Delete a Customer by Email
+exports.delete_customer_by_email = async (req, res) => {
+    const { email } = req.params;
+
+    try {
+        // Check if customer exists
+        const customer = await Customer.findOne({ where: { customeremail: email } });
+
+        if (!customer) {
+            return res.status(404).json({ message: 'Customer not found' });
+        }
+
+        // Delete customer
+        await customer.destroy();
+
+        res.status(200).json({ message: 'Customer deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting customer:', err);
+        res.status(500).json({ error: 'Failed to delete customer' });
+    }
+};
