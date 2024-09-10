@@ -40,7 +40,7 @@ exports.get_categories = async (req, res) => {
                 model: CategoryDetail,
                 attributes: ['categorydetailid', 'categorydetailname'],
             },
-            order: [['createdAt', 'ASC']]
+            order: [['createddate', 'ASC']]
         });
         res.status(200).json(categories);
     } catch (err) {

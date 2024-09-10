@@ -179,7 +179,7 @@ exports.get_images = async (req, res) => {
                 imagetype: { [Op.ne]: 'product' }
             },
             attributes: ['cdnid', 'imagepath', 'imagetype'],
-            order: [['createdAt', 'DESC']]
+            order: [['createddate', 'DESC']]
         });
 
         if (images.length === 0) {
