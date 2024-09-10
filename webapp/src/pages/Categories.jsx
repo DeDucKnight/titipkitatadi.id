@@ -22,6 +22,19 @@ const Categories = () => {
             setIsLoading(false)
         }
     }
+    const handleDelete = async (category) => {
+        try {
+            setIsLoading(true)
+            const response = await axios.delete(
+                `http://localhost:5000/api/categories/${category.categoryid}`
+            )
+            if (response.status >= 200 && response.status < 300) {
+                fetchCategories()
+            }
+        } catch (error) {
+            console.error('Error fetching categories:', error)
+        }
+    }
     useEffect(() => {
         fetchCategories()
     }, [])
@@ -105,7 +118,13 @@ const Categories = () => {
                                     </td>
                                     <td className="w-[1%] p-4">
                                         <div className="inline-flex w-full items-center justify-end gap-4">
-                                            <Switch isChecked={item.status} />
+                                            <Button
+                                                iconName={'trash'}
+                                                type={'link'}
+                                                onClick={() =>
+                                                    handleDelete(item)
+                                                }
+                                            />
                                         </div>
                                     </td>
                                 </tr>

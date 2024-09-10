@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Link, useLocation, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
 import Switch from '../components/Switch'
 import Button from '../components/Button'
@@ -22,36 +22,44 @@ function generateGUID() {
 
 const Category = () => {
     const [isLoading, setIsLoading] = useState(true)
+    const [isLoadingImage, setIsLoadingImage] = useState(false)
+    const [inputValue, setInputValue] = useState('')
+    const [categoryParent, setCategoryParent] = useState('')
+    const [isChanged, setIsChanged] = useState(false)
     const { guid } = useParams()
+    const navigate = useNavigate()
     const location = useLocation()
     const pathnames = location.pathname.split('/').filter((el) => el)
     const [initialData, setInitialData] = useState([])
-    const [inputValue, setInputValue] = useState('')
     const [formData, setFormData] = useState({
         categoryid: '',
+        CategoryName: '',
         categoryname: '',
         isstandard: true,
+        IsStandard: true,
         status: true,
         createddate: '',
         CategoryDetails: [],
     })
-    const [categoryParent, setCategoryParent] = useState('')
-    const [isChanged, setIsChanged] = useState(false)
-    useEffect(() => {
-        const fetchCategory = async () => {
-            try {
-                setIsLoading(true)
-                const response = await axios.get(
-                    `http://localhost:5000/api/categories/${guid}`
-                )
-                setFormData(response.data)
-                setInitialData(response.data)
-            } catch (error) {
-                console.error('Error fetching categories:', error)
-            } finally {
-                setIsLoading(false)
-            }
+    const [imgData, setImgData] = useState([])
+
+    const fetchCategory = async () => {
+        try {
+            setIsLoading(true)
+            const response = await axios.get(
+                `http://localhost:5000/api/categories/${guid}`
+            )
+            setFormData(response.data)
+            setInitialData(response.data)
+            setCategoryParent(response.data.categoryname)
+        } catch (error) {
+            console.error('Error fetching categories:', error)
+        } finally {
+            setIsLoading(false)
         }
+    }
+
+    useEffect(() => {
         if (guid !== 'category') {
             fetchCategory()
         } else {
@@ -79,6 +87,13 @@ const Category = () => {
                 [name]: value,
             })
         }
+
+        if (name == 'categoryname') {
+            setFormData((prevFormData) => ({
+                ...prevFormData,
+                CategoryName: prevFormData.categoryname,
+            }))
+        }
     }
 
     const handleChangeTable = (e) => {
@@ -97,7 +112,6 @@ const Category = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-
         try {
             if (guid !== 'category') {
                 const response = await axios.put(
@@ -105,8 +119,7 @@ const Category = () => {
                     formData
                 )
                 if (response.status >= 200 && response.status < 300) {
-                    setInitialData(response.data.category)
-                    // setFormData(response.data.category)
+                    fetchCategory()
                 }
             } else {
                 const response = await axios.post(
@@ -114,8 +127,7 @@ const Category = () => {
                     formData
                 )
                 if (response.status >= 200 && response.status < 300) {
-                    setInitialData(response.data.category)
-                    // setFormData(response.data.category)
+                    navigate(`/categories/${response.data.category.categoryid}`)
                 }
             }
         } catch (error) {
@@ -134,6 +146,7 @@ const Category = () => {
                 categorydetailid: generateGUID(),
                 categoryid: guid,
                 categorydetailname: inputValue,
+                CategoryDetailName: inputValue,
                 status: true,
                 createddate: new Date(),
             }
@@ -145,12 +158,79 @@ const Category = () => {
             setInputValue('')
         }
     }
-    const handleImgChange = (e) => {
-        let imgFile = ''
+
+    const handleImgChange = async (e, data) => {
+        e.preventDefault()
+        setIsLoadingImage(true)
+
         if (e.target.type === 'file') {
-            imgFile = e.target.files[0]
+            const file = e.target.files[0]
+            const formData = new FormData()
+
+            // Append the file to the FormData object
+            formData.append('file', file)
+            formData.append('imagetype', `${guid}_${data.categorydetailname}`) // hardcoded
+
+            try {
+                debugger
+                const response = await axios.post(
+                    `http://localhost:5000/api/upload-image/`,
+                    formData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    }
+                )
+                console.log('Image Uploaded:', response.data)
+                setImgData((prevData) => [...prevData, response.data.image])
+                setFormData((prevData) => ({
+                    ...prevData,
+                    CategoryDetails: prevData.CategoryDetails.map((detail) =>
+                        detail.categorydetailname ===
+                        response.data.image.imagetype.split('_')[1]
+                            ? { ...detail, image: response.data.image }
+                            : detail
+                    ),
+                }))
+
+                // append imageId to ProductImages
+            } catch (error) {
+                console.error('Error uploading image:', error)
+            } finally {
+                setIsLoadingImage(false)
+            }
         }
     }
+
+    const handleDelete = async (e, data) => {
+        e.preventDefault()
+        setIsLoading(true)
+        try {
+            const response = await axios.delete(
+                `http://localhost:5000/api/category-details/${data.categorydetailid}`,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                }
+            )
+            if (response.status >= 200 && response.status < 300) {
+                setFormData((prevFormData) => ({
+                    ...prevFormData,
+                    CategoryDetails: prevFormData.CategoryDetails.filter(
+                        (detail) =>
+                            detail.categorydetailid !== data.categorydetailid
+                    ),
+                }))
+            }
+        } catch (error) {
+            console.error('Error delete category:', error)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
     return (
         <div className="mx-4 w-full px-4">
             {isLoading ? (
@@ -265,70 +345,116 @@ const Category = () => {
                                 value={inputValue}
                                 handleChange={handleInputChange}
                             />
-                            <table className="min-w-full bg-white">
-                                <thead className="whitespace-nowrap bg-gray-100">
-                                    <tr className="">
-                                        <th className="p-4 text-left text-sm font-semibold text-gray-800">
-                                            Categories
-                                        </th>
-                                        <th className="p-4 text-left text-sm font-semibold text-gray-800">
-                                            Images
-                                        </th>
-                                        <th className="w-[1%] p-4 text-end text-sm font-semibold text-gray-800">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="max-h-40 overflow-auto whitespace-nowrap">
-                                    {formData.CategoryDetails.map(
-                                        (data, index) => (
-                                            <tr
-                                                className="hover:bg-gray-50"
-                                                key={index}
-                                            >
-                                                <td className="p-4 align-top text-sm text-gray-800">
-                                                    {data.categorydetailname}
-                                                </td>
-                                                <td className="p-4 align-top text-sm text-gray-800">
-                                                    <div className="flex w-full flex-wrap gap-3">
-                                                        {/* <Image
-                                                            key={image.imageId}
-                                                            imgSrc={
-                                                                image.imagePath
-                                                            }
-                                                            ratio="aspect-card"
-                                                            className="h-48"
-                                                        /> */}
-                                                        <Input
-                                                            handleChange={
-                                                                handleImgChange
-                                                            }
-                                                            id={`img_${data.categorydetailid}`}
-                                                            isUploadImage={true}
-                                                            imgUploadContainerClassName={
-                                                                '!aspect-20x9 !h-full'
-                                                            }
-                                                        />
-                                                    </div>
-                                                </td>
-                                                <td className="w-[1%] p-4 align-top">
-                                                    <div className="inline-flex w-full items-center justify-end gap-4">
-                                                        <Switch
-                                                            id={`status_${data.categorydetailid}`}
-                                                            isChecked={
-                                                                data.status
-                                                            }
-                                                            handleChange={
-                                                                handleChangeTable
-                                                            }
-                                                        />
-                                                    </div>
-                                                </td>
+                            {formData.CategoryDetails &&
+                                formData.CategoryDetails.length > 0 && (
+                                    <table className="min-w-full bg-white">
+                                        <thead className="whitespace-nowrap bg-gray-100">
+                                            <tr className="">
+                                                <th className="p-4 text-left text-sm font-semibold text-gray-800">
+                                                    Categories
+                                                </th>
+                                                <th className="p-4 text-left text-sm font-semibold text-gray-800">
+                                                    Images
+                                                </th>
+                                                <th className="w-[1%] p-4 text-end text-sm font-semibold text-gray-800">
+                                                    Actions
+                                                </th>
                                             </tr>
-                                        )
-                                    )}
-                                </tbody>
-                            </table>
+                                        </thead>
+                                        <tbody className="max-h-40 overflow-auto whitespace-nowrap">
+                                            {formData.CategoryDetails.map(
+                                                (data, index) => (
+                                                    <tr
+                                                        className="hover:bg-gray-50"
+                                                        key={index}
+                                                    >
+                                                        <td className="p-4 align-top text-sm text-gray-800">
+                                                            {
+                                                                data.categorydetailname
+                                                            }
+                                                        </td>
+                                                        <td className="p-4 align-top text-sm text-gray-800">
+                                                            <div className="flex w-full flex-wrap gap-3">
+                                                                {imgData
+                                                                    .filter(
+                                                                        (img) =>
+                                                                            img.imagetype ===
+                                                                            `${guid}_${data.categorydetailname}`
+                                                                    )
+                                                                    .map(
+                                                                        (
+                                                                            img
+                                                                        ) => (
+                                                                            <Image
+                                                                                key={
+                                                                                    img.imageid
+                                                                                }
+                                                                                imgSrc={
+                                                                                    img.imagepath
+                                                                                }
+                                                                                ratio="aspect-20x9"
+                                                                                className="h-48"
+                                                                            />
+                                                                        )
+                                                                    )}
+                                                                {imgData.filter(
+                                                                    (img) =>
+                                                                        img.imagetype ===
+                                                                        `${guid}_${data.categorydetailname}`
+                                                                ).length > 0 ? (
+                                                                    ''
+                                                                ) : (
+                                                                    <Input
+                                                                        handleChange={(
+                                                                            event
+                                                                        ) =>
+                                                                            handleImgChange(
+                                                                                event,
+                                                                                data
+                                                                            )
+                                                                        }
+                                                                        id={
+                                                                            data.categorydetailid
+                                                                        }
+                                                                        imgUploadContainerClassName={
+                                                                            '!aspect-20x9 !h-48'
+                                                                        }
+                                                                        isUploadImage={
+                                                                            true
+                                                                        }
+                                                                        isLoading={
+                                                                            isLoadingImage
+                                                                        }
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="w-[1%] p-4 align-top">
+                                                            <div className="inline-flex w-full items-center justify-end gap-4">
+                                                                <Button
+                                                                    iconName={
+                                                                        'trash'
+                                                                    }
+                                                                    type={
+                                                                        'link'
+                                                                    }
+                                                                    onClick={(
+                                                                        e
+                                                                    ) =>
+                                                                        handleDelete(
+                                                                            e,
+                                                                            data
+                                                                        )
+                                                                    }
+                                                                />
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            )}
+                                        </tbody>
+                                    </table>
+                                )}
                         </form>
                     </div>
                 </>
