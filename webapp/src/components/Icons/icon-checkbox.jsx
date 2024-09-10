@@ -6,7 +6,7 @@ const SVG = ({ className = '', width = '20' }) => (
         viewBox="0 0 20 20"
         fill="currentColor"
         stroke="currentColor"
-        strokeWidth="1"
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
         className={`svg-icon ${className || ''}`}

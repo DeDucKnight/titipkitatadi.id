@@ -8,6 +8,8 @@ import Categories from './pages/Categories'
 import Images from './pages/Images'
 import Product from './pages/Product'
 import Category from './pages/Category'
+import Customers from './pages/Customers'
+import Customer from './pages/Customer'
 
 const App = () => {
     const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
@@ -162,6 +164,22 @@ const App = () => {
                         path="/images"
                         element={
                             isLoggedIn ? <Images /> : <Navigate to="/login" />
+                        }
+                    />
+                    <Route
+                        path="/customers"
+                        element={
+                            isLoggedIn ? (
+                                <Customers />
+                            ) : (
+                                <Navigate to="/login" />
+                            )
+                        }
+                    />
+                    <Route
+                        path="/customers/:guid"
+                        element={
+                            isLoggedIn ? <Customer /> : <Navigate to="/login" />
                         }
                     />
                 </Routes>

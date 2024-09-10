@@ -46,6 +46,13 @@ const Navbar = forwardRef(
                                 <Icon name="images" />
                                 <span>Images</span>
                             </Link>
+                            <Link
+                                to={'/customers'}
+                                className="flex items-center gap-4 rounded px-4 py-3 text-sm text-primary-500 transition-all hover:bg-primary-50 hover:text-primary-600"
+                            >
+                                <Icon name="customer" />
+                                <span>Customers</span>
+                            </Link>
                         </ul>
                     </div>
                 </div>
