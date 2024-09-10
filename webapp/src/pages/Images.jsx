@@ -10,51 +10,51 @@ import Skeleton from '../components/Skeleton'
 const Images = () => {
     const location = useLocation()
     const [isLoading, setIsLoading] = useState(true)
+    const [isLoadingImage, setIsLoadingImage] = useState(false)
     const pathnames = location.pathname.split('/').filter((el) => el)
-    const [formData, setFormData] = useState([])
+    const [imgData, setImgData] = useState([])
 
-    const handleSubmit = async (e) => {
+    const handleClickDelete = async (e, imageId) => {
         e.preventDefault()
 
         try {
-            console.log(formData)
-            const response = await axios.post(
-                `http://localhost:5000/api/products`,
-                formData
+            const response = await axios.delete(
+                `http://localhost:5000/api/delete-image/${imageId}`
             )
         } catch (error) {
             console.error(error)
         }
     }
-    const fetchImages = async () => {
-        try {
-            setIsLoading(true)
-            const response = await axios.get(
-                'http://localhost:5000/api/images'
-            )
-            setFormData(response.data)
-        } catch (error) {
-            console.error('Error fetching images:', error)
-        } finally {
-            setIsLoading(false)
-        }
-    }
 
     useEffect(() => {
+        const fetchImages = async () => {
+            try {
+                setIsLoading(true)
+                const response = await axios.get(
+                    'http://localhost:5000/api/images'
+                )
+                setImgData(response.data)
+            } catch (error) {
+                console.error('Error fetching images:', error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
         fetchImages()
     }, [])
 
     const handleImgChange = async (e) => {
-        e.preventDefault();
-    
+        e.preventDefault()
+        setIsLoadingImage(true)
+
         if (e.target.type === 'file') {
-            const file = e.target.files[0];
-            const formData = new FormData();
-    
+            const file = e.target.files[0]
+            const formData = new FormData()
+
             // Append the file to the FormData object
-            formData.append('file', file);
-            formData.append('imagetype', 'banner'); // hardcoded - change to proper banner type
-    
+            formData.append('file', file)
+            formData.append('imagetype', e.target.id) // hardcoded - change to proper banner type
+
             try {
                 const response = await axios.post(
                     'http://localhost:5000/api/upload-image',
@@ -64,13 +64,16 @@ const Images = () => {
                             'Content-Type': 'multipart/form-data',
                         },
                     }
-                );
-                console.log('Image Uploaded:', response.data);
+                )
+                console.log('Image Uploaded:', response.data)
+                setImgData((prevData) => [...prevData, response.data.image])
             } catch (error) {
-                console.error('Error uploading image:', error);
+                console.error('Error uploading image:', error)
+            } finally {
+                setIsLoadingImage(false)
             }
         }
-    };
+    }
 
     return (
         <div className="mx-4 w-full overflow-x-hidden px-4">
@@ -91,14 +94,13 @@ const Images = () => {
             ) : (
                 <div className="mb-7 pb-4">
                     <form
-                        className="relative h-max space-y-4 py-4 md:space-y-6"
+                        className="relative space-y-4 py-4 md:space-y-6"
                         action="#"
-                        onSubmit={handleSubmit}
                     >
                         <div className="sticky top-[60px] z-20 flex items-center justify-between bg-white py-4 lg:top-0">
                             <h1 className="mb-4 text-3xl font-bold">Images</h1>
 
-                            <Button text={'Save'} btnType={'submit'} />
+                            {/* <Button text={'Save'} btnType={'submit'} /> */}
                         </div>
                         <div className="space-y-7">
                             <div className="flex flex-col gap-2">
@@ -106,20 +108,31 @@ const Images = () => {
                                     Banner Slide Show
                                 </p>
                                 <div className="flex flex-wrap gap-4">
-                                    <Image
-                                        // key={image.imageId}
-                                        // imgSrc={image.imagePath}
-                                        ratio="aspect-20x9"
-                                        className="w-full lg:w-1/3"
-                                    />
+                                    {imgData
+                                        .filter(
+                                            (img) => img.imagetype === 'header'
+                                        )
+                                        .map((img) => (
+                                            <Image
+                                                key={img.cdnid}
+                                                imgSrc={img.imagepath}
+                                                ratio="aspect-20x9"
+                                                className="w-96"
+                                                handleClickDelete={
+                                                    handleClickDelete
+                                                }
+                                            />
+                                        ))}
+
                                     <Input
                                         handleChange={handleImgChange}
-                                        id="banner_img"
+                                        id="header"
                                         isUploadImage={true}
-                                        containerClassName={'w-full lg:!w-1/3'}
+                                        containerClassName={'w-96'}
                                         imgUploadContainerClassName={
                                             '!aspect-20x9 !h-full'
                                         }
+                                        isLoading={isLoadingImage}
                                     />
                                 </div>
                             </div>
@@ -128,21 +141,38 @@ const Images = () => {
                                     Banner Footer
                                 </p>
                                 <div className="flex flex-wrap gap-4">
-                                    <Image
-                                        // key={image.imageId}
-                                        // imgSrc={image.imagePath}
-                                        ratio="aspect-20x9"
-                                        className="w-full lg:w-1/3"
-                                    />
-                                    <Input
-                                        handleChange={handleImgChange}
-                                        id="footer"
-                                        isUploadImage={true}
-                                        containerClassName={'w-full lg:!w-1/3'}
-                                        imgUploadContainerClassName={
-                                            '!aspect-20x9 !h-full'
-                                        }
-                                    />
+                                    {imgData
+                                        .filter(
+                                            (img) => img.imagetype === 'footer'
+                                        )
+                                        .map((img) => (
+                                            <Image
+                                                key={img.cdnid}
+                                                imgSrc={img.imagepath}
+                                                ratio="aspect-20x9"
+                                                className="w-96"
+                                                handleClickDelete={
+                                                    handleClickDelete
+                                                }
+                                                imgSource={img.cdnid}
+                                            />
+                                        ))}
+                                    {imgData.filter(
+                                        (img) => img.imagetype === 'footer'
+                                    ).length > 0 ? (
+                                        ''
+                                    ) : (
+                                        <Input
+                                            handleChange={handleImgChange}
+                                            id="footer"
+                                            isUploadImage={true}
+                                            containerClassName={'w-96'}
+                                            imgUploadContainerClassName={
+                                                '!aspect-20x9 !h-full'
+                                            }
+                                            isLoading={isLoadingImage}
+                                        />
+                                    )}
                                 </div>
                             </div>
                         </div>

@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react'
+import Icon from './Icons'
 
-const CategorySelection = ({ category, formData }) => {
+const CategorySelection = ({ category, formData, handleCategorySelect }) => {
     const [selectedCategory, setSelectedCategory] = useState('')
     const [selectedCategoryParent, setSelectedCategoryParent] = useState('')
     useEffect(() => {
         if (formData) {
             const data = formData.find(
-                (el) => el.categoryId === category.categoryId
+                (el) => el.categoryid === category.categoryid
             )
             if (data) {
                 setSelectedCategory(data.categorydetailid)
-                setSelectedCategoryParent(category.categoryId)
+                setSelectedCategoryParent(category.categoryid)
             }
         }
-    }, [category.categoryId, formData])
+    }, [category.categoryid, formData])
 
     return (
         <>
@@ -27,38 +28,45 @@ const CategorySelection = ({ category, formData }) => {
                             className={`px-4 py-2`}
                             key={categoryDetail.categorydetailid}
                         >
-                            <div className="flex items-center">
-                                <input
-                                    className="hidden"
-                                    type="radio"
-                                    name={categoryDetail.categorydetailid}
-                                    id={categoryDetail.categorydetailid}
-                                    value={categoryDetail.categorydetailid}
-                                    checked={
-                                        selectedCategory ===
-                                            categoryDetail.categorydetailid &&
-                                        selectedCategoryParent ==
-                                            categoryDetail.categoryid
-                                    }
-                                    onChange={() => {
-                                        setSelectedCategory(
-                                            categoryDetail.categorydetailid
-                                        )
-                                        setSelectedCategoryParent(
-                                            categoryDetail.categoryid
-                                        )
-                                    }}
-                                />
+                            <div className="inline-flex items-center">
                                 <label
-                                    className="flex cursor-pointer items-center gap-2 text-nowrap"
+                                    className="relative flex cursor-pointer items-center"
                                     htmlFor={categoryDetail.categorydetailid}
                                 >
-                                    <span
-                                        className={`relative h-5 w-5 rounded-full border-2 shadow-sm transition-all ease-in-out before:absolute before:left-1/2 before:top-1/2 before:h-3 before:w-3 before:origin-center before:-translate-x-1/2 before:-translate-y-1/2 before:content-[''] ${selectedCategory === categoryDetail.categorydetailid ? 'border-primary-500 before:scale-100 before:bg-primary-500' : 'border-gray-200 before:scale-0 before:bg-transparent'} before:rounded-full`}
-                                    ></span>
-                                    <span className="radio-text">
-                                        {categoryDetail.categorydetailname}
+                                    <input
+                                        type="checkbox"
+                                        name={categoryDetail.categorydetailid}
+                                        id={categoryDetail.categorydetailid}
+                                        value={categoryDetail.categorydetailid}
+                                        checked={
+                                            selectedCategory ===
+                                                categoryDetail.categorydetailid &&
+                                            selectedCategoryParent ==
+                                                category.categoryid
+                                        }
+                                        onChange={() => {
+                                            setSelectedCategory(
+                                                categoryDetail.categorydetailid
+                                            )
+                                            setSelectedCategoryParent(
+                                                category.categoryid
+                                            )
+                                            handleCategorySelect(
+                                                category,
+                                                categoryDetail
+                                            )
+                                        }}
+                                        className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-slate-300 shadow transition-all checked:border-slate-800 checked:bg-slate-800 hover:shadow-md"
+                                    />
+                                    <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform text-white opacity-0 peer-checked:opacity-100">
+                                        <Icon name="checkbox" />
                                     </span>
+                                </label>
+                                <label
+                                    className="ml-2 cursor-pointer text-sm text-slate-600"
+                                    htmlFor={categoryDetail.categorydetailid}
+                                >
+                                    {categoryDetail.categorydetailname}
                                 </label>
                             </div>
                         </li>

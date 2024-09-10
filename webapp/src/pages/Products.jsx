@@ -29,6 +29,20 @@ const Products = () => {
         fetchProducts()
     }, [])
 
+    const handleDelete = async (product) => {
+        const productId = product.productid
+        try {
+            setIsLoading(true)
+            const response = await axios.delete(
+                `http://localhost:5000/api/products/${productId}`
+            )
+        } catch (error) {
+            console.error('Error fetching products:', error)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
     return (
         <div className="relative mx-4 w-full py-3">
             {isLoading ? (
@@ -103,7 +117,7 @@ const Products = () => {
                                                     item.ProductImages.find(
                                                         (image) =>
                                                             image.isdefault
-                                                    ).Image.imagepath
+                                                    )?.Image.imagepath
                                                 }
                                                 className="h-full w-full"
                                             />
@@ -133,7 +147,13 @@ const Products = () => {
                                     </td>
                                     <td className="w-[1%] p-4">
                                         <div className="inline-flex w-full items-center justify-end gap-4">
-                                            <Switch isChecked={item.status} />
+                                            <Button
+                                                iconName={'trash'}
+                                                type={'link'}
+                                                onClick={() =>
+                                                    handleDelete(item)
+                                                }
+                                            />
                                         </div>
                                     </td>
                                 </tr>

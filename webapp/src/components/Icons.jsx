@@ -10,6 +10,7 @@ import ChevronRight from './Icons/icon-chevron-right.jsx'
 import ChevronDown from './Icons/icon-chevron-down.jsx'
 import ChevronLeft from './Icons/icon-chevron-left.jsx'
 import Trash from './Icons/icon-trash.jsx'
+import Checkbox from './Icons/icon-checkbox.jsx'
 
 const Icon = (props) => {
     switch (props.name) {
@@ -35,6 +36,8 @@ const Icon = (props) => {
             return <ChevronDown {...props} />
         case 'trash':
             return <Trash {...props} />
+        case 'checkbox':
+            return <Checkbox {...props} />
         default:
     }
 }

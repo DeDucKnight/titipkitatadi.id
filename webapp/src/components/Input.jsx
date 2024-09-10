@@ -20,6 +20,7 @@ const Input = ({
     handleChange,
     btnOnClick,
     imgUploadContainerClassName,
+    isLoading = false,
 }) => {
     const [showPassword, setShowPassword] = useState(false)
     const [showColorPicker, setShowColorPicker] = useState(false)
@@ -64,8 +65,11 @@ const Input = ({
                                 onBlur={handleOnFocus}
                                 onChange={handleChange}
                                 readOnly={isColorPicker}
+                                {...(isColorPicker
+                                    ? { defaultValue: inputvalue }
+                                    : { value: inputvalue })}
                                 // defaultValue={inputvalue}
-                                value={inputvalue}
+                                // value={inputvalue}
                             />
                         )}
                         {isResizeable && (
@@ -137,8 +141,10 @@ const Input = ({
                                     Click to upload
                                 </span>
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                                SVG, PNG, JPG or GIF
+                            <p className="text-center text-xs text-gray-500 dark:text-gray-400">
+                                SVG, PNG, JPG
+                                <br />
+                                or GIF
                             </p>
                         </div>
                         <input
@@ -148,6 +154,13 @@ const Input = ({
                             className="hidden"
                             onChange={handleChange}
                         />
+
+                        {isLoading && (
+                            <div className="absolute inset-0 top-0 flex items-center justify-center bg-black bg-opacity-30">
+                                {' '}
+                                <div className="spinner-loader"></div>
+                            </div>
+                        )}
                     </label>
                 </>
             )}

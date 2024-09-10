@@ -11,6 +11,13 @@ import Skeleton from '../components/Skeleton'
 import axios from 'axios'
 
 const Product = () => {
+    const [isChanged, setIsChanged] = useState(false)
+    const [isLoadingImage, setIsLoadingImage] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
+    const [sizeValue, setSizeValue] = useState('')
+    const { guid } = useParams()
+    const location = useLocation()
+    const pathnames = location.pathname.split('/').filter((el) => el)
     const [initialData, setInitialData] = useState({
         productname: '',
         description: '',
@@ -33,35 +40,19 @@ const Product = () => {
         colors: [],
         sizes: [],
         material: '',
-        onlinestores: [],
+        onlinestores: [
+            { onlineStore: 'tokped', link: '' },
+            { onlineStore: 'shopee', link: '' },
+        ],
         shipping: '',
         status: '',
         productimages: [],
         productcategories: [],
     })
-    const [isChanged, setIsChanged] = useState(false)
     const [categoriesData, setCategoriesData] = useState([])
-    const [isLoading, setIsLoading] = useState(true)
-
-    const { guid } = useParams()
-    const location = useLocation()
-    const pathnames = location.pathname.split('/').filter((el) => el)
+    const [imgData, setImgData] = useState([])
 
     useEffect(() => {
-        const fetchProduct = async () => {
-            try {
-                setIsLoading(true)
-                const response = await axios.get(
-                    `http://localhost:5000/api/products/${guid}`
-                )
-                setFormData(response.data)
-                setInitialData(response.data)
-            } catch (error) {
-                console.error('Error fetching products:', error)
-            } finally {
-                setIsLoading(false)
-            }
-        }
         const fetchCategories = async () => {
             try {
                 setIsLoading(true)
@@ -75,10 +66,41 @@ const Product = () => {
                 setIsLoading(false)
             }
         }
+        const fetchImages = async () => {
+            try {
+                setIsLoading(true)
+                const response = await axios.get(
+                    'http://localhost:5000/api/images'
+                )
+                setImgData(response.data)
+            } catch (error) {
+                console.error('Error fetching images:', error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        const fetchProduct = async () => {
+            try {
+                setIsLoading(true)
+                const response = await axios.get(
+                    `http://localhost:5000/api/products/${guid}`
+                )
+                setFormData(response.data)
+                setInitialData(response.data)
+                fetchCategories()
+                fetchImages()
+            } catch (error) {
+                console.error('Error fetching products:', error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
         if (guid !== 'product') {
             fetchProduct()
+        } else {
+            fetchCategories()
+            setIsLoading(false)
         }
-        fetchCategories()
     }, [guid])
 
     useEffect(() => {
@@ -117,16 +139,17 @@ const Product = () => {
     }
 
     const handleImgChange = async (e) => {
-        e.preventDefault();
-    
+        e.preventDefault()
+        setIsLoadingImage(true)
+
         if (e.target.type === 'file') {
-            const file = e.target.files[0];
-            const formData = new FormData();
-    
+            const file = e.target.files[0]
+            const formData = new FormData()
+
             // Append the file to the FormData object
-            formData.append('file', file);
-            formData.append('imagetype', 'product'); // hardcoded
-    
+            formData.append('file', file)
+            formData.append('imagetype', `${guid}_${e.target.id}`) // hardcoded
+
             try {
                 const response = await axios.post(
                     `http://localhost:5000/api/upload-image/`,
@@ -136,20 +159,68 @@ const Product = () => {
                             'Content-Type': 'multipart/form-data',
                         },
                     }
-                );
-                console.log('Image Uploaded:', response.data);
+                )
+                console.log('Image Uploaded:', response.data)
+                setImgData((prevData) => [...prevData, response.data.image])
+                setFormData((prevData) => ({
+                    ...prevData,
+                    ProductImages: [
+                        ...imgData.filter(
+                            (img) => img.imagetype.split('_')[0] === guid
+                        ),
+                        response.data.image,
+                    ],
+                }))
 
                 // append imageId to ProductImages
             } catch (error) {
-                console.error('Error uploading image:', error);
+                console.error('Error uploading image:', error)
+            } finally {
+                setIsLoadingImage(false)
             }
         }
-    };
+    }
 
     const handleDeleteColor = (color) => {
         setFormData((prevData) => ({
             ...prevData,
             colors: prevData.colors.filter((item) => item !== color),
+        }))
+    }
+
+    const handleCategorySelect = (category, categoryDetail) => {
+        setFormData((prevData) => {
+            categoryDetail.categoryid = category.categoryid
+            const updatedCategories = prevData.ProductCategories.filter(
+                (category) => category.categoryid !== categoryDetail.categoryid
+            )
+            return {
+                ...prevData,
+                ProductCategories: [...updatedCategories, categoryDetail],
+            }
+        })
+    }
+    // if (
+    //     selectedCategory ===
+    //         categoryDetail.categorydetailid &&
+    //     selectedCategoryParent ===
+    //         categoryDetail.categoryid
+    // ) {
+    //     setSelectedCategory(null)
+    //     setSelectedCategoryParent(null)
+    // } else {
+    //     setSelectedCategory(
+    //         categoryDetail.categorydetailid
+    //     )
+    //     setSelectedCategoryParent(
+    //         categoryDetail.categoryid
+    //     )
+    // }
+
+    const handleDeleteSize = (size) => {
+        setFormData((prevData) => ({
+            ...prevData,
+            sizes: prevData.sizes.filter((item) => item !== size),
         }))
     }
 
@@ -164,6 +235,8 @@ const Product = () => {
                 )
                 if (response.status >= 200 && response.status < 300) {
                     setInitialData(response.data.product)
+                    setFormData(response.data.product)
+                    console.log(response.data.product)
                 }
             } else {
                 const response = await axios.post(
@@ -172,6 +245,7 @@ const Product = () => {
                 )
                 if (response.status >= 200 && response.status < 300) {
                     setInitialData(response.data.product)
+                    setFormData(response.data.product)
                 }
             }
         } catch (error) {
@@ -285,7 +359,7 @@ const Product = () => {
                                 id="discountPrice"
                                 type="number"
                                 labelText="Discount Price"
-                                value={formData.discountprice}
+                                value={formData.discountPrice}
                             />
                             <Input
                                 handleChange={handleChange}
@@ -300,116 +374,140 @@ const Product = () => {
                                 btnText={'Add'}
                                 btnOnClick={handleAddColor}
                             />
-                            <table className="min-w-full bg-white">
-                                <thead className="whitespace-nowrap bg-gray-100">
-                                    <tr className="">
-                                        <th className="p-4 text-left text-sm font-semibold text-gray-800">
-                                            Colors
-                                        </th>
-                                        <th className="p-4 text-left text-sm font-semibold text-gray-800">
-                                            Images
-                                        </th>
-                                        <th className="w-[1%] p-4 text-end text-sm font-semibold text-gray-800">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="max-h-40 overflow-auto whitespace-nowrap">
-                                    {formData.colors.map((color, index) => (
-                                        <tr
-                                            className="hover:bg-gray-50"
-                                            key={index}
-                                        >
-                                            <td className="p-4 align-top text-sm text-gray-800">
-                                                {color}
-                                            </td>
-                                            <td className="p-4 align-top text-sm text-gray-800">
-                                                <div className="flex w-full flex-wrap gap-3">
-                                                    {formData.ProductImages?.map(
-                                                        (image, index) =>
-                                                            image.color ===
-                                                                color && (
+                            {formData.colors.length > 0 && (
+                                <table className="min-w-full bg-white">
+                                    <thead className="whitespace-nowrap bg-gray-100">
+                                        <tr className="">
+                                            <th className="p-4 text-left text-sm font-semibold text-gray-800">
+                                                Colors
+                                            </th>
+                                            <th className="p-4 text-left text-sm font-semibold text-gray-800">
+                                                Images
+                                            </th>
+                                            <th className="w-[1%] p-4 text-end text-sm font-semibold text-gray-800">
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="max-h-40 overflow-auto whitespace-nowrap">
+                                        {formData.colors.map((color, index) => (
+                                            <tr
+                                                className="hover:bg-gray-50"
+                                                key={index}
+                                            >
+                                                <td className="p-4 align-top text-sm text-gray-800">
+                                                    <div className="inline-flex items-center gap-4">
+                                                        <span
+                                                            className="size-6"
+                                                            style={{
+                                                                backgroundColor:
+                                                                    color,
+                                                            }}
+                                                        ></span>
+                                                        <span>{color}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="p-4 align-top text-sm text-gray-800">
+                                                    <div className="flex w-full flex-wrap gap-3">
+                                                        {imgData
+                                                            .filter(
+                                                                (img) =>
+                                                                    img.imagetype ===
+                                                                    `${guid}_${color}`
+                                                            )
+                                                            .map((img) => (
                                                                 <Image
                                                                     key={
-                                                                        image.imageid
+                                                                        img.cdnid
                                                                     }
                                                                     imgSrc={
-                                                                        image.imagePath
+                                                                        img.imagepath
                                                                     }
                                                                     ratio="aspect-card"
                                                                     className="h-48"
                                                                 />
-                                                            )
-                                                    )}
-                                                    <Input
-                                                        handleChange={
-                                                            handleImgChange
-                                                        }
-                                                        id={color}
-                                                        isUploadImage={true}
-                                                    />
-                                                </div>
-                                            </td>
-                                            <td className="w-[1%] p-4 align-top text-sm">
-                                                <div className="inline-flex w-full items-center justify-end gap-4 text-sm">
-                                                    <Button
-                                                        iconName={'trash'}
-                                                        type={'link'}
-                                                        onClick={() =>
-                                                            handleDeleteColor(
-                                                                color
-                                                            )
-                                                        }
-                                                    />
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                                            ))}
+                                                        <Input
+                                                            handleChange={
+                                                                handleImgChange
+                                                            }
+                                                            id={color}
+                                                            ratio="aspect-card"
+                                                            className="h-48"
+                                                            isUploadImage={true}
+                                                            isLoading={
+                                                                isLoadingImage
+                                                            }
+                                                        />
+                                                    </div>
+                                                </td>
+                                                <td className="w-[1%] p-4 align-top text-sm">
+                                                    <div className="inline-flex w-full items-center justify-end gap-4 text-sm">
+                                                        <Button
+                                                            iconName={'trash'}
+                                                            type={'link'}
+                                                            onClick={() =>
+                                                                handleDeleteColor(
+                                                                    color
+                                                                )
+                                                            }
+                                                        />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
                             <Input
                                 id="size"
                                 labelText="Sizes"
                                 btnText={'Add'}
                                 btnOnClick={handleAddSize}
+                                value={sizeValue}
+                                handleChange={(e) =>
+                                    setSizeValue(e.target.value)
+                                }
                             />
-                            <table className="min-w-full bg-white">
-                                <thead className="whitespace-nowrap bg-gray-100">
-                                    <tr className="">
-                                        <th className="p-4 text-left text-xs font-semibold text-gray-800">
-                                            Sizes
-                                        </th>
-                                        <th className="w-[1%] p-4 text-end text-xs font-semibold text-gray-800">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="max-h-40 overflow-auto whitespace-nowrap">
-                                    {formData.sizes.map((size, index) => (
-                                        <tr
-                                            className="hover:bg-gray-50"
-                                            key={index}
-                                        >
-                                            <td className="p-4 text-sm text-gray-800">
-                                                {size}
-                                            </td>
-                                            <td className="w-[1%] p-4 text-sm">
-                                                <div className="inline-flex w-full items-center justify-end gap-4 text-sm">
-                                                    <Button
-                                                        iconName={'edit'}
-                                                        type={'link'}
-                                                    />
-                                                    <Button
-                                                        iconName={'trash'}
-                                                        type={'link'}
-                                                    />
-                                                </div>
-                                            </td>
+                            {formData.sizes.length > 0 && (
+                                <table className="min-w-full bg-white">
+                                    <thead className="whitespace-nowrap bg-gray-100">
+                                        <tr className="">
+                                            <th className="p-4 text-left text-xs font-semibold text-gray-800">
+                                                Sizes
+                                            </th>
+                                            <th className="w-[1%] p-4 text-end text-xs font-semibold text-gray-800">
+                                                Actions
+                                            </th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-
+                                    </thead>
+                                    <tbody className="max-h-40 overflow-auto whitespace-nowrap">
+                                        {formData.sizes.map((size, index) => (
+                                            <tr
+                                                className="hover:bg-gray-50"
+                                                key={index}
+                                            >
+                                                <td className="p-4 text-sm text-gray-800">
+                                                    {size}
+                                                </td>
+                                                <td className="w-[1%] p-4 text-sm">
+                                                    <div className="inline-flex w-full items-center justify-end gap-4 text-sm">
+                                                        <Button
+                                                            iconName={'trash'}
+                                                            type={'link'}
+                                                            onClick={() =>
+                                                                handleDeleteSize(
+                                                                    size
+                                                                )
+                                                            }
+                                                        />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
                             <div className="flex flex-col gap-2">
                                 <p className="block text-sm font-medium text-gray-900">
                                     Size Metrics
@@ -452,28 +550,44 @@ const Product = () => {
                                         </tr>
                                     </thead>
                                     <tbody className="max-h-40 overflow-auto whitespace-nowrap">
-                                        {formData.onlinestores.map(
-                                            (store, index) => (
-                                                <tr
-                                                    className="hover:bg-gray-50"
-                                                    key={index}
-                                                >
-                                                    <td className="p-4 text-sm text-gray-800">
-                                                        {store.onlineStore}
-                                                    </td>
-                                                    <td className="w-full p-4 text-sm">
-                                                        <Input
-                                                            handleChange={
-                                                                handleChange
-                                                            }
-                                                            id={`link_${index}`}
-                                                            required={true}
-                                                            value={store.link}
-                                                        />
-                                                    </td>
-                                                </tr>
-                                            )
-                                        )}
+                                        <tr className="hover:bg-gray-50">
+                                            <td className="p-4 text-sm text-gray-800">
+                                                Tokopedia
+                                            </td>
+                                            <td className="w-full p-4 text-sm">
+                                                <Input
+                                                    handleChange={handleChange}
+                                                    id="link_tokopedia"
+                                                    required={true}
+                                                    value={
+                                                        formData.onlinestores.find(
+                                                            (store) =>
+                                                                store.onlineStore ==
+                                                                'tokped'
+                                                        ).link
+                                                    }
+                                                />
+                                            </td>
+                                        </tr>
+                                        <tr className="hover:bg-gray-50">
+                                            <td className="p-4 text-sm text-gray-800">
+                                                Shopee
+                                            </td>
+                                            <td className="w-full p-4 text-sm">
+                                                <Input
+                                                    handleChange={handleChange}
+                                                    id="link_shopee"
+                                                    required={true}
+                                                    value={
+                                                        formData.onlinestores.find(
+                                                            (store) =>
+                                                                store.onlineStore ==
+                                                                'shopee'
+                                                        ).link
+                                                    }
+                                                />
+                                            </td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -488,6 +602,9 @@ const Product = () => {
                                                 category={category}
                                                 formData={
                                                     formData.ProductCategories
+                                                }
+                                                handleCategorySelect={
+                                                    handleCategorySelect
                                                 }
                                             />
                                         </li>
