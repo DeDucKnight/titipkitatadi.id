@@ -121,6 +121,7 @@ const Images = () => {
                                                 handleClickDelete={
                                                     handleClickDelete
                                                 }
+                                                imgSource={img.cdnid}
                                             />
                                         ))}
 
