@@ -21,7 +21,7 @@ exports.admin_login = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { userId: user.id, email: user.email },
+            { userId: user.userid, username: user.username  },
             process.env.JWT_SECRET,
             { expiresIn: '12h' }
         );
@@ -71,11 +71,11 @@ exports.create_user_admin = async (req, res) => {
 
 // Customer login
 exports.customer_login = async (req, res) => {
-    const { email } = req.body;
+    const { customeremail } = req.body;
 
     try {
         // Find customer by email
-        const customer = await Customer.findOne({ where: { customeremail: email } });
+        const customer = await Customer.findOne({ where: { customeremail } });
 
         if (!customer) {
             return res.status(404).json({ error: 'Customer not found' });
@@ -128,11 +128,11 @@ exports.create_customer = async (req, res) => {
 
 // Delete a Customer by Email
 exports.delete_customer_by_email = async (req, res) => {
-    const { email } = req.params;
+    const { customeremail } = req.params;
 
     try {
         // Check if customer exists
-        const customer = await Customer.findOne({ where: { customeremail: email } });
+        const customer = await Customer.findOne({ where: { customeremail } });
 
         if (!customer) {
             return res.status(404).json({ message: 'Customer not found' });
@@ -145,5 +145,65 @@ exports.delete_customer_by_email = async (req, res) => {
     } catch (err) {
         console.error('Error deleting customer:', err);
         res.status(500).json({ error: 'Failed to delete customer' });
+    }
+};
+
+// Get all customers
+exports.get_customers = async (req, res) => {
+    try {
+        const customers = await Customer.findAll();
+        res.status(200).json(customers);
+    } catch (err) {
+        console.error('Error fetching customers:', err);
+        res.status(500).json({ error: 'Failed to fetch customers' });
+    }
+};
+
+// Get all admins
+exports.get_admins = async (req, res) => {
+    try {
+        const admins = await User.findAll();
+        res.status(200).json(admins);
+    } catch (err) {
+        console.error('Error fetching admins:', err);
+        res.status(500).json({ error: 'Failed to fetch admins' });
+    }
+};
+
+// Delete customer by customerid
+exports.delete_customer = async (req, res) => {
+    const { customerid } = req.params;
+
+    try {
+        const customer = await Customer.findByPk(customerid);
+
+        if (!customer) {
+            return res.status(404).json({ error: 'Customer not found' });
+        }
+
+        await customer.destroy();
+        res.status(200).json({ message: 'Customer deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting customer:', err);
+        res.status(500).json({ error: 'Failed to delete customer' });
+    }
+};
+
+// Delete admin by userid
+exports.delete_admin = async (req, res) => {
+    const { userid } = req.params;
+
+    try {
+        const admin = await User.findByPk(userid);
+
+        if (!admin) {
+            return res.status(404).json({ error: 'Admin not found' });
+        }
+
+        await admin.destroy();
+        res.status(200).json({ message: 'Admin deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting admin:', err);
+        res.status(500).json({ error: 'Failed to delete admin' });
     }
 };
