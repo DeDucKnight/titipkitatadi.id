@@ -3,6 +3,7 @@ const cors = require('cors');
 const productRoutes = require('./routes/productRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const imageRoutes = require('./routes/imageRoutes');
+const identityRoutes = require('./routes/identityRoutes');
 const errorHandler = require('./middlewares/errorHandler.js');
 
 const app = express();
@@ -12,6 +13,7 @@ app.use(express.json());
 app.use('/api', productRoutes);
 app.use('/api', categoryRoutes);
 app.use('/api', imageRoutes);
+app.use('/api', identityRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
