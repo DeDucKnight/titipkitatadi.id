@@ -1,4 +1,4 @@
-const { Product, ProductImage, ProductCategory, Category, CategoryDetail, Image } = require('../models');
+const { Product, ProductImage, ProductCategory, Category, CategoryDetail, Image, sequelize } = require('../models');
 
 const axios = require('axios');
 const fs = require('fs');
@@ -28,6 +28,7 @@ exports.upload_image = async (req, res) => {
     const { productId } = req.params;
     const file = req.file;
 
+    const t = await sequelize.transaction();
     try {
         // Check if the file exists
         if (!file) {
@@ -52,6 +53,7 @@ exports.upload_image = async (req, res) => {
 
         // Ensure the Cloudflare upload was successful
         if (!response.data || !response.data.result) {
+            await t.rollback();
             throw new Error('Cloudflare upload failed');
         }
 
@@ -68,10 +70,20 @@ exports.upload_image = async (req, res) => {
             cdnid: id,
             imagepath: imagePath,
             imagetype: req.body.imagetype || 'banner',
-        });
+        }, { transaction: t });
 
+        // Uploading product image
+        if (!productId) {
+            const productImage = await ProductImage.create({
+                productid: productId,
+                imageid: image.imageid
+            }, { transaction: t });
+        }
+
+        await t.commit();
         res.status(200).json({ message: 'Image uploaded successfully', image });
     } catch (error) {
+        await t.rollback();
         console.error('Error uploading image:', error.response ? error.response.data : error.message);
         res.status(500).json({ error: 'Failed to upload image' });
     }
@@ -193,6 +205,29 @@ exports.get_images = async (req, res) => {
     }
 };
 
+// Get image by product id
+exports.get_images_by_productid = async (req, res) => {
+    const { productId } = req.params;
+    try {
+        const images = await Image.findAll({
+            where: {
+                productid: productId
+            },
+            attributes: ['cdnid', 'imagepath', 'imagetype'],
+            order: [['createddate', 'DESC']]
+        });
+
+        if (images.length === 0) {
+            return res.status(200).json({ message: 'No images found', images: [] });
+        }
+
+        res.status(200).json(images);
+    } catch (error) {
+        console.error('Error fetching images:', error);
+        res.status(500).json({ error: 'Failed to fetch images' });
+    }
+};
+
 // Get image test
 exports.get_image_test = async (req, res) => {
     const imageId = 'b9e7d8b1-9125-4734-35a8-d8a5764c5500';
@@ -218,3 +253,40 @@ exports.get_image_test = async (req, res) => {
         res.status(500).send('Failed to fetch image');
     }
 }
+
+// Delete image function
+exports.delete_image = async (req, res) => {
+    const { imageId } = req.params;
+
+    try {
+        const image = await Image.findOne({ where: { cdnid: imageId } });
+
+        if (!image) {
+            return res.status(404).json({ error: 'Image not found' });
+        }
+
+        // Send a DELETE request to Cloudflare
+        const response = await axios.delete(
+            `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ID}/images/v1/${imageId}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${process.env.CLOUDFLARE_TOKEN}`
+                }
+            }
+        );
+
+        if (!response.data.success) {
+            throw new Error('Cloudflare deletion failed');
+        }
+
+        // Delete the image from database
+        await Image.destroy({ where: { cdnid: imageId } });
+
+        // Return success response
+        res.status(200).json({ message: 'Image deleted successfully' });
+
+    } catch (error) {
+        console.error('Error deleting image:', error.response ? error.response.data : error.message);
+        res.status(500).json({ error: 'Failed to delete image' });
+    }
+};
