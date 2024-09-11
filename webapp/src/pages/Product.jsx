@@ -152,7 +152,7 @@ const Product = () => {
 
             try {
                 const response = await axios.post(
-                    `${import.meta.env.VITE_API_URL}/api/upload-image/`,
+                    `${import.meta.env.VITE_API_URL}/api/upload-image/${guid}`,
                     formData,
                     {
                         headers: {
@@ -356,10 +356,10 @@ const Product = () => {
                             />
                             <Input
                                 handleChange={handleChange}
-                                id="discountPrice"
+                                id="discountprice"
                                 type="number"
                                 labelText="Discount Price"
-                                value={formData.discountPrice}
+                                value={formData.discountprice}
                             />
                             <Input
                                 handleChange={handleChange}
