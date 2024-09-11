@@ -21,33 +21,33 @@ const Product = () => {
     const [initialData, setInitialData] = useState({
         productname: '',
         description: '',
-        price: '',
-        discountprice: '',
+        price: 0,
+        discountprice: 0,
         brand: '',
         colors: [],
         sizes: [],
         material: '',
         onlinestores: [],
-        status: true,
-        productimages: [],
-        productcategories: [],
+        status: 'Active',
+        ProductImages: [],
+        ProductCategories: [],
     })
     const [formData, setFormData] = useState({
         productname: '',
-        price: '',
-        discountprice: '',
+        price: 0,
+        discountprice: 0,
         brand: '',
         colors: [],
         sizes: [],
         material: '',
         onlinestores: [
-            { onlineStore: 'tokped', link: '' },
-            { onlineStore: 'shopee', link: '' },
+            { onlineStore: 'tokped', link: 'https://test1' },
+            { onlineStore: 'shopee', link: 'https://test2' },
         ],
         shipping: '',
-        status: '',
-        productimages: [],
-        productcategories: [],
+        status: 'Active',
+        ProductImages: [],
+        ProductCategories: [],
     })
     const [categoriesData, setCategoriesData] = useState([])
     const [imgData, setImgData] = useState([])
@@ -149,7 +149,6 @@ const Product = () => {
             // Append the file to the FormData object
             formData.append('file', file)
             formData.append('imagetype', `${guid}_${e.target.id}`) // hardcoded
-            
             try {
                 const response = await axios.post(
                     `${import.meta.env.VITE_API_URL}/api/upload-image/${guid}`,

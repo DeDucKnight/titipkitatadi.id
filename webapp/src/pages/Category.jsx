@@ -33,10 +33,8 @@ const Category = () => {
     const [initialData, setInitialData] = useState([])
     const [formData, setFormData] = useState({
         categoryid: '',
-        CategoryName: '',
         categoryname: '',
         isstandard: true,
-        IsStandard: true,
         status: true,
         createddate: '',
         CategoryDetails: [],
@@ -147,7 +145,7 @@ const Category = () => {
                 categorydetailname: inputValue,
                 CategoryDetailName: inputValue,
                 status: true,
-                createddate: new Date(),
+                createddate: 'new',
             }
 
             setFormData((prevFormData) => ({
@@ -205,15 +203,27 @@ const Category = () => {
         e.preventDefault()
         setIsLoading(true)
         try {
-            const response = await axios.delete(
-                `${import.meta.env.VITE_API_URL}/api/category-details/${data.categorydetailid}`,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
+            // bantu rapihin ya
+            if (data.createddate != 'new') {
+                const response = await axios.delete(
+                    `${import.meta.env.VITE_API_URL}/api/category-details/${data.categorydetailid}`,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    }
+                )
+
+                if (response.status >= 200 && response.status < 300) {
+                    setFormData((prevFormData) => ({
+                        ...prevFormData,
+                        CategoryDetails: prevFormData.CategoryDetails.filter(
+                            (detail) =>
+                                detail.categorydetailid !== data.categorydetailid
+                        ),
+                    }))
                 }
-            )
-            if (response.status >= 200 && response.status < 300) {
+            } else {
                 setFormData((prevFormData) => ({
                     ...prevFormData,
                     CategoryDetails: prevFormData.CategoryDetails.filter(

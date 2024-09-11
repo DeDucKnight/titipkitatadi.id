@@ -7,7 +7,7 @@ router.post('/admin-login', identityController.admin_login);
 router.post('/customer-login', identityController.customer_login);
 router.post('/admin-create', identityController.create_user_admin);
 router.post('/customer-create', identityController.create_customer);
-router.delete('/customer/:customeremail', identityController.delete_customer_by_email);
+router.delete('/customer-email/:customeremail', identityController.delete_customer_by_email);
 router.get('/admins', identityController.get_admins);
 router.get('/customers', identityController.get_customers);
 router.delete('/admin/:userid', identityController.delete_admin);

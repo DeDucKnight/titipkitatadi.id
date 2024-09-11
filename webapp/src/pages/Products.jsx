@@ -36,6 +36,9 @@ const Products = () => {
             const response = await axios.delete(
                 `${import.meta.env.VITE_API_URL}/api/products/${productId}`
             )
+            if (response.status === 200) {
+                setProducts((prevData) => prevData.filter(product => product.productid !== productId));
+            }
         } catch (error) {
             console.error('Error fetching products:', error)
         } finally {

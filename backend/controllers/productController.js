@@ -170,8 +170,8 @@ exports.create_product = async (req, res) => {
         // Create Product
         const product = await Product.create({
             productname,
-            price,
-            discountprice,
+            price: parseInt(price, 10) || 0,
+            discountprice: parseInt(discountprice, 10) || 0,
             brand,
             colors,
             sizes,
