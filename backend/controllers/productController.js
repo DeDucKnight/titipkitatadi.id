@@ -101,6 +101,61 @@ exports.get_product_detail = async (req, res) => {
     }
 };
 
+// Get Products by CategoryDetailID
+exports.get_products_by_category_detail = async (req, res) => {
+    const { categorydetailid } = req.params;
+    const { page = 1 } = req.query;
+    const limit = 8;
+    const offset = (parseInt(page, 10) - 1) * limit;
+
+    // Validate categorydetailid
+    if (!categorydetailid) {
+        return res.status(400).json({ error: 'Category Detail ID is required' });
+    }
+
+    try {
+        // Fetch products with an extra limit to check if there's a next page
+        const products = await Product.findAll({
+            include: [
+                {
+                    model: ProductCategory,
+                    where: { categorydetailid },
+                    include: [
+                        {
+                            model: CategoryDetail,
+                            attributes: ['categorydetailname'],
+                            include: [
+                                {
+                                    model: Category,
+                                    attributes: ['categoryname']
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            order: [['createddate', 'DESC']],
+            limit: limit + 1,
+            offset: offset
+        });
+
+        const hasNextPage = products.length > limit; // Check if there's a next page
+        const results = hasNextPage ? products.slice(0, limit) : products; // Return only limit results
+
+        if (!results.length) {
+            return res.status(404).json({ message: 'No products found for this category detail' });
+        }
+
+        res.status(200).json({
+            products: results,
+            currentPage: parseInt(page, 10),
+            nextPage: hasNextPage ? parseInt(page, 10) + 1 : null,
+        });
+    } catch (err) {
+        console.error('Error fetching products by category detail:', err);
+        res.status(500).json({ error: 'Failed to fetch products' });
+    }
+};
 
 // Create a New Product
 exports.create_product = async (req, res) => {

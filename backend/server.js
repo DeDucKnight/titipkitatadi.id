@@ -8,7 +8,13 @@ const wishlistRoutes = require('./routes/wishlistRoutes');
 const errorHandler = require('./middlewares/errorHandler.js');
 
 const app = express();
-app.use(cors());
+
+if (process.env.NODE_ENV === 'development') {
+    app.use(cors());
+    console.log('CORS enabled for development');
+} else {
+    console.log('CORS handled by NGINX in production');
+}
 
 app.use(express.json());
 app.use('/api', productRoutes);
