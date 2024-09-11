@@ -11,6 +11,7 @@ import Category from './pages/Category'
 import Customers from './pages/Customers'
 import Customer from './pages/Customer'
 import Users from './pages/Users'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
 
 const App = () => {
     const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
@@ -48,6 +49,7 @@ const App = () => {
         setIsLoggedIn(true)
         Navigate('/')
     }
+
     const toggleNavbar = (e) => {
         e.stopPropagation()
         setMobileDrawerOpen(!mobileDrawerOpen)
@@ -79,120 +81,142 @@ const App = () => {
     })
 
     return (
-        <div
-            className={`relative h-screen overflow-x-hidden ${mobileDrawerOpen ? 'overflow-y-hidden' : ''} `}
-        >
-            {isLoggedIn && (
-                <Navbar
-                    ref={navbarRef}
-                    mobileDrawerOpen={mobileDrawerOpen}
-                    setMobileDrawerOpen={setMobileDrawerOpen}
-                    toggleNavbar={toggleNavbar}
-                    heightNavbar={heightNavbar}
-                />
-            )}
-            {mobileDrawerOpen && (
-                <div
-                    id="drawer_overlay"
-                    className={`fixed inset-0 bg-black pt-20 transition-opacity duration-300 ${
-                        mobileDrawerOpen
-                            ? 'z-30 opacity-50'
-                            : 'pointer-events-none opacity-0'
-                    }`}
-                    onClick={toggleNavbar}
-                    style={{
-                        marginTop: `${heightNavbar}px`,
-                    }}
-                ></div>
-            )}
+        <AuthProvider>
             <div
-                className={`${isLoggedIn ? 'flex h-screen justify-center' : ''} container mx-auto w-full lg:overflow-x-hidden`}
-                style={{
-                    maxWidth: `calc(100vw - ${navbarWidth}px)`,
-                    marginLeft: `${navbarWidth}px`,
-                }}
+                className={`relative h-screen overflow-x-hidden ${mobileDrawerOpen ? 'overflow-y-hidden' : ''} `}
             >
-                <Routes>
-                    <Route
-                        path="/"
-                        element={
-                            isLoggedIn ? (
-                                <Navigate to="/products" />
-                            ) : (
-                                <Navigate to="/login" />
-                            )
-                        }
+                {isLoggedIn && (
+                    <Navbar
+                        ref={navbarRef}
+                        mobileDrawerOpen={mobileDrawerOpen}
+                        setMobileDrawerOpen={setMobileDrawerOpen}
+                        toggleNavbar={toggleNavbar}
+                        heightNavbar={heightNavbar}
                     />
-                    <Route
-                        path="/login"
-                        element={
-                            isLoggedIn ? (
-                                <Navigate to={currLocation} />
-                            ) : (
-                                <Login onLogin={handleLogin} />
-                            )
-                        }
-                    />
-                    <Route
-                        path="/products"
-                        element={
-                            isLoggedIn ? <Products /> : <Navigate to="/login" />
-                        }
-                    />
-                    <Route
-                        path="/products/:guid"
-                        element={
-                            isLoggedIn ? <Product /> : <Navigate to="/login" />
-                        }
-                    />
-                    <Route
-                        path="/categories"
-                        element={
-                            isLoggedIn ? (
-                                <Categories />
-                            ) : (
-                                <Navigate to="/login" />
-                            )
-                        }
-                    />
-                    <Route
-                        path="/categories/:guid"
-                        element={
-                            isLoggedIn ? <Category /> : <Navigate to="/login" />
-                        }
-                    />
-                    <Route
-                        path="/images"
-                        element={
-                            isLoggedIn ? <Images /> : <Navigate to="/login" />
-                        }
-                    />
-                    <Route
-                        path="/customers"
-                        element={
-                            isLoggedIn ? (
-                                <Customers />
-                            ) : (
-                                <Navigate to="/login" />
-                            )
-                        }
-                    />
-                    <Route
-                        path="/customers/:guid"
-                        element={
-                            isLoggedIn ? <Customer /> : <Navigate to="/login" />
-                        }
-                    />
-                    {/* In case needed */}
-                    {/* <Route
+                )}
+                {mobileDrawerOpen && (
+                    <div
+                        id="drawer_overlay"
+                        className={`fixed inset-0 bg-black pt-20 transition-opacity duration-300 ${
+                            mobileDrawerOpen
+                                ? 'z-30 opacity-50'
+                                : 'pointer-events-none opacity-0'
+                        }`}
+                        onClick={toggleNavbar}
+                        style={{
+                            marginTop: `${heightNavbar}px`,
+                        }}
+                    ></div>
+                )}
+                <div
+                    className={`${isLoggedIn ? 'flex h-screen justify-center' : ''} container mx-auto w-full lg:overflow-x-hidden`}
+                    style={{
+                        maxWidth: `calc(100vw - ${navbarWidth}px)`,
+                        marginLeft: `${navbarWidth}px`,
+                    }}
+                >
+                    <Routes>
+                        <Route
+                            path="/"
+                            element={
+                                isLoggedIn ? (
+                                    <Navigate to="/products" />
+                                ) : (
+                                    <Navigate to="/login" />
+                                )
+                            }
+                        />
+                        <Route
+                            path="/login"
+                            element={
+                                isLoggedIn ? (
+                                    <Navigate to={currLocation} />
+                                ) : (
+                                    <Login onLogin={handleLogin} />
+                                )
+                            }
+                        />
+                        <Route
+                            path="/products"
+                            element={
+                                isLoggedIn ? (
+                                    <Products />
+                                ) : (
+                                    <Navigate to="/login" />
+                                )
+                            }
+                        />
+                        <Route
+                            path="/products/:guid"
+                            element={
+                                isLoggedIn ? (
+                                    <Product />
+                                ) : (
+                                    <Navigate to="/login" />
+                                )
+                            }
+                        />
+                        <Route
+                            path="/categories"
+                            element={
+                                isLoggedIn ? (
+                                    <Categories />
+                                ) : (
+                                    <Navigate to="/login" />
+                                )
+                            }
+                        />
+                        <Route
+                            path="/categories/:guid"
+                            element={
+                                isLoggedIn ? (
+                                    <Category />
+                                ) : (
+                                    <Navigate to="/login" />
+                                )
+                            }
+                        />
+                        <Route
+                            path="/images"
+                            element={
+                                isLoggedIn ? (
+                                    <Images />
+                                ) : (
+                                    <Navigate to="/login" />
+                                )
+                            }
+                        />
+                        <Route
+                            path="/customers"
+                            element={
+                                isLoggedIn ? (
+                                    <Customers />
+                                ) : (
+                                    <Navigate to="/login" />
+                                )
+                            }
+                        />
+                        <Route
+                            path="/customers/:guid"
+                            element={
+                                isLoggedIn ? (
+                                    <Customer />
+                                ) : (
+                                    <Navigate to="/login" />
+                                )
+                            }
+                        />
+                        {/* In case needed */}
+                        {/* <Route
                         path="/users/:guid"
                         element={
                             isLoggedIn ? <Users /> : <Navigate to="/login" />
                         }
                     /> */}
-                </Routes>
+                    </Routes>
+                </div>
             </div>
-        </div>
+        </AuthProvider>
     )
 }
 

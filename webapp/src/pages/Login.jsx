@@ -3,22 +3,30 @@ import { useNavigate } from 'react-router-dom'
 import Input from '../components/Input'
 import Icon from '../components/Icons'
 import Button from '../components/Button'
+import { useAuth } from '../contexts/AuthContext'
+
 const Login = ({ onLogin }) => {
     const navigate = useNavigate()
-    const [username, setUsername] = useState('')
-    const [password, setPassword] = useState('')
+    const [username, setUsername] = useState('titipkitatadi-admin')
+    const [password, setPassword] = useState('Test123')
     const [error, setError] = useState(null)
+
+    const { login } = useAuth()
 
     const handleLogin = (event) => {
         event.preventDefault()
-
-        // Dummy login logic; replace with actual authentication
-        if (!username && !password) {
-            onLogin()
+        if (username && password) {
+            // uncomment kalau mau bypass
+            // onLogin()
+            login(username, password)
         } else {
             setError('Invalid username or password')
         }
     }
+
+    // "username": "titipkitatadi-admin",
+    //     "password": "Test123",
+    //     "role": "admin"
     return (
         <section>
             <div className="mx-auto flex h-screen flex-col items-center justify-center gap-7 px-6 py-8 lg:py-0">
@@ -37,11 +45,15 @@ const Login = ({ onLogin }) => {
                             onSubmit={handleLogin}
                         >
                             <Input
-                                type="email"
-                                id="email"
+                                type="text"
+                                id="username"
                                 placeholder="name@company.com"
                                 labelText="E-mail"
                                 required={true}
+                                value={username}
+                                handleChange={(e) =>
+                                    setUsername(e.target.value)
+                                }
                             />
                             <Input
                                 type="password"
@@ -49,6 +61,10 @@ const Login = ({ onLogin }) => {
                                 placeholder="••••••••"
                                 labelText="Password"
                                 required={true}
+                                value={password}
+                                handleChange={(e) =>
+                                    setPassword(e.target.value)
+                                }
                             />
                             <Button
                                 btnType="submit"
