@@ -19,7 +19,7 @@ const Images = () => {
 
         try {
             const response = await axios.delete(
-                `http://localhost:5000/api/delete-image/${imageId}`
+                `${import.meta.env.VITE_API_URL}/api/delete-image/${imageId}`
             )
         } catch (error) {
             console.error(error)
@@ -31,7 +31,7 @@ const Images = () => {
             try {
                 setIsLoading(true)
                 const response = await axios.get(
-                    'http://localhost:5000/api/images'
+                    `${import.meta.env.VITE_API_URL}/api/images`
                 )
                 setImgData(response.data)
             } catch (error) {
@@ -57,7 +57,7 @@ const Images = () => {
 
             try {
                 const response = await axios.post(
-                    'http://localhost:5000/api/upload-image',
+                    `${import.meta.env.VITE_API_URL}/api/upload-image`,
                     formData,
                     {
                         headers: {

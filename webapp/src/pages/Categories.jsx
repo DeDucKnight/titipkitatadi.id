@@ -13,7 +13,7 @@ const Categories = () => {
         try {
             setIsLoading(true)
             const response = await axios.get(
-                'http://localhost:5000/api/categories'
+                `${import.meta.env.VITE_API_URL}/api/categories`
             )
             setCategories(response.data)
         } catch (error) {
@@ -26,7 +26,7 @@ const Categories = () => {
         try {
             setIsLoading(true)
             const response = await axios.delete(
-                `http://localhost:5000/api/categories/${category.categoryid}`
+                `${import.meta.env.VITE_API_URL}/api/categories/${category.categoryid}`
             )
             if (response.status >= 200 && response.status < 300) {
                 fetchCategories()

@@ -1,48 +1,44 @@
 import React, { useState, useEffect } from 'react'
-import placeholderImg from '../assets/images/placeholder-image.jpg'
-import Switch from '../components/Switch'
 import Button from '../components/Button'
-import { Link } from 'react-router-dom'
 import axios from 'axios'
 import Skeleton from '../components/Skeleton'
 
-const Products = () => {
-    const [products, setProducts] = useState([])
+const Users = () => {
+    const [users, setUsers] = useState([])
     const [isLoading, setIsLoading] = useState(true)
     const handleOnChange = () => {}
 
-    const fetchProducts = async () => {
+    const fetchUsers = async () => {
         try {
             setIsLoading(true)
             const response = await axios.get(
-                `${import.meta.env.VITE_API_URL}/api/products`
+                `${import.meta.env.VITE_API_URL}/api/users`
             )
-            setProducts(response.data.products)
+            setUsers(response.data)
         } catch (error) {
-            console.error('Error fetching products:', error)
+            console.error('Error fetching users:', error)
         } finally {
             setIsLoading(false)
         }
     }
-
-    useEffect(() => {
-        fetchProducts()
-    }, [])
-
-    const handleDelete = async (product) => {
-        const productId = product.productid
+    const handleDelete = async (admin) => {
         try {
             setIsLoading(true)
             const response = await axios.delete(
-                `${import.meta.env.VITE_API_URL}/api/products/${productId}`
+                `${import.meta.env.VITE_API_URL}/api/admin/${admin.userid}`
             )
+            debugger
+            if (response.status >= 200 && response.status < 300) {
+                fetchUsers()
+            }
         } catch (error) {
-            console.error('Error fetching products:', error)
-        } finally {
+            console.error('Error fetching users:', error)
             setIsLoading(false)
         }
     }
-
+    useEffect(() => {
+        fetchUsers()
+    }, [])
     return (
         <div className="relative mx-4 w-full py-3">
             {isLoading ? (
@@ -72,30 +68,22 @@ const Products = () => {
             ) : (
                 <>
                     <div className="sticky top-[60px] z-20 flex items-center justify-between bg-white py-4 lg:top-0">
-                        <h1 className="mx-4 mb-4 text-3xl font-bold">
-                            Products
-                        </h1>
+                        <h1 className="mx-4 mb-4 text-3xl font-bold">Users</h1>
 
                         <Button
-                            text={'Add Product'}
+                            text={'Add User'}
                             isLink={true}
-                            urlTarget={'./product'}
+                            urlTarget={'./user'}
                         />
                     </div>
                     <table className="top-0 z-10 min-w-full bg-white">
                         <thead className="sticky top-0 z-10 whitespace-nowrap bg-gray-100">
                             <tr className="top-0 z-10">
-                                <th className="top-0 z-10 w-24 p-4 text-left text-xs font-semibold text-gray-800">
-                                    Product Image
+                                <th className="top-0 z-10 p-4 text-left text-xs font-semibold text-gray-800">
+                                    User Name
                                 </th>
                                 <th className="top-0 z-10 p-4 text-left text-xs font-semibold text-gray-800">
-                                    Product Name
-                                </th>
-                                <th className="top-0 z-10 p-4 text-left text-xs font-semibold text-gray-800">
-                                    Price
-                                </th>
-                                <th className="top-0 z-10 p-4 text-left text-xs font-semibold text-gray-800">
-                                    Last Edited
+                                    Email
                                 </th>
                                 <th className="top-0 z-10 w-[1%] p-4 text-end text-xs font-semibold text-gray-800">
                                     Actions
@@ -103,47 +91,16 @@ const Products = () => {
                             </tr>
                         </thead>
                         <tbody className="max-h-40 overflow-auto whitespace-nowrap">
-                            {products.map((item, index) => (
+                            {users.map((item, index) => (
                                 <tr
                                     className="hover:bg-gray-50"
-                                    key={item.productid}
+                                    key={item.userid}
                                 >
-                                    <td className="table-cell size-24 p-4 text-gray-800">
-                                        <Link
-                                            to={`/products/${item.productid}`}
-                                        >
-                                            <img
-                                                src={
-                                                    item.ProductImages.find(
-                                                        (image) =>
-                                                            image.isdefault
-                                                    )?.Image.imagepath
-                                                }
-                                                className="h-full w-full"
-                                            />
-                                        </Link>
+                                    <td className="p-4 text-gray-800">
+                                        <p>{item.username}</p>
                                     </td>
                                     <td className="p-4 text-gray-800">
-                                        <Button
-                                            isLink={true}
-                                            type={'link'}
-                                            urlTarget={`/products/${item.productid}`}
-                                            text={item.productname}
-                                            className="!justify-start"
-                                        />
-                                    </td>
-                                    <td className="p-4 text-gray-800">
-                                        {item.price}
-                                    </td>
-                                    <td className="p-4 text-gray-800">
-                                        {new Intl.DateTimeFormat('en-US', {
-                                            year: 'numeric',
-                                            month: '2-digit',
-                                            day: '2-digit',
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                            second: '2-digit',
-                                        }).format(new Date(item.createddate))}
+                                        <p>{item.useremail}</p>
                                     </td>
                                     <td className="w-[1%] p-4">
                                         <div className="inline-flex w-full items-center justify-end gap-4">
@@ -166,4 +123,4 @@ const Products = () => {
     )
 }
 
-export default Products
+export default Users

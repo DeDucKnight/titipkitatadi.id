@@ -10,6 +10,7 @@ import Product from './pages/Product'
 import Category from './pages/Category'
 import Customers from './pages/Customers'
 import Customer from './pages/Customer'
+import Users from './pages/Users'
 
 const App = () => {
     const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
@@ -182,6 +183,13 @@ const App = () => {
                             isLoggedIn ? <Customer /> : <Navigate to="/login" />
                         }
                     />
+                    {/* In case needed */}
+                    {/* <Route
+                        path="/users/:guid"
+                        element={
+                            isLoggedIn ? <Users /> : <Navigate to="/login" />
+                        }
+                    /> */}
                 </Routes>
             </div>
         </div>

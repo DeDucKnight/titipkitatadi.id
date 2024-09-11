@@ -57,7 +57,7 @@ const Product = () => {
             try {
                 setIsLoading(true)
                 const response = await axios.get(
-                    `http://localhost:5000/api/categories`
+                    `${import.meta.env.VITE_API_URL}/api/categories`
                 )
                 setCategoriesData(response.data)
             } catch (error) {
@@ -70,7 +70,7 @@ const Product = () => {
             try {
                 setIsLoading(true)
                 const response = await axios.get(
-                    'http://localhost:5000/api/images'
+                    `${import.meta.env.VITE_API_URL}/api/images`
                 )
                 setImgData(response.data)
             } catch (error) {
@@ -83,7 +83,7 @@ const Product = () => {
             try {
                 setIsLoading(true)
                 const response = await axios.get(
-                    `http://localhost:5000/api/products/${guid}`
+                    `${import.meta.env.VITE_API_URL}/api/products/${guid}`
                 )
                 setFormData(response.data)
                 setInitialData(response.data)
@@ -152,7 +152,7 @@ const Product = () => {
 
             try {
                 const response = await axios.post(
-                    `http://localhost:5000/api/upload-image/`,
+                    `${import.meta.env.VITE_API_URL}/api/upload-image/`,
                     formData,
                     {
                         headers: {
@@ -230,7 +230,7 @@ const Product = () => {
         try {
             if (guid !== 'product') {
                 const response = await axios.put(
-                    `http://localhost:5000/api/products/${guid}`,
+                    `${import.meta.env.VITE_API_URL}/api/products/${guid}`,
                     formData
                 )
                 if (response.status >= 200 && response.status < 300) {
@@ -240,7 +240,7 @@ const Product = () => {
                 }
             } else {
                 const response = await axios.post(
-                    `http://localhost:5000/api/products`,
+                    `${import.meta.env.VITE_API_URL}/api/products`,
                     formData
                 )
                 if (response.status >= 200 && response.status < 300) {

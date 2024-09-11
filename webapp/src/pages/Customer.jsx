@@ -45,7 +45,7 @@ const Cusstomer = () => {
         try {
             debugger
             const response = await axios.post(
-                `http://localhost:5000/api/customer-create`,
+                `${import.meta.env.VITE_API_URL}/api/customer-create`,
                 formData
             )
             if (response.status >= 200 && response.status < 300) {

@@ -47,7 +47,7 @@ const Category = () => {
         try {
             setIsLoading(true)
             const response = await axios.get(
-                `http://localhost:5000/api/categories/${guid}`
+                `${import.meta.env.VITE_API_URL}/api/categories/${guid}`
             )
             setFormData(response.data)
             setInitialData(response.data)
@@ -115,7 +115,7 @@ const Category = () => {
         try {
             if (guid !== 'category') {
                 const response = await axios.put(
-                    `http://localhost:5000/api/categories/${guid}`,
+                    `${import.meta.env.VITE_API_URL}/api/categories/${guid}`,
                     formData
                 )
                 if (response.status >= 200 && response.status < 300) {
@@ -123,7 +123,7 @@ const Category = () => {
                 }
             } else {
                 const response = await axios.post(
-                    `http://localhost:5000/api/categories`,
+                    `${import.meta.env.VITE_API_URL}/api/categories`,
                     formData
                 )
                 if (response.status >= 200 && response.status < 300) {
@@ -174,7 +174,7 @@ const Category = () => {
             try {
                 debugger
                 const response = await axios.post(
-                    `http://localhost:5000/api/upload-image/`,
+                    `${import.meta.env.VITE_API_URL}/api/upload-image/`,
                     formData,
                     {
                         headers: {
@@ -208,7 +208,7 @@ const Category = () => {
         setIsLoading(true)
         try {
             const response = await axios.delete(
-                `http://localhost:5000/api/category-details/${data.categorydetailid}`,
+                `${import.meta.env.VITE_API_URL}/api/category-details/${data.categorydetailid}`,
                 {
                     headers: {
                         'Content-Type': 'multipart/form-data',

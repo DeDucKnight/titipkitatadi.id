@@ -12,7 +12,7 @@ const Customers = () => {
         try {
             setIsLoading(true)
             const response = await axios.get(
-                'http://localhost:5000/api/customers'
+                `${import.meta.env.VITE_API_URL}/api/customers`
             )
             setCustomers(response.data)
         } catch (error) {
@@ -25,7 +25,7 @@ const Customers = () => {
         try {
             setIsLoading(true)
             const response = await axios.delete(
-                `http://localhost:5000/api/customer/${customer.customerid}`
+                `${import.meta.env.VITE_API_URL}/api/customer/${customer.customerid}`
             )
             debugger
             if (response.status >= 200 && response.status < 300) {
