@@ -51,10 +51,10 @@ exports.get_categories = async (req, res) => {
 
 // Get Category by Id
 exports.get_category = async (req, res) => {
-    const { categorid } = req.params;
+    const { categoryid } = req.params;
 
     try {
-        const category = await Category.findByPk(categorid, {
+        const category = await Category.findByPk(categoryid, {
             include: {
                 model: CategoryDetail,
                 attributes: ['categorydetailid', 'categorydetailname'],

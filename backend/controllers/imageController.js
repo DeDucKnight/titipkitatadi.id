@@ -73,7 +73,7 @@ exports.upload_image = async (req, res) => {
         }, { transaction: t });
 
         // Uploading product image
-        if (!productId) {
+        if (productId) {
             const productImage = await ProductImage.create({
                 productid: productId,
                 imageid: image.imageid
