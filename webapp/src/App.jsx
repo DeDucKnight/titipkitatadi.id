@@ -17,6 +17,7 @@ import Category from './pages/Category'
 import Customers from './pages/Customers'
 import Customer from './pages/Customer'
 import Users from './pages/Users'
+import axios from 'axios'
 
 const App = () => {
     const navigate = useNavigate()
@@ -55,35 +56,31 @@ const App = () => {
         }
     }, [isAuthenticated])
 
-    const handleLogin = (user) => {
+    const handleLogin = async (user) => {
         // Uncomment to have real logic
-        // try {
-        //     const userData = {
-        //         username,
-        //         password,
-        //     }
-        //     const response = await axios.post(
-        //         `http://localhost:5000/api/products/api/admin-login`,
-        //         // `${import.meta.env.VITE_API_URL}/api/products/api/admin-login`,
-        //         userData
-        //     )
+        try {
+            const response = await axios.post(
+                `http://localhost:5000/api/products/api/admin-login`,
+                // `${import.meta.env.VITE_API_URL}/api/products/api/admin-login`,
+                user
+            )
 
-        //     if (response.status >= 200 && response.status < 300) {
-        // only executed if response is success
-        localStorage.setItem(
-            'authState',
-            JSON.stringify({
-                isAuthenticated: true,
-                user: JSON.stringify(user),
-            })
-        )
-        setIsAuthenticated(true)
-        setUser(user)
-        navigate('/')
-        //     }
-        // } catch (error) {
-        //     console.error('Login failed', error);
-        // }
+            if (response.status >= 200 && response.status < 300) {
+                // only executed if response is successis
+                localStorage.setItem(
+                    'authState',
+                    JSON.stringify({
+                        isAuthenticated: true,
+                        user: JSON.stringify(user),
+                    })
+                )
+                setIsAuthenticated(true)
+                setUser(user)
+                navigate('/')
+            }
+        } catch (error) {
+            console.error('Login failed', error)
+        }
     }
 
     const handleLogout = () => {
