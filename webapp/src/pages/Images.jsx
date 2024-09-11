@@ -21,6 +21,10 @@ const Images = () => {
             const response = await axios.delete(
                 `${import.meta.env.VITE_API_URL}/api/delete-image/${imageId}`
             )
+            
+            if (response.status === 200) {
+                setImgData((prevData) => prevData.filter(img => img.cdnid !== imageId));
+            }
         } catch (error) {
             console.error(error)
         }

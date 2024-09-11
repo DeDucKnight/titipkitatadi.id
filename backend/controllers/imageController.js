@@ -23,10 +23,18 @@ const decodeBase64Image = (dataString) => {
     return response;
 };
 
+// GUID Validator
+const isValidUUID = (productId) => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return productId && uuidRegex.test(productId);
+};
+
 // Upload Image
 exports.upload_image = async (req, res) => {
     const { productId } = req.params;
     const file = req.file;
+
+    console.log(productId);
 
     const t = await sequelize.transaction();
     try {
@@ -50,6 +58,7 @@ exports.upload_image = async (req, res) => {
                 },
             }
         );
+        console.log("upload cloudflare");
 
         // Ensure the Cloudflare upload was successful
         if (!response.data || !response.data.result) {
@@ -60,10 +69,13 @@ exports.upload_image = async (req, res) => {
         fs.promises.unlink(file.path).catch(err => {
             console.error('Failed to delete temp file:', err);
         });
+        console.log("delete temp");
 
         // Extract the image information from Cloudflare response
         const { id, variants } = response.data.result;
         const imagePath = variants[0];
+        console.log(id);
+        console.log(imagePath);
 
         // Save image information to the database
         const image = await Image.create({
@@ -71,14 +83,16 @@ exports.upload_image = async (req, res) => {
             imagepath: imagePath,
             imagetype: req.body.imagetype || 'banner',
         }, { transaction: t });
+        console.log("create image");
 
         // Uploading product image
-        if (productId) {
+        if (productId && isValidUUID(productId)) {
             const productImage = await ProductImage.create({
                 productid: productId,
                 imageid: image.imageid
             }, { transaction: t });
-        }
+            console.log("create product image");
+        };
 
         await t.commit();
         res.status(200).json({ message: 'Image uploaded successfully', image });

@@ -149,7 +149,7 @@ const Product = () => {
             // Append the file to the FormData object
             formData.append('file', file)
             formData.append('imagetype', `${guid}_${e.target.id}`) // hardcoded
-
+            
             try {
                 const response = await axios.post(
                     `${import.meta.env.VITE_API_URL}/api/upload-image/${guid}`,
@@ -188,6 +188,10 @@ const Product = () => {
             const response = await axios.delete(
                 `${import.meta.env.VITE_API_URL}/api/delete-image/${imageId}`
             )
+
+            if (response.status === 200) {
+                setImgData((prevData) => prevData.filter(img => img.cdnid !== imageId));
+            }
         } catch (error) {
             console.error(error)
         }
@@ -200,16 +204,28 @@ const Product = () => {
         }))
     }
 
-    const handleCategorySelect = (category, categoryDetail) => {
+    const handleCategorySelect = (category, categoryDetail, isChecked = true) => {
         setFormData((prevData) => {
-            categoryDetail.categoryid = category.categoryid
-            const updatedCategories = prevData.ProductCategories.filter(
-                (category) => category.categoryid !== categoryDetail.categoryid
-            )
-            return {
-                ...prevData,
-                ProductCategories: [...updatedCategories, categoryDetail],
+            if (isChecked) {
+                categoryDetail.categoryid = category.categoryid
+                const updatedCategories = prevData.ProductCategories.filter(
+                    (category) => category.categoryid !== categoryDetail.categoryid
+                )
+                return {
+                    ...prevData,
+                    ProductCategories: [...updatedCategories, categoryDetail],
+                }
+            } else {
+                const updatedCategories = prevData.ProductCategories.filter(
+                    (cat) => cat.categorydetailid !== categoryDetail.categorydetailid
+                );
+    
+                return {
+                    ...prevData,
+                    ProductCategories: updatedCategories,
+                };
             }
+            
         })
     }
 
@@ -222,7 +238,7 @@ const Product = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-
+        console.log(formData)
         try {
             if (guid !== 'product') {
                 const response = await axios.put(
@@ -413,17 +429,14 @@ const Product = () => {
                                                             )
                                                             .map((img) => (
                                                                 <Image
-                                                                    key={
-                                                                        img.cdnid
-                                                                    }
-                                                                    imgSrc={
-                                                                        img.imagepath
-                                                                    }
+                                                                    key={img.cdnid}
+                                                                    imgSrc={img.imagepath}
                                                                     ratio="aspect-card"
                                                                     className="h-48"
                                                                     handleClickDelete={
                                                                         handleClickDeleteImg
                                                                     }
+                                                                    imgSource={img.cdnid}
                                                                 />
                                                             ))}
                                                         <Input

@@ -232,7 +232,7 @@ exports.update_product = async (req, res) => {
         await product.update(updates, { transaction: t });
 
         // Handle Product Categories
-        if (updates.CategoryDetails) {
+        if (updates.ProductCategories) {
             // Fetch existing product categories
             const existingProductCategories = await ProductCategory.findAll({
                 where: { productid: productId },
@@ -241,10 +241,10 @@ exports.update_product = async (req, res) => {
 
             // Map existing category IDs and new category IDs
             const existingCategoryIds = existingProductCategories.map(cat => cat.categorydetailid);
-            const newCategoryIds = updates.CategoryDetails.map(cat => cat.categorydetailid);
+            const newCategoryIds = updates.ProductCategories.map(cat => cat.categorydetailid);
 
             // Add new categories
-            for (const category of updates.CategoryDetails) {
+            for (const category of updates.ProductCategories) {
                 const categoryId = category.categorydetailid;
                 const exists = existingCategoryIds.includes(categoryId);
 
