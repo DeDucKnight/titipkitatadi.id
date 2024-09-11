@@ -27,7 +27,6 @@ const Users = () => {
             const response = await axios.delete(
                 `${import.meta.env.VITE_API_URL}/api/admin/${admin.userid}`
             )
-            debugger
             if (response.status >= 200 && response.status < 300) {
                 fetchUsers()
             }

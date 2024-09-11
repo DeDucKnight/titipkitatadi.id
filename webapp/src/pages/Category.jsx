@@ -172,7 +172,6 @@ const Category = () => {
             formData.append('imagetype', `${guid}_${data.categorydetailname}`) // hardcoded
 
             try {
-                debugger
                 const response = await axios.post(
                     `${import.meta.env.VITE_API_URL}/api/upload-image/`,
                     formData,
