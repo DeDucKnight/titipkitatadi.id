@@ -101,11 +101,10 @@ const Category = () => {
         const currentId = name.split('_')[1]
         setFormData((prevFormData) => ({
             ...prevFormData,
-            CategoryDetails: prevFormData.CategoryDetails.map(
-                (cat) =>
-                    cat.categorydetailid === currentId
-                        ? { ...cat, status: checked }
-                        : cat // ,
+            CategoryDetails: prevFormData.CategoryDetails.map((cat) =>
+                cat.categorydetailid === currentId
+                    ? { ...cat, status: checked }
+                    : cat
             ),
         }))
     }

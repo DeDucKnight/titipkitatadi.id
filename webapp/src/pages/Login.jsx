@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import Input from '../components/Input'
 import Icon from '../components/Icons'
 import Button from '../components/Button'
-import { useAuth } from '../contexts/AuthContext'
 
 const Login = ({ onLogin }) => {
     const navigate = useNavigate()
@@ -11,22 +10,18 @@ const Login = ({ onLogin }) => {
     const [password, setPassword] = useState('Test123')
     const [error, setError] = useState(null)
 
-    const { login } = useAuth()
-
     const handleLogin = (event) => {
         event.preventDefault()
         if (username && password) {
-            // uncomment kalau mau bypass
-            // onLogin()
-            login(username, password)
+            const user = {
+                username,
+                password,
+            }
+            onLogin(user)
         } else {
             setError('Invalid username or password')
         }
     }
-
-    // "username": "titipkitatadi-admin",
-    //     "password": "Test123",
-    //     "role": "admin"
     return (
         <section>
             <div className="mx-auto flex h-screen flex-col items-center justify-center gap-7 px-6 py-8 lg:py-0">

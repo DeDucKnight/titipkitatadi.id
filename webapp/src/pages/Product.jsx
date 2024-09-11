@@ -181,6 +181,18 @@ const Product = () => {
         }
     }
 
+    const handleClickDeleteImg = async (e, imageId) => {
+        e.preventDefault()
+
+        try {
+            const response = await axios.delete(
+                `${import.meta.env.VITE_API_URL}/api/delete-image/${imageId}`
+            )
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
     const handleDeleteColor = (color) => {
         setFormData((prevData) => ({
             ...prevData,
@@ -200,22 +212,6 @@ const Product = () => {
             }
         })
     }
-    // if (
-    //     selectedCategory ===
-    //         categoryDetail.categorydetailid &&
-    //     selectedCategoryParent ===
-    //         categoryDetail.categoryid
-    // ) {
-    //     setSelectedCategory(null)
-    //     setSelectedCategoryParent(null)
-    // } else {
-    //     setSelectedCategory(
-    //         categoryDetail.categorydetailid
-    //     )
-    //     setSelectedCategoryParent(
-    //         categoryDetail.categoryid
-    //     )
-    // }
 
     const handleDeleteSize = (size) => {
         setFormData((prevData) => ({
@@ -425,6 +421,9 @@ const Product = () => {
                                                                     }
                                                                     ratio="aspect-card"
                                                                     className="h-48"
+                                                                    handleClickDelete={
+                                                                        handleClickDeleteImg
+                                                                    }
                                                                 />
                                                             ))}
                                                         <Input

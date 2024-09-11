@@ -31,10 +31,6 @@ const Input = ({
         setShowColorPicker(!showColorPicker)
     }
 
-    // const handleChangeComplete = (color) => {
-    //     this.setColorPicked({ background: color.hex })
-    // }
-
     return (
         <div className={`relative ${containerClassName}`}>
             {!isUploadImage && (
@@ -68,8 +64,6 @@ const Input = ({
                                 {...(isColorPicker
                                     ? { defaultValue: inputvalue }
                                     : { value: inputvalue })}
-                                // defaultValue={inputvalue}
-                                // value={inputvalue}
                             />
                         )}
                         {isResizeable && (

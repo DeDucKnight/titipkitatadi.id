@@ -5,7 +5,6 @@ import Button from '../components/Button'
 import Icon from '../components/Icons'
 import Input from '../components/Input'
 import Skeleton from '../components/Skeleton'
-import Dropdown from '../components/Dropdown'
 
 const Cusstomer = () => {
     const [isLoading, setIsLoading] = useState(true)
@@ -21,7 +20,6 @@ const Cusstomer = () => {
     })
 
     useEffect(() => {
-        // fetchCustomer()
         setIsLoading(false)
     }, [guid])
 

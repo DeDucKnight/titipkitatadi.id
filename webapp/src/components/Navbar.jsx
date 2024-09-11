@@ -1,12 +1,8 @@
-import { forwardRef, useState } from 'react'
+import { forwardRef } from 'react'
 import Icon from './Icons'
-import { Link, useLocation } from 'react-router-dom'
-
+import { Link } from 'react-router-dom'
 const Navbar = forwardRef(
-    (
-        { mobileDrawerOpen, setMobileDrawerOpen, toggleNavbar, heightNavbar },
-        ref
-    ) => {
+    ({ handleLogout, mobileDrawerOpen, toggleNavbar, heightNavbar }, ref) => {
         return (
             <nav className="sticky top-0 z-50 bg-white" id="navbar">
                 <div
@@ -53,6 +49,13 @@ const Navbar = forwardRef(
                                 <Icon name="customer" />
                                 <span>Customers</span>
                             </Link>
+                            <button
+                                className="flex w-full items-center gap-4 rounded px-4 py-3 text-sm text-primary-500 transition-all hover:bg-primary-50 hover:text-primary-600"
+                                onClick={handleLogout}
+                            >
+                                <Icon name="logout" />
+                                <span>Logout</span>
+                            </button>
                         </ul>
                     </div>
                 </div>
