@@ -7,8 +7,9 @@ import axios from 'axios'
 import Skeleton from '../components/Skeleton'
 
 const Products = () => {
-    const [products, setProducts] = useState([])
     const [isLoading, setIsLoading] = useState(true)
+    const [products, setProducts] = useState([])
+    const [imgData, setImgData] = useState([])
     const handleOnChange = () => {}
 
     const fetchProducts = async () => {
@@ -18,6 +19,7 @@ const Products = () => {
                 `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/products`
             )
             setProducts(response.data.products)
+            fetchImages()
         } catch (error) {
             console.error('Error fetching products:', error)
         } finally {
@@ -25,6 +27,19 @@ const Products = () => {
         }
     }
 
+    const fetchImages = async () => {
+        try {
+            setIsLoading(true)
+            const response = await axios.get(
+                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/images`
+            )
+            setImgData(response.data)
+        } catch (error) {
+            console.error('Error fetching images:', error)
+        } finally {
+            setIsLoading(false)
+        }
+    }
     useEffect(() => {
         fetchProducts()
     }, [])
@@ -121,12 +136,23 @@ const Products = () => {
                                         >
                                             <img
                                                 src={
-                                                    item.ProductImages.find(
+                                                    imgData.find(
                                                         (image) =>
-                                                            image.isdefault
-                                                    )?.Image.imagepath
+                                                            image.imagetype.split(
+                                                                '_'
+                                                            )[0] ===
+                                                            item.productid
+                                                    )?.imagepath
+                                                        ? imgData.find(
+                                                              (image) =>
+                                                                  image.imagetype.split(
+                                                                      '_'
+                                                                  )[0] ===
+                                                                  item.productid
+                                                          )?.imagepath
+                                                        : placeholderImg
                                                 }
-                                                className="h-full w-full"
+                                                className="h-full w-full border"
                                             />
                                         </Link>
                                     </td>
