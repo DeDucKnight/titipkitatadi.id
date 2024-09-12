@@ -172,7 +172,10 @@ const Category = () => {
 
             // Append the file to the FormData object
             formData.append('file', file)
-            formData.append('imagetype', `${guid}_${data.categorydetailname}`) // hardcoded
+            formData.append(
+                'imagetype',
+                `${data.categorydetailid}_${data.categorydetailname}`
+            ) // hardcoded
 
             try {
                 const response = await axios.post(
@@ -414,7 +417,7 @@ const Category = () => {
                                                                     .filter(
                                                                         (img) =>
                                                                             img.imagetype ===
-                                                                            `${guid}_${data.categorydetailname}`
+                                                                            `${data.categorydetailid}_${data.categorydetailname}`
                                                                     )
                                                                     .slice(0, 1)
                                                                     .map(
@@ -448,7 +451,7 @@ const Category = () => {
                                                                 {imgData.filter(
                                                                     (img) =>
                                                                         img.imagetype ===
-                                                                        `${guid}_${data.categorydetailname}`
+                                                                        `${data.categorydetailid}_${data.categorydetailname}`
                                                                 ).length > 0 ? (
                                                                     ''
                                                                 ) : (
