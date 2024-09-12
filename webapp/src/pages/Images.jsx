@@ -11,22 +11,27 @@ const Images = () => {
     const location = useLocation()
     const [isLoading, setIsLoading] = useState(true)
     const [isLoadingImage, setIsLoadingImage] = useState(false)
+    const [isDeletingImage, setIsDeletingImage] = useState(false)
     const pathnames = location.pathname.split('/').filter((el) => el)
     const [imgData, setImgData] = useState([])
 
     const handleClickDelete = async (e, imageId) => {
         e.preventDefault()
-
+        setIsDeletingImage(true)
         try {
             const response = await axios.delete(
-                `${import.meta.env.VITE_API_URL}/api/delete-image/${imageId}`
+                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/delete-image/${imageId}`
             )
-            
+
             if (response.status === 200) {
-                setImgData((prevData) => prevData.filter(img => img.cdnid !== imageId));
+                setImgData((prevData) =>
+                    prevData.filter((img) => img.cdnid !== imageId)
+                )
             }
         } catch (error) {
             console.error(error)
+        } finally {
+            setIsDeletingImage(false)
         }
     }
 
@@ -35,7 +40,7 @@ const Images = () => {
             try {
                 setIsLoading(true)
                 const response = await axios.get(
-                    `${import.meta.env.VITE_API_URL}/api/images`
+                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/images`
                 )
                 setImgData(response.data)
             } catch (error) {
@@ -61,7 +66,7 @@ const Images = () => {
 
             try {
                 const response = await axios.post(
-                    `${import.meta.env.VITE_API_URL}/api/upload-image`,
+                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/upload-image`,
                     formData,
                     {
                         headers: {
@@ -69,7 +74,6 @@ const Images = () => {
                         },
                     }
                 )
-                console.log('Image Uploaded:', response.data)
                 setImgData((prevData) => [...prevData, response.data.image])
             } catch (error) {
                 console.error('Error uploading image:', error)
@@ -125,7 +129,9 @@ const Images = () => {
                                                 handleClickDelete={
                                                     handleClickDelete
                                                 }
-                                                imgSource={img.cdnid}
+                                                imgCdnId={img.cdnid}
+                                                isLoading={isLoadingImage}
+                                                isDeleting={isDeletingImage}
                                             />
                                         ))}
 
@@ -138,6 +144,7 @@ const Images = () => {
                                             '!aspect-20x9 !h-full'
                                         }
                                         isLoading={isLoadingImage}
+                                        isDeleting={isDeletingImage}
                                     />
                                 </div>
                             </div>
@@ -159,7 +166,9 @@ const Images = () => {
                                                 handleClickDelete={
                                                     handleClickDelete
                                                 }
-                                                imgSource={img.cdnid}
+                                                imgCdnId={img.cdnid}
+                                                isLoading={isLoadingImage}
+                                                isDeleting={isDeletingImage}
                                             />
                                         ))}
                                     {imgData.filter(
@@ -176,6 +185,7 @@ const Images = () => {
                                                 '!aspect-20x9 !h-full'
                                             }
                                             isLoading={isLoadingImage}
+                                            isDeleting={isDeletingImage}
                                         />
                                     )}
                                 </div>

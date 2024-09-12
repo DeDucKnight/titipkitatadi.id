@@ -23,6 +23,8 @@ function generateGUID() {
 const Category = () => {
     const [isLoading, setIsLoading] = useState(true)
     const [isLoadingImage, setIsLoadingImage] = useState(false)
+    const [isDeletingImage, setIsDeletingImage] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
     const [inputValue, setInputValue] = useState('')
     const [categoryParent, setCategoryParent] = useState('')
     const [isChanged, setIsChanged] = useState(false)
@@ -45,13 +47,27 @@ const Category = () => {
         try {
             setIsLoading(true)
             const response = await axios.get(
-                `${import.meta.env.VITE_API_URL}/api/categories/${guid}`
+                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/categories/${guid}`
             )
             setFormData(response.data)
             setInitialData(response.data)
             setCategoryParent(response.data.categoryname)
+            fetchImages()
         } catch (error) {
             console.error('Error fetching categories:', error)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+    const fetchImages = async () => {
+        try {
+            setIsLoading(true)
+            const response = await axios.get(
+                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/images`
+            )
+            setImgData(response.data)
+        } catch (error) {
+            console.error('Error fetching images:', error)
         } finally {
             setIsLoading(false)
         }
@@ -94,25 +110,13 @@ const Category = () => {
         }
     }
 
-    const handleChangeTable = (e) => {
-        const { name, value, checked } = e.target
-        const currentId = name.split('_')[1]
-        setFormData((prevFormData) => ({
-            ...prevFormData,
-            CategoryDetails: prevFormData.CategoryDetails.map((cat) =>
-                cat.categorydetailid === currentId
-                    ? { ...cat, status: checked }
-                    : cat
-            ),
-        }))
-    }
-
     const handleSubmit = async (e) => {
         e.preventDefault()
+        setIsSubmitting(true)
         try {
             if (guid !== 'category') {
                 const response = await axios.put(
-                    `${import.meta.env.VITE_API_URL}/api/categories/${guid}`,
+                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/categories/${guid}`,
                     formData
                 )
                 if (response.status >= 200 && response.status < 300) {
@@ -120,7 +124,7 @@ const Category = () => {
                 }
             } else {
                 const response = await axios.post(
-                    `${import.meta.env.VITE_API_URL}/api/categories`,
+                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/categories`,
                     formData
                 )
                 if (response.status >= 200 && response.status < 300) {
@@ -129,6 +133,8 @@ const Category = () => {
             }
         } catch (error) {
             console.error(error)
+        } finally {
+            setIsSubmitting(false)
         }
     }
 
@@ -170,7 +176,7 @@ const Category = () => {
 
             try {
                 const response = await axios.post(
-                    `${import.meta.env.VITE_API_URL}/api/upload-image/`,
+                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/upload-image/`,
                     formData,
                     {
                         headers: {
@@ -178,7 +184,6 @@ const Category = () => {
                         },
                     }
                 )
-                console.log('Image Uploaded:', response.data)
                 setImgData((prevData) => [...prevData, response.data.image])
                 setFormData((prevData) => ({
                     ...prevData,
@@ -199,6 +204,26 @@ const Category = () => {
         }
     }
 
+    const handleClickDeleteImg = async (e, imageId) => {
+        e.preventDefault()
+        setIsDeletingImage(true)
+        try {
+            const response = await axios.delete(
+                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/delete-image/${imageId}`
+            )
+
+            if (response.status === 200) {
+                setImgData((prevData) =>
+                    prevData.filter((img) => img.cdnid !== imageId)
+                )
+            }
+        } catch (error) {
+            console.error(error)
+        } finally {
+            setIsDeletingImage(false)
+        }
+    }
+
     const handleDelete = async (e, data) => {
         e.preventDefault()
         setIsLoading(true)
@@ -206,7 +231,7 @@ const Category = () => {
             // bantu rapihin ya
             if (data.createddate != 'new') {
                 const response = await axios.delete(
-                    `${import.meta.env.VITE_API_URL}/api/category-details/${data.categorydetailid}`,
+                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/category-details/${data.categorydetailid}`,
                     {
                         headers: {
                             'Content-Type': 'multipart/form-data',
@@ -219,7 +244,8 @@ const Category = () => {
                         ...prevFormData,
                         CategoryDetails: prevFormData.CategoryDetails.filter(
                             (detail) =>
-                                detail.categorydetailid !== data.categorydetailid
+                                detail.categorydetailid !==
+                                data.categorydetailid
                         ),
                     }))
                 }
@@ -317,7 +343,7 @@ const Category = () => {
                         >
                             <div className="sticky top-[60px] z-20 flex items-center justify-between bg-white py-4 lg:top-0">
                                 <h1 className="text-3xl font-bold">
-                                    {guid !== 'category'
+                                    {formData.categoryname
                                         ? formData.categoryname
                                         : 'Add Category'}
                                 </h1>
@@ -326,6 +352,7 @@ const Category = () => {
                                     text={'Save'}
                                     btnType={'submit'}
                                     disabled={!isChanged}
+                                    isSubmitting={isSubmitting}
                                 />
                             </div>
                             <div className="flex w-full items-center gap-4">
@@ -389,16 +416,29 @@ const Category = () => {
                                                                             img.imagetype ===
                                                                             `${guid}_${data.categorydetailname}`
                                                                     )
+                                                                    .slice(0, 1)
                                                                     .map(
                                                                         (
                                                                             img
                                                                         ) => (
                                                                             <Image
                                                                                 key={
-                                                                                    img.imageid
+                                                                                    img.cdnid
                                                                                 }
                                                                                 imgSrc={
                                                                                     img.imagepath
+                                                                                }
+                                                                                isLoading={
+                                                                                    isLoadingImage
+                                                                                }
+                                                                                isDeleting={
+                                                                                    isDeletingImage
+                                                                                }
+                                                                                handleClickDelete={
+                                                                                    handleClickDeleteImg
+                                                                                }
+                                                                                imgCdnId={
+                                                                                    img.cdnid
                                                                                 }
                                                                                 ratio="aspect-20x9"
                                                                                 className="h-48"
@@ -432,6 +472,9 @@ const Category = () => {
                                                                         }
                                                                         isLoading={
                                                                             isLoadingImage
+                                                                        }
+                                                                        isDeleting={
+                                                                            isDeletingImage
                                                                         }
                                                                     />
                                                                 )}

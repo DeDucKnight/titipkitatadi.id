@@ -7,7 +7,9 @@ const Image = ({
     objectFit = 'object-cover',
     className = '',
     handleClickDelete,
-    imgSource,
+    imgCdnId,
+    isLoading = false,
+    isDeleting = false,
 }) => {
     return (
         <div className="group relative">
@@ -21,10 +23,16 @@ const Image = ({
                 <Button
                     iconName={'trash'}
                     className="!bg-white !text-primary-500"
-                    onClick={(e) => handleClickDelete(e, imgSource)}
+                    onClick={(e) => handleClickDelete(e, imgCdnId)}
                     iconWidth={'20'}
                 />
             </div>
+            {(isLoading || isDeleting) && (
+                <div className="pointer-events-none absolute inset-0 top-0 flex items-center justify-center bg-black bg-opacity-30">
+                    {' '}
+                    <div className="spinner-loader"></div>
+                </div>
+            )}
         </div>
     )
 }

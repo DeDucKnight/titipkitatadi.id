@@ -20,17 +20,18 @@ const Button = ({
     onMouseEnter,
     onMouseLeave,
     btnType,
+    isSubmitting = false,
 }) => {
-    let btnStyle = `flex gap-2 items-center justify-center text-center text-sm font-medium transition-all ease-linear focus-visible:ring-offset-0 ${btnWidth} `
+    let btnStyle = `relative flex gap-2 items-center justify-center text-center text-sm font-medium transition-all ease-linear focus-visible:ring-offset-0 ${btnWidth} `
     switch (type) {
         case 'primary':
-            btnStyle += `${disabled ? '!bg-gray-100 pointer-events-none !text-gray-400' : ''} px-5 py-2.5 bg-primary-500 text-white hover:bg-gray-700 focus:outline-none `
+            btnStyle += `${disabled || isSubmitting ? '!bg-gray-100 pointer-events-none !text-gray-400' : ''} px-5 py-2.5 bg-primary-500 text-white hover:bg-gray-700 focus:outline-none `
             break
         case 'outline':
-            btnStyle += `${disabled ? '!bg-gray-100 pointer-events-none !text-gray-400' : ''} px-5 py-2.5 hover:bg-gray-300 border border-primary-500 text-primary-500 `
+            btnStyle += `${disabled || isSubmitting ? '!bg-gray-100 pointer-events-none !text-gray-400' : ''} px-5 py-2.5 hover:bg-gray-300 border border-primary-500 text-primary-500 `
             break
         case 'link':
-            btnStyle += `${disabled ? 'pointer-events-none !text-gray-400' : 'text-primary-500'} btn-link`
+            btnStyle += `${disabled || isSubmitting ? 'pointer-events-none !text-gray-400' : 'text-primary-500'} btn-link`
             break
     }
 
@@ -85,18 +86,24 @@ const Button = ({
                     onMouseLeave={onMouseLeave}
                     type={btnType}
                 >
+                    {isSubmitting && (
+                        <div className="pointer-events-none absolute inset-0 top-0 flex items-center justify-center bg-opacity-30">
+                            {' '}
+                            <div className="spinner-loader !w-6 !p-1"></div>
+                        </div>
+                    )}
                     {iconName && (
-                        <span>
+                        <span className={`${isSubmitting ? 'opacity-0' : ''}`}>
                             <Icon name={iconName} width={iconWidth} />
                         </span>
                     )}
                     {text && (
                         <span
-                            className={
+                            className={`${isSubmitting ? 'opacity-0' : ''} ${
                                 type === 'link'
                                     ? `btn-text tracking-widest focus-visible:ring-offset-0 ${btnTextClass}`
                                     : 'tracking-wider'
-                            }
+                            }`}
                         >
                             {text}
                         </span>

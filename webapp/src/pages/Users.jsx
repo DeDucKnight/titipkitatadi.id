@@ -12,7 +12,7 @@ const Users = () => {
         try {
             setIsLoading(true)
             const response = await axios.get(
-                `${import.meta.env.VITE_API_URL}/api/users`
+                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/users`
             )
             setUsers(response.data)
         } catch (error) {
@@ -25,7 +25,7 @@ const Users = () => {
         try {
             setIsLoading(true)
             const response = await axios.delete(
-                `${import.meta.env.VITE_API_URL}/api/admin/${admin.userid}`
+                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/admin/${admin.userid}`
             )
             if (response.status >= 200 && response.status < 300) {
                 fetchUsers()

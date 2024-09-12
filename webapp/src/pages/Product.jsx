@@ -13,6 +13,8 @@ import axios from 'axios'
 const Product = () => {
     const [isChanged, setIsChanged] = useState(false)
     const [isLoadingImage, setIsLoadingImage] = useState(false)
+    const [isDeletingImage, setIsDeletingImage] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [sizeValue, setSizeValue] = useState('')
     const { guid } = useParams()
@@ -57,7 +59,7 @@ const Product = () => {
             try {
                 setIsLoading(true)
                 const response = await axios.get(
-                    `${import.meta.env.VITE_API_URL}/api/categories`
+                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/categories`
                 )
                 setCategoriesData(response.data)
             } catch (error) {
@@ -70,7 +72,7 @@ const Product = () => {
             try {
                 setIsLoading(true)
                 const response = await axios.get(
-                    `${import.meta.env.VITE_API_URL}/api/images`
+                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/images`
                 )
                 setImgData(response.data)
             } catch (error) {
@@ -83,7 +85,7 @@ const Product = () => {
             try {
                 setIsLoading(true)
                 const response = await axios.get(
-                    `${import.meta.env.VITE_API_URL}/api/products/${guid}`
+                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/products/${guid}`
                 )
                 setFormData(response.data)
                 setInitialData(response.data)
@@ -132,6 +134,19 @@ const Product = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target
+        if (!name) return
+        if (name.includes('table')) {
+            const storeType = name.split('_')[1]
+            setFormData((prevFormData) => ({
+                ...prevFormData,
+                onlinestores: prevFormData.onlinestores.map((store) =>
+                    store.onlineStore === storeType
+                        ? { ...store, link: value }
+                        : store
+                ),
+            }))
+            return
+        }
         setFormData({
             ...formData,
             [name]: value,
@@ -151,7 +166,7 @@ const Product = () => {
             formData.append('imagetype', `${guid}_${e.target.id}`) // hardcoded
             try {
                 const response = await axios.post(
-                    `${import.meta.env.VITE_API_URL}/api/upload-image/${guid}`,
+                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/upload-image/${guid}`,
                     formData,
                     {
                         headers: {
@@ -159,7 +174,6 @@ const Product = () => {
                         },
                     }
                 )
-                console.log('Image Uploaded:', response.data)
                 setImgData((prevData) => [...prevData, response.data.image])
                 setFormData((prevData) => ({
                     ...prevData,
@@ -182,17 +196,21 @@ const Product = () => {
 
     const handleClickDeleteImg = async (e, imageId) => {
         e.preventDefault()
-
+        setIsDeletingImage(true)
         try {
             const response = await axios.delete(
-                `${import.meta.env.VITE_API_URL}/api/delete-image/${imageId}`
+                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/delete-image/${imageId}`
             )
 
             if (response.status === 200) {
-                setImgData((prevData) => prevData.filter(img => img.cdnid !== imageId));
+                setImgData((prevData) =>
+                    prevData.filter((img) => img.cdnid !== imageId)
+                )
             }
         } catch (error) {
             console.error(error)
+        } finally {
+            setIsDeletingImage(false)
         }
     }
 
@@ -203,12 +221,17 @@ const Product = () => {
         }))
     }
 
-    const handleCategorySelect = (category, categoryDetail, isChecked = true) => {
+    const handleCategorySelect = (
+        category,
+        categoryDetail,
+        isChecked = true
+    ) => {
         setFormData((prevData) => {
             if (isChecked) {
                 categoryDetail.categoryid = category.categoryid
                 const updatedCategories = prevData.ProductCategories.filter(
-                    (category) => category.categoryid !== categoryDetail.categoryid
+                    (category) =>
+                        category.categoryid !== categoryDetail.categoryid
                 )
                 return {
                     ...prevData,
@@ -216,15 +239,15 @@ const Product = () => {
                 }
             } else {
                 const updatedCategories = prevData.ProductCategories.filter(
-                    (cat) => cat.categorydetailid !== categoryDetail.categorydetailid
-                );
-    
+                    (cat) =>
+                        cat.categorydetailid !== categoryDetail.categorydetailid
+                )
+
                 return {
                     ...prevData,
                     ProductCategories: updatedCategories,
-                };
+                }
             }
-            
         })
     }
 
@@ -237,21 +260,20 @@ const Product = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        console.log(formData)
+        setIsSubmitting(true)
         try {
             if (guid !== 'product') {
                 const response = await axios.put(
-                    `${import.meta.env.VITE_API_URL}/api/products/${guid}`,
+                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/products/${guid}`,
                     formData
                 )
                 if (response.status >= 200 && response.status < 300) {
                     setInitialData(response.data.product)
                     setFormData(response.data.product)
-                    console.log(response.data.product)
                 }
             } else {
                 const response = await axios.post(
-                    `${import.meta.env.VITE_API_URL}/api/products`,
+                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/products`,
                     formData
                 )
                 if (response.status >= 200 && response.status < 300) {
@@ -261,6 +283,8 @@ const Product = () => {
             }
         } catch (error) {
             console.error(error)
+        } finally {
+            setIsSubmitting(false)
         }
     }
     return (
@@ -325,7 +349,7 @@ const Product = () => {
                         >
                             <div className="sticky top-[60px] z-20 flex items-center justify-between bg-white py-4 lg:top-0">
                                 <h1 className="text-3xl font-bold">
-                                    {guid !== 'product'
+                                    {formData.productname
                                         ? formData.productname
                                         : 'Add Product'}
                                 </h1>
@@ -334,6 +358,7 @@ const Product = () => {
                                     text={'Save'}
                                     btnType={'submit'}
                                     disabled={!isChanged}
+                                    isSubmitting={isSubmitting}
                                 />
                             </div>
                             <div className="flex w-full items-end gap-4">
@@ -428,14 +453,26 @@ const Product = () => {
                                                             )
                                                             .map((img) => (
                                                                 <Image
-                                                                    key={img.cdnid}
-                                                                    imgSrc={img.imagepath}
+                                                                    key={
+                                                                        img.cdnid
+                                                                    }
+                                                                    imgSrc={
+                                                                        img.imagepath
+                                                                    }
                                                                     ratio="aspect-card"
                                                                     className="h-48"
                                                                     handleClickDelete={
                                                                         handleClickDeleteImg
                                                                     }
-                                                                    imgSource={img.cdnid}
+                                                                    imgCdnId={
+                                                                        img.cdnid
+                                                                    }
+                                                                    isLoading={
+                                                                        isLoadingImage
+                                                                    }
+                                                                    isDeleting={
+                                                                        isDeletingImage
+                                                                    }
                                                                 />
                                                             ))}
                                                         <Input
@@ -448,6 +485,9 @@ const Product = () => {
                                                             isUploadImage={true}
                                                             isLoading={
                                                                 isLoadingImage
+                                                            }
+                                                            isDeleting={
+                                                                isDeletingImage
                                                             }
                                                         />
                                                     </div>
@@ -561,44 +601,28 @@ const Product = () => {
                                         </tr>
                                     </thead>
                                     <tbody className="max-h-40 overflow-auto whitespace-nowrap">
-                                        <tr className="hover:bg-gray-50">
-                                            <td className="p-4 text-sm text-gray-800">
-                                                Tokopedia
-                                            </td>
-                                            <td className="w-full p-4 text-sm">
-                                                <Input
-                                                    handleChange={handleChange}
-                                                    id="link_tokopedia"
-                                                    required={true}
-                                                    value={
-                                                        formData.onlinestores.find(
-                                                            (store) =>
-                                                                store.onlineStore ==
-                                                                'tokped'
-                                                        ).link
-                                                    }
-                                                />
-                                            </td>
-                                        </tr>
-                                        <tr className="hover:bg-gray-50">
-                                            <td className="p-4 text-sm text-gray-800">
-                                                Shopee
-                                            </td>
-                                            <td className="w-full p-4 text-sm">
-                                                <Input
-                                                    handleChange={handleChange}
-                                                    id="link_shopee"
-                                                    required={true}
-                                                    value={
-                                                        formData.onlinestores.find(
-                                                            (store) =>
-                                                                store.onlineStore ==
-                                                                'shopee'
-                                                        ).link
-                                                    }
-                                                />
-                                            </td>
-                                        </tr>
+                                        {formData.onlinestores.map(
+                                            (store, index) => (
+                                                <tr
+                                                    className="hover:bg-gray-50"
+                                                    key={index}
+                                                >
+                                                    <td className="p-4 text-sm text-gray-800">
+                                                        Tokopedia
+                                                    </td>
+                                                    <td className="w-full p-4 text-sm">
+                                                        <Input
+                                                            handleChange={
+                                                                handleChange
+                                                            }
+                                                            id={`table_${store.onlineStore}`}
+                                                            required={true}
+                                                            value={store.link}
+                                                        />
+                                                    </td>
+                                                </tr>
+                                            )
+                                        )}
                                     </tbody>
                                 </table>
                             </div>

@@ -21,6 +21,7 @@ const Input = ({
     btnOnClick,
     imgUploadContainerClassName,
     isLoading = false,
+    isDeleting = false,
 }) => {
     const [showPassword, setShowPassword] = useState(false)
     const [showColorPicker, setShowColorPicker] = useState(false)
@@ -149,8 +150,8 @@ const Input = ({
                             onChange={handleChange}
                         />
 
-                        {isLoading && (
-                            <div className="absolute inset-0 top-0 flex items-center justify-center bg-black bg-opacity-30">
+                        {(isLoading || isDeleting) && (
+                            <div className="pointer-events-none absolute inset-0 top-0 flex items-center justify-center bg-black bg-opacity-30">
                                 {' '}
                                 <div className="spinner-loader"></div>
                             </div>

@@ -15,7 +15,7 @@ const Products = () => {
         try {
             setIsLoading(true)
             const response = await axios.get(
-                `${import.meta.env.VITE_API_URL}/api/products`
+                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/products`
             )
             setProducts(response.data.products)
         } catch (error) {
@@ -34,10 +34,14 @@ const Products = () => {
         try {
             setIsLoading(true)
             const response = await axios.delete(
-                `${import.meta.env.VITE_API_URL}/api/products/${productId}`
+                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/products/${productId}`
             )
             if (response.status === 200) {
-                setProducts((prevData) => prevData.filter(product => product.productid !== productId));
+                setProducts((prevData) =>
+                    prevData.filter(
+                        (product) => product.productid !== productId
+                    )
+                )
             }
         } catch (error) {
             console.error('Error fetching products:', error)

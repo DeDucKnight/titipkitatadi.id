@@ -22,7 +22,7 @@ import axios from 'axios'
 const App = () => {
     const navigate = useNavigate()
     const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
-    const [isAuthenticated, setIsAuthenticated] = useState(false)
+    const [isAuthenticated, setIsAuthenticated] = useState(true)
     const [user, setUser] = useState(null)
     const [navbarWidth, setNavbarWidth] = useState(0)
     const navbarRef = useRef(null)
@@ -60,8 +60,7 @@ const App = () => {
         // Uncomment to have real logic
         try {
             const response = await axios.post(
-                `http://localhost:5000/api/admin-login`,
-                // `${import.meta.env.VITE_API_URL}/api/admin-login`,
+                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/admin-login`,
                 user
             )
 
