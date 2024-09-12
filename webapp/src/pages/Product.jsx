@@ -43,8 +43,8 @@ const Product = () => {
         sizes: [],
         material: '',
         onlinestores: [
-            { onlineStore: 'tokped', link: 'https://test1' },
-            { onlineStore: 'shopee', link: 'https://test2' },
+            { onlineStore: 'Tokopedia', link: 'https://test1' },
+            { onlineStore: 'Shopee', link: 'https://test2' },
         ],
         shipping: '',
         status: 'Active',
@@ -608,7 +608,7 @@ const Product = () => {
                                                     key={index}
                                                 >
                                                     <td className="p-4 text-sm text-gray-800">
-                                                        Tokopedia
+                                                        {store.onlineStore}
                                                     </td>
                                                     <td className="w-full p-4 text-sm">
                                                         <Input
