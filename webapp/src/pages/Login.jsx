@@ -6,8 +6,8 @@ import Button from '../components/Button'
 
 const Login = ({ onLogin, setErrorLogIn, errorLogIn }) => {
     const navigate = useNavigate()
-    const [username, setUsername] = useState('titipkitatadi-admin')
-    const [password, setPassword] = useState('Test123')
+    const [username, setUsername] = useState('')
+    const [password, setPassword] = useState('')
 
     const handleLogin = (event) => {
         event.preventDefault()

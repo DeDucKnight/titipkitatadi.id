@@ -165,17 +165,17 @@ const Category = () => {
     const handleImgChange = async (e, data) => {
         e.preventDefault()
         setIsLoadingImage(true)
-
         if (e.target.type === 'file') {
             const file = e.target.files[0]
             const formData = new FormData()
+            let imgType = `${data.categorydetailid}_${data.categorydetailname}`
 
+            if (data.isstandard) {
+                imgType = `${data.categoryid}_${data.categoryname}`
+            }
             // Append the file to the FormData object
             formData.append('file', file)
-            formData.append(
-                'imagetype',
-                `${data.categorydetailid}_${data.categorydetailname}`
-            ) // hardcoded
+            formData.append('imagetype', imgType) // hardcoded
 
             try {
                 const response = await axios.post(
@@ -231,41 +231,36 @@ const Category = () => {
         e.preventDefault()
         setIsLoading(true)
         try {
-            // bantu rapihin ya
-            if (data.createddate != 'new') {
-                const response = await axios.delete(
-                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/category-details/${data.categorydetailid}`,
-                    {
-                        headers: {
-                            'Content-Type': 'multipart/form-data',
-                        },
-                    }
-                )
+            const { categorydetailid, createddate } = data
+            const apiUrl = `${
+                import.meta.env.VITE_ENV === 'development'
+                    ? import.meta.env.VITE_API_LOCAL
+                    : import.meta.env.VITE_API_URL
+            }/api/category-details/${categorydetailid}`
+            if (createddate !== 'new') {
+                const response = await axios.delete(apiUrl, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                })
 
                 if (response.status >= 200 && response.status < 300) {
-                    setFormData((prevFormData) => ({
-                        ...prevFormData,
-                        CategoryDetails: prevFormData.CategoryDetails.filter(
-                            (detail) =>
-                                detail.categorydetailid !==
-                                data.categorydetailid
-                        ),
-                    }))
+                    updateCategoryDetails(categorydetailid)
                 }
             } else {
-                setFormData((prevFormData) => ({
-                    ...prevFormData,
-                    CategoryDetails: prevFormData.CategoryDetails.filter(
-                        (detail) =>
-                            detail.categorydetailid !== data.categorydetailid
-                    ),
-                }))
+                updateCategoryDetails(categorydetailid)
             }
         } catch (error) {
             console.error('Error delete category:', error)
         } finally {
             setIsLoading(false)
         }
+    }
+    const updateCategoryDetails = (categorydetailid) => {
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            CategoryDetails: prevFormData.CategoryDetails.filter(
+                (detail) => detail.categorydetailid !== categorydetailid
+            ),
+        }))
     }
 
     return (
@@ -374,6 +369,49 @@ const Category = () => {
                                     text={'Status'}
                                     id="status"
                                 />
+                            </div>
+                            <div className="flex w-full flex-wrap gap-3">
+                                {imgData
+                                    .filter(
+                                        (img) =>
+                                            img.imagetype ===
+                                            `${formData.categoryid}_${formData.categoryname}`
+                                    )
+                                    .slice(0, 1)
+                                    .map((img) => (
+                                        <Image
+                                            key={img.cdnid}
+                                            imgSrc={img.imagepath}
+                                            isLoading={isLoadingImage}
+                                            isDeleting={isDeletingImage}
+                                            handleClickDelete={
+                                                handleClickDeleteImg
+                                            }
+                                            imgCdnId={img.cdnid}
+                                            ratio="aspect-20x9"
+                                            className="h-48"
+                                        />
+                                    ))}
+                                {imgData.filter(
+                                    (img) =>
+                                        img.imagetype ===
+                                        `${formData.categoryid}_${formData.categoryname}`
+                                ).length > 0 ? (
+                                    ''
+                                ) : (
+                                    <Input
+                                        handleChange={(event) =>
+                                            handleImgChange(event, formData)
+                                        }
+                                        id={formData.categoryid}
+                                        imgUploadContainerClassName={
+                                            '!aspect-20x9 !h-48'
+                                        }
+                                        isUploadImage={true}
+                                        isLoading={isLoadingImage}
+                                        isDeleting={isDeletingImage}
+                                    />
+                                )}
                             </div>
                             <Input
                                 id="categories"
