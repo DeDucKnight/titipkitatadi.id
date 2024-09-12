@@ -22,7 +22,8 @@ import axios from 'axios'
 const App = () => {
     const navigate = useNavigate()
     const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
-    const [isAuthenticated, setIsAuthenticated] = useState(true)
+    const [isAuthenticated, setIsAuthenticated] = useState(false)
+    const [errorLogIn, setErrorLogIn] = useState(null)
     const [user, setUser] = useState(null)
     const [navbarWidth, setNavbarWidth] = useState(0)
     const navbarRef = useRef(null)
@@ -57,7 +58,6 @@ const App = () => {
     }, [isAuthenticated])
 
     const handleLogin = async (user) => {
-        // Uncomment to have real logic
         try {
             const response = await axios.post(
                 `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/admin-login`,
@@ -65,12 +65,12 @@ const App = () => {
             )
 
             if (response.status >= 200 && response.status < 300) {
-                // only executed if response is successis
                 localStorage.setItem(
                     'authState',
                     JSON.stringify({
                         isAuthenticated: true,
                         user: JSON.stringify(user),
+                        token: response.data.token,
                     })
                 )
                 setIsAuthenticated(true)
@@ -78,6 +78,7 @@ const App = () => {
                 navigate('/')
             }
         } catch (error) {
+            setErrorLogIn('Invalid username or password')
             console.error('Login failed', error)
         }
     }
@@ -179,7 +180,11 @@ const App = () => {
                             isAuthenticated ? (
                                 <Navigate to={currLocation} />
                             ) : (
-                                <Login onLogin={handleLogin} />
+                                <Login
+                                    onLogin={handleLogin}
+                                    errorLogIn={errorLogIn}
+                                    setErrorLogIn={setErrorLogIn}
+                                />
                             )
                         }
                     />

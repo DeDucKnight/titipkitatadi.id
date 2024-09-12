@@ -4,11 +4,10 @@ import Input from '../components/Input'
 import Icon from '../components/Icons'
 import Button from '../components/Button'
 
-const Login = ({ onLogin }) => {
+const Login = ({ onLogin, setErrorLogIn, errorLogIn }) => {
     const navigate = useNavigate()
     const [username, setUsername] = useState('titipkitatadi-admin')
     const [password, setPassword] = useState('Test123')
-    const [error, setError] = useState(null)
 
     const handleLogin = (event) => {
         event.preventDefault()
@@ -19,7 +18,7 @@ const Login = ({ onLogin }) => {
             }
             onLogin(user)
         } else {
-            setError('Invalid username or password')
+            setErrorLogIn('Invalid username or password')
         }
     }
     return (
@@ -27,12 +26,14 @@ const Login = ({ onLogin }) => {
             <div className="mx-auto flex h-screen flex-col items-center justify-center gap-7 px-6 py-8 lg:py-0">
                 <Icon name="logo" className="lg:size-18 size-16" />
                 <div className="w-full border border-gray-700 shadow sm:max-w-md md:mt-0 xl:p-0">
-                    <div className="space-y-4 p-6 sm:p-8 md:space-y-6">
+                    <div className="space-y-2 p-6 sm:p-8 md:space-y-4">
                         <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl">
                             Sign in
                         </h1>
-                        {error && (
-                            <div className="mb-4 text-red-500">{error}</div>
+                        {errorLogIn && (
+                            <div className="mb-4 text-red-500">
+                                {errorLogIn}
+                            </div>
                         )}
                         <form
                             className="space-y-4 md:space-y-6"
