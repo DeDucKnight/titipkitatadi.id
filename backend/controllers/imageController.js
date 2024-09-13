@@ -318,7 +318,7 @@ exports.update_image_by_cdnid = async (req, res) => {
         for (const imageObj of images) {
             const { cdnid, properties } = imageObj;
 
-            if (!cdnid || !properties) {
+            if (!cdnid) {
                 return res.status(400).json({ error: `Missing cdnid or properties for image.` });
             }
 

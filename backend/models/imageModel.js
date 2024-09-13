@@ -28,7 +28,7 @@ const Image = sequelize.define('Image', {
         defaultValue: DataTypes.NOW,
     },
     properties: {
-        type: DataTypes.TEXT,
+        type: DataTypes.JSONB,
         allowNull: true
     }
 }, {
