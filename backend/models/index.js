@@ -10,6 +10,9 @@ const Image = require('./imageModel');
 const User = require('./userModel');
 const Customer = require('./customerModel');
 const Wishlist = require('./wishlistModel');
+const SizeMetric = require('./sizeMetricModel');
+const SizeAttribute = require('./sizeAttributeModel');
+const ProductSizeMetric = require('./productSizeMetricModel');
 
 // Export models
 module.exports = {
@@ -22,5 +25,8 @@ module.exports = {
     User,
     Customer,
     Wishlist,
+    SizeMetric,
+    SizeAttribute,
+    ProductSizeMetric,
     sequelize
 };

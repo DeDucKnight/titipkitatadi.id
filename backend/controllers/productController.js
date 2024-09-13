@@ -1,4 +1,4 @@
-const { Product, ProductImage, ProductCategory, Category, CategoryDetail, Image, sequelize } = require('../models');
+const { Product, ProductImage, ProductCategory, Category, CategoryDetail, Image, SizeMetric, SizeAttribute, ProductSizeMetric, sequelize } = require('../models');
 
 // Get Product List with Pagination
 exports.get_product_list = async (req, res) => {
@@ -86,6 +86,21 @@ exports.get_product_detail = async (req, res) => {
                             ]
                         }                        
                     ]
+                },
+                {
+                    model: ProductSizeMetric,
+                    include: [
+                        {
+                            model: SizeAttribute,
+                            attributes: ['sizeattributeid', 'sizemetricname'],
+                            include: [
+                                {
+                                    model: SizeMetric,
+                                    attributes: ['sizemetricid', 'sizemetricname']
+                                }
+                            ]
+                        }
+                    ]
                 }
             ]
         });
@@ -161,7 +176,7 @@ exports.get_products_by_category_detail = async (req, res) => {
 exports.create_product = async (req, res) => {
     const { 
         productname, price, discountprice, brand, colors, sizes, material, onlinestores, shipping, status, 
-        ProductImages, ProductCategories 
+        ProductImages, ProductCategories, ProductSizeMetrics 
     } = req.body;
 
     const t = await sequelize.transaction();
@@ -201,6 +216,17 @@ exports.create_product = async (req, res) => {
             }));
 
             await ProductCategory.bulkCreate(categoriesToInsert, { transaction: t });
+        }
+
+        //Bulk Create Product Size Metrics
+        if (ProductSizeMetrics && ProductSizeMetrics.length > 0) {
+            const metricsToInsert = ProductSizeMetrics.map(metric => ({
+                productid: product.productId,
+                sizeattributeid: metric.sizeattributeid,
+                measurements: metric.measurements
+            }));
+
+            await ProductSizeMetrics.bulkCreate(metricsToInsert, { transaction: t });
         }
 
         await t.commit();
@@ -261,6 +287,43 @@ exports.update_product = async (req, res) => {
                 if (!newCategoryIds.includes(existingCategory.categorydetailid)) {
                     await ProductCategory.destroy({
                         where: { productcategoryid: existingCategory.productcategoryid },
+                        transaction: t
+                    });
+                }
+            }
+        }
+
+        // Handle Product Size Metrics
+        if (updates.ProductSizeMetrics) {
+            // Fetch existing Product Size Metric
+            const existingProductSizeMetric = await ProductSizeMetric.findAll({
+                where: { productid: productId },
+                transaction: t
+            });
+
+            // Map existing size attru=ibute IDs and new size attribute IDs
+            const existingMetricIds = existingProductSizeMetric.map(metric => metric.sizeattributeidid);
+            const newMetricIds = updates.ProductSizeMetrics.map(metric => metric.sizeattributeidid);
+
+            // Add new size metric
+            for (const metric of updates.ProductSizeMetrics) {
+                const metricId = metric.sizeattributeidid;
+                const exists = existingMetricIds.includes(metricId);
+
+                if (!exists) {
+                    await ProductSizeMetric.create({
+                        productid: productId,
+                        sizeattributeidid: metricId,
+                        measurements: metric.measurements
+                    }, { transaction: t });
+                }
+            }
+
+            // Remove size metric that are no longer present
+            for (const existingMetric of existingProductSizeMetric) {
+                if (!newMetricIds.includes(existingProductSizeMetric.sizeattributeidid)) {
+                    await ProductSizeMetric.destroy({
+                        where: { sizeattributeidid: existingMetric.sizeattributeidid },
                         transaction: t
                     });
                 }
