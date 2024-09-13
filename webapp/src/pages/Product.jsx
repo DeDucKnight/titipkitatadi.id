@@ -229,10 +229,9 @@ const Product = () => {
         setFormData((prevData) => {
             if (isChecked) {
                 categoryDetail.categoryid = category.categoryid
-                const updatedCategories = prevData.ProductCategories.filter(
-                    (category) =>
-                        category.categoryid !== categoryDetail.categoryid
-                )
+                const updatedCategories = prevData.ProductCategories.filter((cat) => {
+                    return !(cat?.CategoryDetail?.Category?.categoryid === category.categoryid || cat.categoryid === category.categoryid);
+                });
                 return {
                     ...prevData,
                     ProductCategories: [...updatedCategories, categoryDetail],
