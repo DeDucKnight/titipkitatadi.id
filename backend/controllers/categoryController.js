@@ -2,7 +2,7 @@ const { Category, CategoryDetail, sequelize } = require('../models');
 
 // Create a New Category & Category Details
 exports.create_category = async (req, res) => {
-    const { categoryname, isstandard, categorydetails } = req.body;
+    const { categoryname, isstandard, CategoryDetails } = req.body;
     
     const t = await sequelize.transaction();
     try {
@@ -13,8 +13,8 @@ exports.create_category = async (req, res) => {
         }, { transaction: t });
 
         // Bulk Create CategoryDetails
-        if (categorydetails && categorydetails.length > 0) {
-            const categoryDetailsToInsert = categorydetails.map(detail => ({
+        if (CategoryDetails && CategoryDetails.length > 0) {
+            const categoryDetailsToInsert = CategoryDetails.map(detail => ({
                 categoryid: category.categoryid,
                 categorydetailname: detail.categorydetailname,
             }));
