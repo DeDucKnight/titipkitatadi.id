@@ -22,14 +22,17 @@ const Product = () => {
     const pathnames = location.pathname.split('/').filter((el) => el)
     const [initialData, setInitialData] = useState({
         productname: '',
-        description: '',
         price: 0,
         discountprice: 0,
         brand: '',
         colors: [],
         sizes: [],
         material: '',
-        onlinestores: [],
+        onlinestores: [
+            { onlineStore: 'Tokopedia', link: 'https://www.tokopedia.com' },
+            { onlineStore: 'Shopee', link: 'https://www.shopee.com' },
+        ],
+        shipping: '',
         status: 'Active',
         ProductImages: [],
         ProductCategories: [],
@@ -43,8 +46,8 @@ const Product = () => {
         sizes: [],
         material: '',
         onlinestores: [
-            { onlineStore: 'Tokopedia', link: 'https://test1' },
-            { onlineStore: 'Shopee', link: 'https://test2' },
+            { onlineStore: 'Tokopedia', link: 'https://www.tokopedia.com' },
+            { onlineStore: 'Shopee', link: 'https://www.shopee.com' },
         ],
         shipping: '',
         status: 'Active',
