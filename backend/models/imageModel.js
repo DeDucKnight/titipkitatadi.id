@@ -27,6 +27,10 @@ const Image = sequelize.define('Image', {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
     },
+    properties: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    }
 }, {
     sequelize,
     modelName: 'image',
