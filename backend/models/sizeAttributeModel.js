@@ -19,7 +19,7 @@ SizeAttribute.init({
         onDelete: 'CASCADE',
         allowNull: false,
     },
-    sizemetricname: {
+    sizeattributename: {
         type: DataTypes.STRING(255),
         allowNull: false,
     },

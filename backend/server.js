@@ -5,6 +5,7 @@ const categoryRoutes = require('./routes/categoryRoutes');
 const imageRoutes = require('./routes/imageRoutes');
 const identityRoutes = require('./routes/identityRoutes');
 const wishlistRoutes = require('./routes/wishlistRoutes');
+const sizeMetricRoutes = require('./routes/sizeMetricRoutes');
 const errorHandler = require('./middlewares/errorHandler.js');
 
 const app = express();
@@ -22,6 +23,7 @@ app.use('/api', categoryRoutes);
 app.use('/api', imageRoutes);
 app.use('/api', identityRoutes);
 app.use('/api', wishlistRoutes)
+app.use('/api', sizeMetricRoutes)
 
 // Error handling middleware
 app.use(errorHandler);
