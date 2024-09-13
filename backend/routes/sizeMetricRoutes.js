@@ -5,8 +5,8 @@ const router = express.Router();
 
 router.post('/size-metrics', sizeMetricController.create_size_metric);
 router.get('/size-metrics', sizeMetricController.get_size_metrics);
-router.get('/size-metrics/:categoryid', sizeMetricController.get_size_metric_by_id);
-router.put('/size-metrics/:categoryid', sizeMetricController.update_size_metric);
+router.get('/size-metrics/:sizemetricid', sizeMetricController.get_size_metric_by_id);
+router.put('/size-metrics/:sizemetricid', sizeMetricController.update_size_metric);
 // router.delete('/categories/:categoryid', sizeMetricController.delete_category);
 
 // router.put('/category-details/:categorydetailid', sizeMetricController.update_category_detail);
