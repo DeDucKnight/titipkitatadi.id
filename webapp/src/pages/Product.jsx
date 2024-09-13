@@ -9,7 +9,7 @@ import CategorySelection from '../components/CategorySelection'
 import Dropdown from '../components/Dropdown'
 import Skeleton from '../components/Skeleton'
 import axios from 'axios'
-
+const ProductSizeMetrics = []
 const Product = () => {
     const [isChanged, setIsChanged] = useState(false)
     const [isLoadingImage, setIsLoadingImage] = useState(false)
@@ -229,9 +229,15 @@ const Product = () => {
         setFormData((prevData) => {
             if (isChecked) {
                 categoryDetail.categoryid = category.categoryid
-                const updatedCategories = prevData.ProductCategories.filter((cat) => {
-                    return !(cat?.CategoryDetail?.Category?.categoryid === category.categoryid || cat.categoryid === category.categoryid);
-                });
+                const updatedCategories = prevData.ProductCategories.filter(
+                    (cat) => {
+                        return !(
+                            cat?.CategoryDetail?.Category?.categoryid ===
+                                category.categoryid ||
+                            cat.categoryid === category.categoryid
+                        )
+                    }
+                )
                 return {
                     ...prevData,
                     ProductCategories: [...updatedCategories, categoryDetail],
@@ -417,6 +423,9 @@ const Product = () => {
                                                 Colors
                                             </th>
                                             <th className="p-4 text-left text-sm font-semibold text-gray-800">
+                                                Color Label
+                                            </th>
+                                            <th className="p-4 text-left text-sm font-semibold text-gray-800">
                                                 Images
                                             </th>
                                             <th className="w-[1%] p-4 text-end text-sm font-semibold text-gray-800">
@@ -441,6 +450,12 @@ const Product = () => {
                                                         ></span>
                                                         <span>{color}</span>
                                                     </div>
+                                                </td>
+                                                <td className="p-4 align-top text-sm text-gray-800">
+                                                    <Input
+                                                        id={`label_${color}`}
+                                                        inputClassName="!text-xs"
+                                                    />
                                                 </td>
                                                 <td className="p-4 align-top text-sm text-gray-800">
                                                     <div className="flex w-full flex-wrap gap-3">
@@ -509,55 +524,6 @@ const Product = () => {
                                     </tbody>
                                 </table>
                             )}
-                            <Input
-                                id="size"
-                                labelText="Sizes"
-                                btnText={'Add'}
-                                btnOnClick={handleAddSize}
-                                value={sizeValue}
-                                handleChange={(e) =>
-                                    setSizeValue(e.target.value)
-                                }
-                            />
-                            {formData.sizes.length > 0 && (
-                                <table className="min-w-full bg-white">
-                                    <thead className="whitespace-nowrap bg-gray-100">
-                                        <tr className="">
-                                            <th className="p-4 text-left text-xs font-semibold text-gray-800">
-                                                Sizes
-                                            </th>
-                                            <th className="w-[1%] p-4 text-end text-xs font-semibold text-gray-800">
-                                                Actions
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="max-h-40 overflow-auto whitespace-nowrap">
-                                        {formData.sizes.map((size, index) => (
-                                            <tr
-                                                className="hover:bg-gray-50"
-                                                key={index}
-                                            >
-                                                <td className="p-4 text-sm text-gray-800">
-                                                    {size}
-                                                </td>
-                                                <td className="w-[1%] p-4 text-sm">
-                                                    <div className="inline-flex w-full items-center justify-end gap-4 text-sm">
-                                                        <Button
-                                                            iconName={'trash'}
-                                                            type={'link'}
-                                                            onClick={() =>
-                                                                handleDeleteSize(
-                                                                    size
-                                                                )
-                                                            }
-                                                        />
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            )}
                             <div className="flex flex-col gap-2">
                                 <p className="block text-sm font-medium text-gray-900">
                                     Size Metrics
@@ -577,6 +543,88 @@ const Product = () => {
                                     ]}
                                     value={formData.sizeMetric}
                                 />
+                            </div>
+                            <Input
+                                id="size"
+                                labelText="Sizes"
+                                btnText={'Add'}
+                                btnOnClick={handleAddSize}
+                                value={sizeValue}
+                                handleChange={(e) =>
+                                    setSizeValue(e.target.value)
+                                }
+                            />
+                            <div className="overflow-x-auto">
+                                {formData.sizes.length > 0 && (
+                                    <table className="min-w-full bg-white">
+                                        <thead className="whitespace-nowrap bg-gray-100">
+                                            <tr className="">
+                                                <th className="p-4 text-left text-xs font-semibold text-gray-800">
+                                                    Sizes
+                                                </th>
+                                                {ProductSizeMetrics.map(
+                                                    (metric, index) => (
+                                                        <td
+                                                            key={index}
+                                                            className="p-4 text-sm text-gray-800"
+                                                        >
+                                                            {metric.attributeid}
+                                                        </td>
+                                                    )
+                                                )}
+                                                <th className="w-[1%] p-4 text-end text-xs font-semibold text-gray-800">
+                                                    Actions
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="max-h-40 overflow-auto whitespace-nowrap">
+                                            {formData.sizes.map(
+                                                (size, index) => (
+                                                    <tr
+                                                        className="hover:bg-gray-50"
+                                                        key={index}
+                                                    >
+                                                        <td className="p-4 text-sm text-gray-800">
+                                                            {size}
+                                                        </td>
+                                                        {ProductSizeMetrics.map(
+                                                            (metric, index) => (
+                                                                <td
+                                                                    key={index}
+                                                                    className="p-4 text-sm text-gray-800"
+                                                                >
+                                                                    <Input
+                                                                        inputClassName="min-w-[200px] !text-xs"
+                                                                        id={
+                                                                            index
+                                                                        }
+                                                                    />
+                                                                </td>
+                                                            )
+                                                        )}
+                                                        <td className="w-[1%] p-4 text-sm">
+                                                            <div className="inline-flex w-full items-center justify-end gap-4 text-sm">
+                                                                <Button
+                                                                    iconName={
+                                                                        'trash'
+                                                                    }
+                                                                    type={
+                                                                        'link'
+                                                                    }
+                                                                    onClick={() =>
+                                                                        handleDeleteSize(
+                                                                            size
+                                                                        )
+                                                                    }
+                                                                />
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            )}
+                                        </tbody>
+                                    </table>
+                                )}
                             </div>
                             <Input
                                 handleChange={handleChange}

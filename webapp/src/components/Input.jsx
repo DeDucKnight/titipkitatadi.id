@@ -36,13 +36,15 @@ const Input = ({
         <div className={`relative ${containerClassName}`}>
             {!isUploadImage && (
                 <>
-                    <label
-                        htmlFor={id}
-                        className={`${labelCLassName} mb-2 block text-sm font-medium text-gray-900`}
-                    >
-                        {labelText}
-                        <span></span>
-                    </label>
+                    {labelText && (
+                        <label
+                            htmlFor={id}
+                            className={`${labelCLassName} mb-2 block text-sm font-medium text-gray-900`}
+                        >
+                            {labelText}
+                            <span></span>
+                        </label>
+                    )}
                     <div className="relative flex items-center gap-4">
                         {!isResizeable && (
                             <input

@@ -1,8 +1,16 @@
 import { useState } from 'react'
 
-const Switch = ({ text, isChecked, id, handleChange }) => {
+const Switch = ({
+    text,
+    isChecked,
+    id,
+    handleChange,
+    containerClassName = '',
+}) => {
     return (
-        <div className="flex flex-col items-center gap-2">
+        <div
+            className={`${containerClassName} flex flex-col items-center gap-2`}
+        >
             {text && (
                 <p className="mb-2 block text-sm font-medium text-gray-900">
                     {text}

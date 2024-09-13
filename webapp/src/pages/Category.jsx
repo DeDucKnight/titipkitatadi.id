@@ -36,8 +36,8 @@ const Category = () => {
     const [formData, setFormData] = useState({
         categoryid: '',
         categoryname: '',
-        isstandard: true,
-        status: true,
+        isstandard: false,
+        status: false,
         createddate: '',
         CategoryDetails: [],
     })
@@ -367,6 +367,16 @@ const Category = () => {
                                     id="status"
                                 />
                             </div>
+
+                            <div className="w-full">
+                                <Switch
+                                    handleChange={handleChange}
+                                    isChecked={formData.isstandard}
+                                    text={'Is Standard'}
+                                    id="isstandard"
+                                    containerClassName={'!items-start'}
+                                />
+                            </div>
                             <div className="flex w-full flex-wrap gap-3">
                                 {imgData
                                     .filter(
@@ -386,7 +396,7 @@ const Category = () => {
                                             }
                                             imgCdnId={img.cdnid}
                                             ratio="aspect-card"
-                                            className="h-48"
+                                            className="h-96"
                                         />
                                     ))}
                                 {imgData.filter(
@@ -402,7 +412,7 @@ const Category = () => {
                                         }
                                         id={`${formData.categoryid}_${formData.categoryname}`}
                                         imgUploadContainerClassName={
-                                            '!aspect-card !h-48'
+                                            '!aspect-card !h-96'
                                         }
                                         isUploadImage={true}
                                         isLoading={isLoadingImage}
@@ -418,7 +428,7 @@ const Category = () => {
                                 value={inputValue}
                                 handleChange={handleInputChange}
                             />
-                            <div className="overflow-x-scroll">
+                            <div className="overflow-x-auto">
                                 {formData.CategoryDetails &&
                                     formData.CategoryDetails.length > 0 && (
                                         <table className="min-w-full bg-white">
