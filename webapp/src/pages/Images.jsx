@@ -90,22 +90,22 @@ const Images = () => {
                     <Skeleton className="mb-11 h-9 w-3/12" />
                     <Skeleton className="mb-7 h-6 w-4/12 lg:w-3/12" />
                     <Skeleton
-                        classContainer="relative mb-6 w-full lg:w-1/3 flex aspect-20x9 overflow-hidden"
-                        className="aspect-20x9 h-full"
+                        classContainer="relative mb-6 w-full lg:w-1/3 flex aspect-16x9 overflow-hidden"
+                        className="aspect-16x9 h-full"
                     />
                     <Skeleton className="mb-7 h-6 w-4/12 lg:w-3/12" />
                     <Skeleton
-                        classContainer="relative mb-4 w-full lg:w-1/3 flex aspect-20x9 overflow-hidden"
-                        className="aspect-20x9 h-full"
+                        classContainer="relative mb-4 w-full lg:w-1/3 flex aspect-16x9 overflow-hidden"
+                        className="aspect-16x9 h-full"
                     />
                 </div>
             ) : (
                 <div className="mb-7 pb-4">
                     <form
-                        className="relative space-y-4 py-4 md:space-y-6"
+                        className="relative h-max space-y-4 md:space-y-6"
                         action="#"
                     >
-                        <div className="sticky top-[60px] z-20 flex items-center justify-between bg-white py-4 lg:top-0">
+                        <div className="z-20 flex items-center justify-between bg-white py-4">
                             <h1 className="mb-4 text-3xl font-bold">Images</h1>
 
                             {/* <Button text={'Save'} btnType={'submit'} /> */}
@@ -113,18 +113,20 @@ const Images = () => {
                         <div className="space-y-7">
                             <div className="flex flex-col gap-2">
                                 <p className="text-lg font-semibold">
-                                    Banner Slide Show
+                                    Banner Slide Show - Desktop
                                 </p>
                                 <div className="flex flex-wrap gap-4">
                                     {imgData
                                         .filter(
-                                            (img) => img.imagetype === 'header'
+                                            (img) =>
+                                                img.imagetype ===
+                                                'header_desktop'
                                         )
                                         .map((img) => (
                                             <Image
                                                 key={img.cdnid}
                                                 imgSrc={img.imagepath}
-                                                ratio="aspect-20x9"
+                                                ratio="aspect-16x9"
                                                 className="w-96"
                                                 handleClickDelete={
                                                     handleClickDelete
@@ -137,11 +139,11 @@ const Images = () => {
 
                                     <Input
                                         handleChange={handleImgChange}
-                                        id="header"
+                                        id="header_desktop"
                                         isUploadImage={true}
                                         containerClassName={'w-96'}
                                         imgUploadContainerClassName={
-                                            '!aspect-20x9 !h-full'
+                                            '!aspect-16x9 !h-full'
                                         }
                                         isLoading={isLoadingImage}
                                         isDeleting={isDeletingImage}
@@ -150,18 +152,59 @@ const Images = () => {
                             </div>
                             <div className="flex flex-col gap-2">
                                 <p className="text-lg font-semibold">
-                                    Banner Footer
+                                    Banner Slide Show - Mobile
                                 </p>
                                 <div className="flex flex-wrap gap-4">
                                     {imgData
                                         .filter(
-                                            (img) => img.imagetype === 'footer'
+                                            (img) =>
+                                                img.imagetype ===
+                                                'header_mobile'
                                         )
                                         .map((img) => (
                                             <Image
                                                 key={img.cdnid}
                                                 imgSrc={img.imagepath}
-                                                ratio="aspect-20x9"
+                                                ratio="aspect-[320/250]"
+                                                className="h-full w-96"
+                                                handleClickDelete={
+                                                    handleClickDelete
+                                                }
+                                                imgCdnId={img.cdnid}
+                                                isLoading={isLoadingImage}
+                                                isDeleting={isDeletingImage}
+                                            />
+                                        ))}
+
+                                    <Input
+                                        handleChange={handleImgChange}
+                                        id="header_mobile"
+                                        isUploadImage={true}
+                                        containerClassName={'w-96 h-full'}
+                                        imgUploadContainerClassName={
+                                            '!aspect-[320/250] !h-full'
+                                        }
+                                        isLoading={isLoadingImage}
+                                        isDeleting={isDeletingImage}
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <p className="text-lg font-semibold">
+                                    Banner Footer - Desktop
+                                </p>
+                                <div className="flex flex-wrap gap-4">
+                                    {imgData
+                                        .filter(
+                                            (img) =>
+                                                img.imagetype ===
+                                                'footer_desktop'
+                                        )
+                                        .map((img) => (
+                                            <Image
+                                                key={img.cdnid}
+                                                imgSrc={img.imagepath}
+                                                ratio="aspect-16x9"
                                                 className="w-96"
                                                 handleClickDelete={
                                                     handleClickDelete
@@ -172,17 +215,63 @@ const Images = () => {
                                             />
                                         ))}
                                     {imgData.filter(
-                                        (img) => img.imagetype === 'footer'
+                                        (img) =>
+                                            img.imagetype === 'footer_desktop'
                                     ).length > 0 ? (
                                         ''
                                     ) : (
                                         <Input
                                             handleChange={handleImgChange}
-                                            id="footer"
+                                            id="footer_desktop"
                                             isUploadImage={true}
                                             containerClassName={'w-96'}
                                             imgUploadContainerClassName={
-                                                '!aspect-20x9 !h-full'
+                                                '!aspect-16x9 !h-full'
+                                            }
+                                            isLoading={isLoadingImage}
+                                            isDeleting={isDeletingImage}
+                                        />
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <p className="text-lg font-semibold">
+                                    Banner Footer - Mobile
+                                </p>
+                                <div className="flex flex-wrap gap-4">
+                                    {imgData
+                                        .filter(
+                                            (img) =>
+                                                img.imagetype ===
+                                                'footer_mobile'
+                                        )
+                                        .map((img) => (
+                                            <Image
+                                                key={img.cdnid}
+                                                imgSrc={img.imagepath}
+                                                ratio="aspect-[320/250]"
+                                                className="w-96"
+                                                handleClickDelete={
+                                                    handleClickDelete
+                                                }
+                                                imgCdnId={img.cdnid}
+                                                isLoading={isLoadingImage}
+                                                isDeleting={isDeletingImage}
+                                            />
+                                        ))}
+                                    {imgData.filter(
+                                        (img) =>
+                                            img.imagetype === 'footer_mobile'
+                                    ).length > 0 ? (
+                                        ''
+                                    ) : (
+                                        <Input
+                                            handleChange={handleImgChange}
+                                            id="footer_mobile"
+                                            isUploadImage={true}
+                                            containerClassName={'w-96'}
+                                            imgUploadContainerClassName={
+                                                '!aspect-[320/250] !h-full'
                                             }
                                             isLoading={isLoadingImage}
                                             isDeleting={isDeletingImage}
