@@ -168,11 +168,8 @@ const Category = () => {
         if (e.target.type === 'file') {
             const file = e.target.files[0]
             const formData = new FormData()
-            let imgType = `${data.categorydetailid}_${data.categorydetailname}`
+            const imgType = e.target.id
 
-            if (data.isstandard) {
-                imgType = `${data.categoryid}_${data.categoryname}`
-            }
             // Append the file to the FormData object
             formData.append('file', file)
             formData.append('imagetype', imgType) // hardcoded
@@ -388,7 +385,7 @@ const Category = () => {
                                                 handleClickDeleteImg
                                             }
                                             imgCdnId={img.cdnid}
-                                            ratio="aspect-20x9"
+                                            ratio="aspect-card"
                                             className="h-48"
                                         />
                                     ))}
@@ -403,9 +400,9 @@ const Category = () => {
                                         handleChange={(event) =>
                                             handleImgChange(event, formData)
                                         }
-                                        id={formData.categoryid}
+                                        id={`${formData.categoryid}_${formData.categoryname}`}
                                         imgUploadContainerClassName={
-                                            '!aspect-20x9 !h-48'
+                                            '!aspect-card !h-48'
                                         }
                                         isUploadImage={true}
                                         isLoading={isLoadingImage}
@@ -421,132 +418,217 @@ const Category = () => {
                                 value={inputValue}
                                 handleChange={handleInputChange}
                             />
-                            {formData.CategoryDetails &&
-                                formData.CategoryDetails.length > 0 && (
-                                    <table className="min-w-full bg-white">
-                                        <thead className="whitespace-nowrap bg-gray-100">
-                                            <tr className="">
-                                                <th className="p-4 text-left text-sm font-semibold text-gray-800">
-                                                    Categories
-                                                </th>
-                                                <th className="p-4 text-left text-sm font-semibold text-gray-800">
-                                                    Images
-                                                </th>
-                                                <th className="w-[1%] p-4 text-end text-sm font-semibold text-gray-800">
-                                                    Actions
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="max-h-40 overflow-auto whitespace-nowrap">
-                                            {formData.CategoryDetails.map(
-                                                (data, index) => (
-                                                    <tr
-                                                        className="hover:bg-gray-50"
-                                                        key={index}
-                                                    >
-                                                        <td className="p-4 align-top text-sm text-gray-800">
-                                                            {
-                                                                data.categorydetailname
-                                                            }
-                                                        </td>
-                                                        <td className="p-4 align-top text-sm text-gray-800">
-                                                            <div className="flex w-full flex-wrap gap-3">
-                                                                {imgData
-                                                                    .filter(
+                            <div className="overflow-x-scroll">
+                                {formData.CategoryDetails &&
+                                    formData.CategoryDetails.length > 0 && (
+                                        <table className="min-w-full bg-white">
+                                            <thead className="whitespace-nowrap bg-gray-100">
+                                                <tr className="">
+                                                    <th className="p-4 text-left text-sm font-semibold text-gray-800">
+                                                        Categories
+                                                    </th>
+                                                    <th className="p-4 text-left text-sm font-semibold text-gray-800">
+                                                        Images - Desktop
+                                                    </th>
+                                                    <th className="p-4 text-left text-sm font-semibold text-gray-800">
+                                                        Images - Mobile
+                                                    </th>
+                                                    <th className="w-[1%] p-4 text-end text-sm font-semibold text-gray-800">
+                                                        Actions
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="max-h-40 overflow-auto whitespace-nowrap">
+                                                {formData.CategoryDetails.map(
+                                                    (data, index) => (
+                                                        <tr
+                                                            className="hover:bg-gray-50"
+                                                            key={index}
+                                                        >
+                                                            <td className="p-4 align-top text-sm text-gray-800">
+                                                                {
+                                                                    data.categorydetailname
+                                                                }
+                                                            </td>
+                                                            <td className="p-4 align-top text-sm text-gray-800">
+                                                                <div className="flex w-full flex-wrap gap-3">
+                                                                    {imgData
+                                                                        .filter(
+                                                                            (
+                                                                                img
+                                                                            ) =>
+                                                                                img.imagetype ===
+                                                                                `${data.categorydetailid}_${data.categorydetailname}_desktop`
+                                                                        )
+                                                                        .slice(
+                                                                            0,
+                                                                            1
+                                                                        )
+                                                                        .map(
+                                                                            (
+                                                                                img
+                                                                            ) => (
+                                                                                <Image
+                                                                                    key={
+                                                                                        img.cdnid
+                                                                                    }
+                                                                                    imgSrc={
+                                                                                        img.imagepath
+                                                                                    }
+                                                                                    isLoading={
+                                                                                        isLoadingImage
+                                                                                    }
+                                                                                    isDeleting={
+                                                                                        isDeletingImage
+                                                                                    }
+                                                                                    handleClickDelete={
+                                                                                        handleClickDeleteImg
+                                                                                    }
+                                                                                    imgCdnId={
+                                                                                        img.cdnid
+                                                                                    }
+                                                                                    ratio="aspect-20x9"
+                                                                                    className="h-48"
+                                                                                />
+                                                                            )
+                                                                        )}
+                                                                    {imgData.filter(
                                                                         (img) =>
                                                                             img.imagetype ===
-                                                                            `${data.categorydetailid}_${data.categorydetailname}`
-                                                                    )
-                                                                    .slice(0, 1)
-                                                                    .map(
-                                                                        (
-                                                                            img
-                                                                        ) => (
-                                                                            <Image
-                                                                                key={
-                                                                                    img.cdnid
-                                                                                }
-                                                                                imgSrc={
-                                                                                    img.imagepath
-                                                                                }
-                                                                                isLoading={
-                                                                                    isLoadingImage
-                                                                                }
-                                                                                isDeleting={
-                                                                                    isDeletingImage
-                                                                                }
-                                                                                handleClickDelete={
-                                                                                    handleClickDeleteImg
-                                                                                }
-                                                                                imgCdnId={
-                                                                                    img.cdnid
-                                                                                }
-                                                                                ratio="aspect-20x9"
-                                                                                className="h-48"
-                                                                            />
-                                                                        )
+                                                                            `${data.categorydetailid}_${data.categorydetailname}_desktop`
+                                                                    ).length >
+                                                                    0 ? (
+                                                                        ''
+                                                                    ) : (
+                                                                        <Input
+                                                                            handleChange={(
+                                                                                event
+                                                                            ) =>
+                                                                                handleImgChange(
+                                                                                    event,
+                                                                                    data
+                                                                                )
+                                                                            }
+                                                                            id={`${data.categorydetailid}_${data.categorydetailname}_desktop`}
+                                                                            imgUploadContainerClassName={
+                                                                                '!aspect-20x9 !h-48'
+                                                                            }
+                                                                            isUploadImage={
+                                                                                true
+                                                                            }
+                                                                            isLoading={
+                                                                                isLoadingImage
+                                                                            }
+                                                                            isDeleting={
+                                                                                isDeletingImage
+                                                                            }
+                                                                        />
                                                                     )}
-                                                                {imgData.filter(
-                                                                    (img) =>
-                                                                        img.imagetype ===
-                                                                        `${data.categorydetailid}_${data.categorydetailname}`
-                                                                ).length > 0 ? (
-                                                                    ''
-                                                                ) : (
-                                                                    <Input
-                                                                        handleChange={(
-                                                                            event
+                                                                </div>
+                                                            </td>
+                                                            <td className="p-4 align-top text-sm text-gray-800">
+                                                                <div className="flex w-full flex-wrap gap-3">
+                                                                    {imgData
+                                                                        .filter(
+                                                                            (
+                                                                                img
+                                                                            ) =>
+                                                                                img.imagetype ===
+                                                                                `${data.categorydetailid}_${data.categorydetailname}_mobile`
+                                                                        )
+                                                                        .slice(
+                                                                            0,
+                                                                            1
+                                                                        )
+                                                                        .map(
+                                                                            (
+                                                                                img
+                                                                            ) => (
+                                                                                <Image
+                                                                                    key={
+                                                                                        img.cdnid
+                                                                                    }
+                                                                                    imgSrc={
+                                                                                        img.imagepath
+                                                                                    }
+                                                                                    isLoading={
+                                                                                        isLoadingImage
+                                                                                    }
+                                                                                    isDeleting={
+                                                                                        isDeletingImage
+                                                                                    }
+                                                                                    handleClickDelete={
+                                                                                        handleClickDeleteImg
+                                                                                    }
+                                                                                    imgCdnId={
+                                                                                        img.cdnid
+                                                                                    }
+                                                                                    ratio="aspect-[320/250]"
+                                                                                    className="h-48"
+                                                                                />
+                                                                            )
+                                                                        )}
+                                                                    {imgData.filter(
+                                                                        (img) =>
+                                                                            img.imagetype ===
+                                                                            `${data.categorydetailid}_${data.categorydetailname}_mobile`
+                                                                    ).length >
+                                                                    0 ? (
+                                                                        ''
+                                                                    ) : (
+                                                                        <Input
+                                                                            handleChange={(
+                                                                                event
+                                                                            ) =>
+                                                                                handleImgChange(
+                                                                                    event,
+                                                                                    data
+                                                                                )
+                                                                            }
+                                                                            id={`${data.categorydetailid}_${data.categorydetailname}_mobile`}
+                                                                            imgUploadContainerClassName={
+                                                                                '!aspect-[320/250] !h-48'
+                                                                            }
+                                                                            isUploadImage={
+                                                                                true
+                                                                            }
+                                                                            isLoading={
+                                                                                isLoadingImage
+                                                                            }
+                                                                            isDeleting={
+                                                                                isDeletingImage
+                                                                            }
+                                                                        />
+                                                                    )}
+                                                                </div>
+                                                            </td>
+                                                            <td className="w-[1%] p-4 align-top">
+                                                                <div className="inline-flex w-full items-center justify-end gap-4">
+                                                                    <Button
+                                                                        iconName={
+                                                                            'trash'
+                                                                        }
+                                                                        type={
+                                                                            'link'
+                                                                        }
+                                                                        onClick={(
+                                                                            e
                                                                         ) =>
-                                                                            handleImgChange(
-                                                                                event,
+                                                                            handleDelete(
+                                                                                e,
                                                                                 data
                                                                             )
                                                                         }
-                                                                        id={
-                                                                            data.categorydetailid
-                                                                        }
-                                                                        imgUploadContainerClassName={
-                                                                            '!aspect-20x9 !h-48'
-                                                                        }
-                                                                        isUploadImage={
-                                                                            true
-                                                                        }
-                                                                        isLoading={
-                                                                            isLoadingImage
-                                                                        }
-                                                                        isDeleting={
-                                                                            isDeletingImage
-                                                                        }
                                                                     />
-                                                                )}
-                                                            </div>
-                                                        </td>
-                                                        <td className="w-[1%] p-4 align-top">
-                                                            <div className="inline-flex w-full items-center justify-end gap-4">
-                                                                <Button
-                                                                    iconName={
-                                                                        'trash'
-                                                                    }
-                                                                    type={
-                                                                        'link'
-                                                                    }
-                                                                    onClick={(
-                                                                        e
-                                                                    ) =>
-                                                                        handleDelete(
-                                                                            e,
-                                                                            data
-                                                                        )
-                                                                    }
-                                                                />
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                )
-                                            )}
-                                        </tbody>
-                                    </table>
-                                )}
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    )
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    )}
+                            </div>
                         </form>
                     </div>
                 </>
