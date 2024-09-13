@@ -36,7 +36,7 @@ exports.get_size_metrics = async (req, res) => {
     try {
         const sizeMetric = await SizeMetric.findAll({
             include: {
-                model: SizeAttributes,
+                model: SizeAttribute,
                 attributes: ['sizeattributeid', 'sizeattributename'],
             },
             order: [['sizemetricname', 'ASC']]
