@@ -304,3 +304,25 @@ exports.delete_image = async (req, res) => {
         res.status(500).json({ error: 'Failed to delete image' });
     }
 };
+
+// Update image
+exports.update_image_by_cdnid = async (req, res) => {
+    const { cdnid } = req.params;
+    const { properties } = req.body;
+
+    try {
+        const result = await Image.update(
+            { properties },
+            { where: { cdnid } }
+        );
+
+        if (result[0] === 0) {
+            return res.status(404).json({ error: 'Image not found' });
+        }
+
+        return res.status(200).json({ message: 'Image updated successfully' });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Server error' });
+    }
+}
