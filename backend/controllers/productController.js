@@ -92,7 +92,7 @@ exports.get_product_detail = async (req, res) => {
                     include: [
                         {
                             model: SizeAttribute,
-                            attributes: ['sizeattributeid', 'sizemetricname'],
+                            attributes: ['sizeattributeid', 'sizeattributename'],
                             include: [
                                 {
                                     model: SizeMetric,
