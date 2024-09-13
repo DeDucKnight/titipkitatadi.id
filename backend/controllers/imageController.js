@@ -307,22 +307,34 @@ exports.delete_image = async (req, res) => {
 
 // Update image
 exports.update_image_by_cdnid = async (req, res) => {
-    const { cdnid } = req.params;
-    const { properties } = req.body;
+    const images = req.body;
+
+    if (!Array.isArray(images)) {
+        return res.status(400).json({ error: 'Invalid data format. Expected an array of image objects.' });
+    }
 
     try {
-        const result = await Image.update(
-            { properties },
-            { where: { cdnid } }
-        );
+        // Loop through each image in the array
+        for (const imageObj of images) {
+            const { cdnid, properties } = imageObj;
 
-        if (result[0] === 0) {
-            return res.status(404).json({ error: 'Image not found' });
+            if (!cdnid || !properties) {
+                return res.status(400).json({ error: `Missing cdnid or properties for image.` });
+            }
+
+            // Find the image by cdnid
+            const image = await Image.findOne({ where: { cdnid } });
+
+            if (!image) {
+                return res.status(404).json({ error: `Image with cdnid ${cdnid} not found.` });
+            }
+
+            await image.update({ properties });
         }
 
-        return res.status(200).json({ message: 'Image updated successfully' });
+        res.status(200).json({ message: 'Images updated successfully.' });
     } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Server error' });
+        console.error('Error updating images:', err);
+        res.status(500).json({ error: 'Failed to update images.' });
     }
-}
+};
