@@ -59,8 +59,6 @@ const Product = () => {
     const [categoriesData, setCategoriesData] = useState([])
     const [imgData, setImgData] = useState([])
     const [sizeMetrics, setSizeMetrics] = useState([])
-    const [sizes, setSizes] = useState([])
-    // const [measurements, setMeasurements] = useState([])
     useEffect(() => {
         const fetchCategories = async () => {
             try {
@@ -88,18 +86,143 @@ const Product = () => {
                 setIsLoading(false)
             }
         }
+        const fetchSizeMetrics = async () => {
+            try {
+                setIsLoading(true)
+                const response = await axios.get(
+                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/size-metrics`
+                )
+
+                const sizeArray = response.data
+                setSizeMetrics(sizeArray)
+
+                setFormData((prevFormData) => ({
+                    ...prevFormData,
+                    sizemetricid: prevFormData.sizemetricid
+                        ? prevFormData.sizemetricid
+                        : response.data[0].sizemetricid,
+                    ProductSizeMetrics:
+                        prevFormData.ProductSizeMetrics?.length > 0
+                            ? prevFormData.ProductSizeMetrics.map((metric) => ({
+                                  ...metric,
+                                  measurements:
+                                      prevFormData.sizes.length > 0
+                                          ? prevFormData.sizes.map((size) => ({
+                                                [size]: '',
+                                            }))
+                                          : [],
+                              }))
+                            : response.data[0].SizeAttributes.map(
+                                  (attribute) => ({
+                                      productsizemetricid:
+                                          attribute.productsizemetricid
+                                              ? attribute.productsizemetricid
+                                              : '',
+                                      productid: prevFormData.productid
+                                          ? prevFormData.productid
+                                          : '',
+                                      sizeattributeid:
+                                          attribute.sizeattributeid,
+                                      measurements:
+                                          prevFormData.sizes.length > 0
+                                              ? prevFormData.sizes.map(
+                                                    (size) => ({
+                                                        [size]: '',
+                                                    })
+                                                )
+                                              : [],
+                                      SizeAttribute: {
+                                          sizeattributeid:
+                                              attribute.sizeattributeid,
+                                          sizeattributename:
+                                              attribute.sizeattributename,
+                                          SizeMetric: {
+                                              sizemetricid:
+                                                  response.data[0].sizemetricid,
+                                              sizemetricname:
+                                                  response.data[0]
+                                                      .sizemetricname,
+                                          },
+                                      },
+                                  })
+                              ),
+                }))
+                setInitialData((prevInitialData) => ({
+                    ...prevInitialData,
+                    sizemetricid: prevInitialData.sizemetricid
+                        ? prevInitialData.sizemetricid
+                        : response.data[0].sizemetricid,
+                    ProductSizeMetrics:
+                        prevInitialData.ProductSizeMetrics?.length > 0
+                            ? prevInitialData.ProductSizeMetrics.map(
+                                  (metric) => ({
+                                      ...metric,
+                                      measurements:
+                                          prevInitialData.sizes.length > 0
+                                              ? prevInitialData.sizes.map(
+                                                    (size) => ({
+                                                        [size]: '',
+                                                    })
+                                                )
+                                              : [],
+                                  })
+                              )
+                            : response.data[0].SizeAttributes.map(
+                                  (attribute) => ({
+                                      productsizemetricid:
+                                          attribute.productsizemetricid
+                                              ? attribute.productsizemetricid
+                                              : '',
+                                      productid: prevInitialData.productid
+                                          ? prevInitialData.productid
+                                          : '',
+                                      sizeattributeid:
+                                          attribute.sizeattributeid,
+                                      measurements: [],
+                                      SizeAttribute: {
+                                          sizeattributeid:
+                                              attribute.sizeattributeid,
+                                          sizeattributename:
+                                              attribute.sizeattributename,
+                                          SizeMetric: {
+                                              sizemetricid:
+                                                  response.data[0].sizemetricid,
+                                              sizemetricname:
+                                                  response.data[0]
+                                                      .sizemetricname,
+                                          },
+                                      },
+                                  })
+                              ),
+                }))
+
+                if (formData.sizes.length > 0) {
+                    sizeArray.forEach((size) => {
+                        size.SizeAttributes.forEach((attr) => {
+                            attr.measurements = formData.sizes.map((size) => ({
+                                [size]: '',
+                            }))
+                        })
+                    })
+                }
+            } catch (error) {
+                console.error('Error fetching size metrics:', error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
         const fetchProduct = async () => {
             try {
                 setIsLoading(true)
                 const response = await axios.get(
                     `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/products/${guid}`
                 )
+
                 setFormData(response.data)
                 setInitialData(response.data)
                 fetchCategories()
+                fetchSizeMetrics()
                 fetchImages()
-                setselectedSizeMetricId(response.data.sizemetricid)
-                setSizes(response.data.sizes)
             } catch (error) {
                 console.error('Error fetching products:', error)
             } finally {
@@ -110,59 +233,49 @@ const Product = () => {
             fetchProduct()
         } else {
             fetchCategories()
+            fetchSizeMetrics()
             setIsLoading(false)
         }
     }, [guid])
 
     useEffect(() => {
-        const fetchSizeMetrics = async () => {
-            try {
-                setIsLoading(true)
-                const response = await axios.get(
-                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/size-metrics`
-                )
-                const sizeArray = response.data
-                if (formData.sizes.length > 0) {
-                    sizeArray.forEach((size) => {
-                        size.SizeAttributes.forEach((attr) => {
-                            attr.measurements = formData.sizes.map((size) => ({
-                                [size]: '',
-                            }))
-                        })
-                    })
-                }
-                let sizeMetric = response.data[0]
-                if (formData.sizemetricid) {
-                    sizeMetric = response.data.find(
-                        (data) => data.sizemetricid === formData.sizemetricid
-                    )
-                }
-                setSizeMetrics(sizeArray)
-                setInitialData((prevData) => ({
-                    ...prevData,
-                    ProductSizeMetrics: JSON.parse(JSON.stringify(sizeMetric)),
-                }))
-                setFormData((prevData) => ({
-                    ...prevData,
-                    ProductSizeMetrics: JSON.parse(JSON.stringify(sizeMetric)),
-                }))
-            } catch (error) {
-                console.error('Error fetching size metrics:', error)
-            } finally {
-                setIsLoading(false)
-            }
-        }
-        fetchSizeMetrics()
-    }, [sizes])
-
-    useEffect(() => {
-        setFormData((prevData) => ({
-            ...prevData,
-            ProductSizeMetrics: sizeMetrics.find(
-                (el) => el.sizemetricid === selectedSizeMetricId
+        if (sizeMetrics.length < 1) return
+        const selectedSizeMetrics = sizeMetrics.find(
+            (el) => el.sizemetricid === selectedSizeMetricId
+        )
+        if (!selectedSizeMetrics) return
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            sizemetricid: prevFormData.sizemetricid
+                ? prevFormData.sizemetricid
+                : selectedSizeMetrics.sizemetricid,
+            ProductSizeMetrics: selectedSizeMetrics.SizeAttributes.map(
+                (attribute) => ({
+                    productsizemetricid: attribute.productsizemetricid
+                        ? attribute.productsizemetricid
+                        : '',
+                    productid: prevFormData.productid
+                        ? prevFormData.productid
+                        : '',
+                    sizeattributeid: attribute.sizeattributeid,
+                    measurements:
+                        prevFormData.sizes.length > 0
+                            ? prevFormData.sizes.map((size) => ({
+                                  [size]: '',
+                              }))
+                            : [],
+                    SizeAttribute: {
+                        sizeattributeid: attribute.sizeattributeid,
+                        sizeattributename: attribute.sizeattributename,
+                        SizeMetric: {
+                            sizemetricid: selectedSizeMetrics.sizemetricid,
+                            sizemetricname: selectedSizeMetrics.sizemetricname,
+                        },
+                    },
+                })
             ),
         }))
-    }, [selectedSizeMetricId, sizeMetrics])
+    }, [selectedSizeMetricId, sizeMetrics, formData.productid])
 
     useEffect(() => {
         const isFormChanged =
@@ -188,27 +301,13 @@ const Product = () => {
             setFormData((prevFormData) => ({
                 ...prevFormData,
                 sizes: [...prevFormData.sizes, value],
-                ProductSizeMetrics: {
-                    ...prevFormData.ProductSizeMetrics,
-                    SizeAttributes:
-                        prevFormData.ProductSizeMetrics.SizeAttributes.map(
-                            (attribute) => ({
-                                ...attribute,
-                                measurements: [
-                                    ...attribute.measurements,
-                                    { [value]: '' },
-                                ],
-                            })
-                        ),
-                },
-            }))
-            setSizeMetrics((prevData) => {
-                prevData.forEach((size) => {
-                    size.SizeAttributes.forEach((attr) => {
-                        attr.measurements.push({ [value]: '' })
+                ProductSizeMetrics: prevFormData.ProductSizeMetrics.map(
+                    (metric) => ({
+                        ...metric,
+                        measurements: [...metric.measurements, { [value]: '' }],
                     })
-                })
-            })
+                ),
+            }))
         }
     }
 
@@ -240,10 +339,9 @@ const Product = () => {
         const { name, value } = e.target
         setFormData((prevData) => {
             const updatedData = { ...prevData }
-            const measurements =
-                updatedData.ProductSizeMetrics.find(
-                    (attr) => attr.sizeattributeid === name.split('_')[0]
-                )?.measurements
+            const measurements = updatedData.ProductSizeMetrics.find(
+                (attr) => attr.sizeattributeid === name.split('_')[0]
+            )?.measurements
 
             const updatedMeasurements = measurements.map((measurement) => {
                 if (measurement[name.split('_')[1]] !== undefined) {
@@ -399,6 +497,7 @@ const Product = () => {
             setIsSubmitting(false)
         }
     }
+
     return (
         <div className="mx-4 w-full px-4">
             {isLoading ? (
@@ -664,7 +763,7 @@ const Product = () => {
                                                 <th className="p-4 text-left text-xs font-semibold text-gray-800">
                                                     Sizes
                                                 </th>
-                                                {formData.ProductSizeMetrics?.SizeAttributes?.map(
+                                                {formData.ProductSizeMetrics?.map(
                                                     (metric, index) => (
                                                         <td
                                                             key={
@@ -673,7 +772,9 @@ const Product = () => {
                                                             className="p-4 text-left text-xs font-semibold text-gray-800"
                                                         >
                                                             {
-                                                                metric.sizeattributename
+                                                                metric
+                                                                    .SizeAttribute
+                                                                    .sizeattributename
                                                             }
                                                         </td>
                                                     )
@@ -693,7 +794,7 @@ const Product = () => {
                                                         <td className="p-4 text-xs text-gray-800">
                                                             {size}
                                                         </td>
-                                                        {formData.ProductSizeMetrics?.SizeAttributes?.map(
+                                                        {formData.ProductSizeMetrics?.map(
                                                             (metric, index) => {
                                                                 return (
                                                                     metric
