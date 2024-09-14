@@ -16,6 +16,7 @@ const Product = () => {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [sizeValue, setSizeValue] = useState('')
+    const [selectedSizeMetricId, setselectedSizeMetricId] = useState('')
     const { guid } = useParams()
     const location = useLocation()
     const pathnames = location.pathname.split('/').filter((el) => el)
@@ -97,6 +98,7 @@ const Product = () => {
                 setInitialData(response.data)
                 fetchCategories()
                 fetchImages()
+                setselectedSizeMetricId(response.data.sizemetricid)
                 setSizes(response.data.sizes)
             } catch (error) {
                 console.error('Error fetching products:', error)
@@ -129,18 +131,20 @@ const Product = () => {
                         })
                     })
                 }
+                let sizeMetric = response.data[0]
+                if (formData.sizemetricid) {
+                    sizeMetric = response.data.find(
+                        (data) => data.sizemetricid === formData.sizemetricid
+                    )
+                }
                 setSizeMetrics(sizeArray)
                 setInitialData((prevData) => ({
                     ...prevData,
-                    ProductSizeMetrics: JSON.parse(
-                        JSON.stringify(response.data[0])
-                    ),
+                    ProductSizeMetrics: JSON.parse(JSON.stringify(sizeMetric)),
                 }))
                 setFormData((prevData) => ({
                     ...prevData,
-                    ProductSizeMetrics: JSON.parse(
-                        JSON.stringify(response.data[0])
-                    ),
+                    ProductSizeMetrics: JSON.parse(JSON.stringify(sizeMetric)),
                 }))
             } catch (error) {
                 console.error('Error fetching size metrics:', error)
@@ -150,6 +154,15 @@ const Product = () => {
         }
         fetchSizeMetrics()
     }, [sizes])
+
+    useEffect(() => {
+        setFormData((prevData) => ({
+            ...prevData,
+            ProductSizeMetrics: sizeMetrics.find(
+                (el) => el.sizemetricid === selectedSizeMetricId
+            ),
+        }))
+    }, [selectedSizeMetricId, sizeMetrics])
 
     useEffect(() => {
         const isFormChanged =
@@ -218,6 +231,9 @@ const Product = () => {
             ...formData,
             [name]: value,
         })
+        if (name === 'sizemetricid') {
+            setselectedSizeMetricId(value)
+        }
     }
 
     const handleChangeSize = (e) => {
@@ -231,7 +247,7 @@ const Product = () => {
 
             const updatedMeasurements = measurements.map((measurement) => {
                 if (measurement[name.split('_')[1]] !== undefined) {
-                    return { [name.split('_')[1]]: value } // Update the value of M
+                    return { [name.split('_')[1]]: value }
                 }
                 return measurement
             })
@@ -621,8 +637,8 @@ const Product = () => {
                                 </p>
                                 {sizeMetrics && (
                                     <Dropdown
-                                        handleChange={handleChangeSize}
-                                        id={'sizeMetric'}
+                                        handleChange={handleChange}
+                                        id={'sizemetricid'}
                                         labelText={'Size Metric'}
                                         options={sizeMetrics}
                                         optionFetched={true}
