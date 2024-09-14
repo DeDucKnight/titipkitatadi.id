@@ -36,6 +36,7 @@ const Product = () => {
         status: 'Active',
         ProductImages: [],
         ProductCategories: [],
+        productsizemetrics: [],
     })
     const [formData, setFormData] = useState({
         productname: '',
@@ -53,10 +54,13 @@ const Product = () => {
         status: 'Active',
         ProductImages: [],
         ProductCategories: [],
+        productsizemetrics: [],
     })
     const [categoriesData, setCategoriesData] = useState([])
     const [imgData, setImgData] = useState([])
-
+    const [sizeMetrics, setSizeMetrics] = useState([])
+    const [sizes, setSizes] = useState([])
+    // const [measurements, setMeasurements] = useState([])
     useEffect(() => {
         const fetchCategories = async () => {
             try {
@@ -94,6 +98,7 @@ const Product = () => {
                 setInitialData(response.data)
                 fetchCategories()
                 fetchImages()
+                setSizes(response.data.sizes)
             } catch (error) {
                 console.error('Error fetching products:', error)
             } finally {
@@ -107,6 +112,41 @@ const Product = () => {
             setIsLoading(false)
         }
     }, [guid])
+
+    useEffect(() => {
+        const fetchSizeMetrics = async () => {
+            try {
+                setIsLoading(true)
+                const response = await axios.get(
+                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/size-metrics`
+                )
+                const sizeArray = response.data
+                if (formData.sizes.length > 0) {
+                    sizeArray.forEach((size) => {
+                        size.sizeattributes.forEach((attr) => {
+                            attr.measurements = formData.sizes.map((size) => ({
+                                [size]: '',
+                            }))
+                        })
+                    })
+                }
+                setSizeMetrics(sizeArray)
+                // setInitialData((prevData) => ({
+                //     ...prevData,
+                //     productsizemetrics: response.data[0],
+                // }))
+                setFormData((prevData) => ({
+                    ...prevData,
+                    productsizemetrics: response.data[0],
+                }))
+            } catch (error) {
+                console.error('Error fetching size metrics:', error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        fetchSizeMetrics()
+    }, [sizes])
 
     useEffect(() => {
         const isFormChanged =
@@ -124,6 +164,7 @@ const Product = () => {
             }))
         }
     }
+
     const handleAddSize = (e) => {
         e.preventDefault()
         const { value } = document.querySelector('#size')
@@ -153,6 +194,30 @@ const Product = () => {
         setFormData({
             ...formData,
             [name]: value,
+        })
+    }
+
+    const handleChangeSize = (e) => {
+        const { name, value } = e.target
+        setFormData((prevData) => {
+            const updatedData = { ...prevData }
+            const measurements =
+                updatedData.productsizemetrics.sizeattributes.find(
+                    (attr) => attr.sizeattributeid === name.split('_')[0]
+                ).measurements
+
+            const updatedMeasurements = measurements.map((measurement) => {
+                if (measurement[name.split('_')[1]] !== undefined) {
+                    return { [name.split('_')[1]]: value } // Update the value of M
+                }
+                return measurement
+            })
+
+            updatedData.productsizemetrics.sizeattributes.find(
+                (attr) => attr.sizeattributeid === name.split('_')[0]
+            ).measurements = updatedMeasurements
+
+            return updatedData
         })
     }
 
@@ -455,10 +520,10 @@ const Product = () => {
                                                     </div>
                                                 </td>
                                                 <td className="p-4 align-top text-sm text-gray-800">
-                                                    <Input
+                                                    {/* <Input
                                                         id={`label_${color}`}
                                                         inputClassName="!text-xs"
-                                                    />
+                                                    /> */}
                                                 </td>
                                                 <td className="p-4 align-top text-sm text-gray-800">
                                                     <div className="flex w-full flex-wrap gap-3">
@@ -531,21 +596,16 @@ const Product = () => {
                                 <p className="block text-sm font-medium text-gray-900">
                                     Size Metrics
                                 </p>
-                                <Dropdown
-                                    handleChange={handleChange}
-                                    id={'sizeMetric'}
-                                    labelText={'Size Metric'}
-                                    options={[
-                                        'tshirt',
-                                        'coat',
-                                        'dress',
-                                        'pants',
-                                        'shirt',
-                                        'skirt',
-                                        'trousers',
-                                    ]}
-                                    value={formData.sizeMetric}
-                                />
+                                {sizeMetrics && (
+                                    <Dropdown
+                                        handleChange={handleChangeSize}
+                                        id={'sizeMetric'}
+                                        labelText={'Size Metric'}
+                                        options={sizeMetrics}
+                                        optionFetched={true}
+                                        value={formData.sizeMetric}
+                                    />
+                                )}
                             </div>
                             <Input
                                 id="size"
@@ -565,13 +625,17 @@ const Product = () => {
                                                 <th className="p-4 text-left text-xs font-semibold text-gray-800">
                                                     Sizes
                                                 </th>
-                                                {ProductSizeMetrics.map(
+                                                {formData.productsizemetrics?.sizeattributes?.map(
                                                     (metric, index) => (
                                                         <td
-                                                            key={index}
-                                                            className="p-4 text-sm text-gray-800"
+                                                            key={
+                                                                metric.sizeattributeid
+                                                            }
+                                                            className="p-4 text-left text-xs font-semibold text-gray-800"
                                                         >
-                                                            {metric.attributeid}
+                                                            {
+                                                                metric.sizeattributename
+                                                            }
                                                         </td>
                                                     )
                                                 )}
@@ -582,31 +646,49 @@ const Product = () => {
                                         </thead>
                                         <tbody className="max-h-40 overflow-auto whitespace-nowrap">
                                             {formData.sizes.map(
-                                                (size, index) => (
+                                                (size, indexSize) => (
                                                     <tr
                                                         className="hover:bg-gray-50"
-                                                        key={index}
+                                                        key={indexSize}
                                                     >
-                                                        <td className="p-4 text-sm text-gray-800">
+                                                        <td className="p-4 text-xs text-gray-800">
                                                             {size}
                                                         </td>
-                                                        {ProductSizeMetrics.map(
-                                                            (metric, index) => (
-                                                                <td
-                                                                    key={index}
-                                                                    className="p-4 text-sm text-gray-800"
-                                                                >
-                                                                    <Input
-                                                                        inputClassName="min-w-[200px] !text-xs"
-                                                                        id={
-                                                                            index
-                                                                        }
-                                                                    />
-                                                                </td>
-                                                            )
+                                                        {formData.productsizemetrics?.sizeattributes?.map(
+                                                            (metric, index) => {
+                                                                return (
+                                                                    metric
+                                                                        .measurements
+                                                                        ?.length >
+                                                                        0 && (
+                                                                        <td
+                                                                            key={
+                                                                                metric.sizeattributeid
+                                                                            }
+                                                                            className="p-4 text-xs text-gray-800"
+                                                                        >
+                                                                            <Input
+                                                                                inputClassName="min-w-[200px] !text-xs"
+                                                                                id={`${metric.sizeattributeid}_${size}`}
+                                                                                value={
+                                                                                    metric
+                                                                                        .measurements[
+                                                                                        indexSize
+                                                                                    ][
+                                                                                        size
+                                                                                    ]
+                                                                                }
+                                                                                handleChange={
+                                                                                    handleChangeSize
+                                                                                }
+                                                                            />
+                                                                        </td>
+                                                                    )
+                                                                )
+                                                            }
                                                         )}
-                                                        <td className="w-[1%] p-4 text-sm">
-                                                            <div className="inline-flex w-full items-center justify-end gap-4 text-sm">
+                                                        <td className="w-[1%] p-4 text-xs">
+                                                            <div className="inline-flex w-full items-center justify-end gap-4 text-xs">
                                                                 <Button
                                                                     iconName={
                                                                         'trash'
