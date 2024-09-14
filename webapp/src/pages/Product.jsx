@@ -108,7 +108,7 @@ const Product = () => {
             fetchProduct()
         } else {
             fetchCategories()
-            setIsLoading(false)                                                                                                                           
+            setIsLoading(false)
         }
     }, [guid])
 
@@ -122,7 +122,7 @@ const Product = () => {
                 const sizeArray = response.data
                 if (formData.sizes.length > 0) {
                     sizeArray.forEach((size) => {
-                        size.sizeattributes.forEach((attr) => {
+                        size.SizeAttributes.forEach((attr) => {
                             attr.measurements = formData.sizes.map((size) => ({
                                 [size]: '',
                             }))
@@ -130,13 +130,17 @@ const Product = () => {
                     })
                 }
                 setSizeMetrics(sizeArray)
-                // setInitialData((prevData) => ({
-                //     ...prevData,
-                //     productsizemetrics: response.data[0],
-                // }))
+                setInitialData((prevData) => ({
+                    ...prevData,
+                    ProductSizeMetrics: JSON.parse(
+                        JSON.stringify(response.data[0])
+                    ),
+                }))
                 setFormData((prevData) => ({
                     ...prevData,
-                    ProductSizeMetrics: response.data[0],
+                    ProductSizeMetrics: JSON.parse(
+                        JSON.stringify(response.data[0])
+                    ),
                 }))
             } catch (error) {
                 console.error('Error fetching size metrics:', error)
@@ -171,7 +175,27 @@ const Product = () => {
             setFormData((prevFormData) => ({
                 ...prevFormData,
                 sizes: [...prevFormData.sizes, value],
+                ProductSizeMetrics: {
+                    ...prevFormData.ProductSizeMetrics,
+                    SizeAttributes:
+                        prevFormData.ProductSizeMetrics.SizeAttributes.map(
+                            (attribute) => ({
+                                ...attribute,
+                                measurements: [
+                                    ...attribute.measurements,
+                                    { [value]: '' },
+                                ],
+                            })
+                        ),
+                },
             }))
+            setSizeMetrics((prevData) => {
+                prevData.forEach((size) => {
+                    size.SizeAttributes.forEach((attr) => {
+                        attr.measurements.push({ [value]: '' })
+                    })
+                })
+            })
         }
     }
 
@@ -201,7 +225,7 @@ const Product = () => {
         setFormData((prevData) => {
             const updatedData = { ...prevData }
             const measurements =
-                updatedData.ProductSizeMetrics.sizeattributes.find(
+                updatedData.ProductSizeMetrics.SizeAttributes.find(
                     (attr) => attr.sizeattributeid === name.split('_')[0]
                 ).measurements
 
@@ -212,7 +236,7 @@ const Product = () => {
                 return measurement
             })
 
-            updatedData.ProductSizeMetrics.sizeattributes.find(
+            updatedData.ProductSizeMetrics.SizeAttributes.find(
                 (attr) => attr.sizeattributeid === name.split('_')[0]
             ).measurements = updatedMeasurements
 
@@ -333,7 +357,6 @@ const Product = () => {
     const handleSubmit = async (e) => {
         e.preventDefault()
         setIsSubmitting(true)
-        console.log(formData)
         try {
             if (guid !== 'product') {
                 const response = await axios.put(
@@ -360,7 +383,6 @@ const Product = () => {
             setIsSubmitting(false)
         }
     }
-    console.log(formData)
     return (
         <div className="mx-4 w-full px-4">
             {isLoading ? (
@@ -604,7 +626,7 @@ const Product = () => {
                                         labelText={'Size Metric'}
                                         options={sizeMetrics}
                                         optionFetched={true}
-                                        value={formData.sizeMetric}
+                                        value={formData.sizemetricid}
                                     />
                                 )}
                             </div>
@@ -626,7 +648,7 @@ const Product = () => {
                                                 <th className="p-4 text-left text-xs font-semibold text-gray-800">
                                                     Sizes
                                                 </th>
-                                                {formData.ProductSizeMetrics?.sizeattributes?.map(
+                                                {formData.ProductSizeMetrics?.SizeAttributes?.map(
                                                     (metric, index) => (
                                                         <td
                                                             key={
@@ -655,7 +677,7 @@ const Product = () => {
                                                         <td className="p-4 text-xs text-gray-800">
                                                             {size}
                                                         </td>
-                                                        {formData.ProductSizeMetrics?.sizeattributes?.map(
+                                                        {formData.ProductSizeMetrics?.SizeAttributes?.map(
                                                             (metric, index) => {
                                                                 return (
                                                                     metric
