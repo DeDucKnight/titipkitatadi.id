@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
+const SizeMetric = require('./sizeMetricModel');
 
 const Product = sequelize.define('Product', {
     productid: {
@@ -44,6 +45,14 @@ const Product = sequelize.define('Product', {
     createddate: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
+    },
+    sizemetricid: {
+        type: DataTypes.UUID,
+        references: {
+            model: SizeMetric,
+            key: 'sizemetricid',
+        },
+        allowNull: true,
     },
 }, {
     timestamps: false,

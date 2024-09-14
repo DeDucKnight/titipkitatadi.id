@@ -23,7 +23,6 @@ SizeMetric.init({
     },
 }, {
     sequelize,
-    modelName: 'sizemetric',
     tableName: 'sizemetrics',
     timestamps: false,
 });

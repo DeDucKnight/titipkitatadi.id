@@ -35,7 +35,6 @@ ProductSizeMetric.init({
     },
 }, {
     sequelize,
-    modelName: 'productsizemetric',
     tableName: 'productsizemetrics',
     timestamps: false,
 });

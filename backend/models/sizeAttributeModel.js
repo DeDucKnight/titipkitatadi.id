@@ -33,7 +33,6 @@ SizeAttribute.init({
     },
 }, {
     sequelize,
-    modelName: 'sizeattribute',
     tableName: 'sizeattributes',
     timestamps: false,
 });

@@ -9,7 +9,6 @@ import CategorySelection from '../components/CategorySelection'
 import Dropdown from '../components/Dropdown'
 import Skeleton from '../components/Skeleton'
 import axios from 'axios'
-const ProductSizeMetrics = []
 const Product = () => {
     const [isChanged, setIsChanged] = useState(false)
     const [isLoadingImage, setIsLoadingImage] = useState(false)
@@ -36,7 +35,7 @@ const Product = () => {
         status: 'Active',
         ProductImages: [],
         ProductCategories: [],
-        productsizemetrics: [],
+        ProductSizeMetrics: [],
     })
     const [formData, setFormData] = useState({
         productname: '',
@@ -54,7 +53,7 @@ const Product = () => {
         status: 'Active',
         ProductImages: [],
         ProductCategories: [],
-        productsizemetrics: [],
+        ProductSizeMetrics: [],
     })
     const [categoriesData, setCategoriesData] = useState([])
     const [imgData, setImgData] = useState([])
@@ -109,7 +108,7 @@ const Product = () => {
             fetchProduct()
         } else {
             fetchCategories()
-            setIsLoading(false)
+            setIsLoading(false)                                                                                                                           
         }
     }, [guid])
 
@@ -137,7 +136,7 @@ const Product = () => {
                 // }))
                 setFormData((prevData) => ({
                     ...prevData,
-                    productsizemetrics: response.data[0],
+                    ProductSizeMetrics: response.data[0],
                 }))
             } catch (error) {
                 console.error('Error fetching size metrics:', error)
@@ -202,7 +201,7 @@ const Product = () => {
         setFormData((prevData) => {
             const updatedData = { ...prevData }
             const measurements =
-                updatedData.productsizemetrics.sizeattributes.find(
+                updatedData.ProductSizeMetrics.sizeattributes.find(
                     (attr) => attr.sizeattributeid === name.split('_')[0]
                 ).measurements
 
@@ -213,7 +212,7 @@ const Product = () => {
                 return measurement
             })
 
-            updatedData.productsizemetrics.sizeattributes.find(
+            updatedData.ProductSizeMetrics.sizeattributes.find(
                 (attr) => attr.sizeattributeid === name.split('_')[0]
             ).measurements = updatedMeasurements
 
@@ -334,6 +333,7 @@ const Product = () => {
     const handleSubmit = async (e) => {
         e.preventDefault()
         setIsSubmitting(true)
+        console.log(formData)
         try {
             if (guid !== 'product') {
                 const response = await axios.put(
@@ -360,6 +360,7 @@ const Product = () => {
             setIsSubmitting(false)
         }
     }
+    console.log(formData)
     return (
         <div className="mx-4 w-full px-4">
             {isLoading ? (
@@ -625,7 +626,7 @@ const Product = () => {
                                                 <th className="p-4 text-left text-xs font-semibold text-gray-800">
                                                     Sizes
                                                 </th>
-                                                {formData.productsizemetrics?.sizeattributes?.map(
+                                                {formData.ProductSizeMetrics?.sizeattributes?.map(
                                                     (metric, index) => (
                                                         <td
                                                             key={
@@ -654,7 +655,7 @@ const Product = () => {
                                                         <td className="p-4 text-xs text-gray-800">
                                                             {size}
                                                         </td>
-                                                        {formData.productsizemetrics?.sizeattributes?.map(
+                                                        {formData.ProductSizeMetrics?.sizeattributes?.map(
                                                             (metric, index) => {
                                                                 return (
                                                                     metric
