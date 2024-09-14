@@ -53,4 +53,7 @@ ProductSizeMetric.belongsTo(SizeAttribute, {
     foreignKey: 'sizeattributeid'
 });
 
+Product.belongsToMany(SizeAttribute, { through: ProductSizeMetric, foreignKey: 'productid' });
+SizeAttribute.belongsToMany(Product, { through: ProductSizeMetric, foreignKey: 'sizeattributeid' });
+
 module.exports = ProductSizeMetric;

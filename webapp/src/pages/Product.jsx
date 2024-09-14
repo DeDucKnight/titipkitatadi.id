@@ -225,9 +225,9 @@ const Product = () => {
         setFormData((prevData) => {
             const updatedData = { ...prevData }
             const measurements =
-                updatedData.ProductSizeMetrics.SizeAttributes.find(
+                updatedData.ProductSizeMetrics.find(
                     (attr) => attr.sizeattributeid === name.split('_')[0]
-                ).measurements
+                )?.measurements
 
             const updatedMeasurements = measurements.map((measurement) => {
                 if (measurement[name.split('_')[1]] !== undefined) {
@@ -236,7 +236,7 @@ const Product = () => {
                 return measurement
             })
 
-            updatedData.ProductSizeMetrics.SizeAttributes.find(
+            updatedData.ProductSizeMetrics.find(
                 (attr) => attr.sizeattributeid === name.split('_')[0]
             ).measurements = updatedMeasurements
 
