@@ -7,7 +7,7 @@ SizeMetric.init({
     sizemetricid: {
         type: DataTypes.UUID,
         primaryKey: true,
-        allowNull: false,
+        defaultValue: DataTypes.UUIDV4,
     },
     sizemetricname: {
         type: DataTypes.STRING(255),

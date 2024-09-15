@@ -8,7 +8,7 @@ SizeAttribute.init({
     sizeattributeid: {
         type: DataTypes.UUID,
         primaryKey: true,
-        allowNull: false,
+        defaultValue: DataTypes.UUIDV4,
     },
     sizemetricid: {
         type: DataTypes.UUID,

@@ -9,7 +9,7 @@ ProductSizeMetric.init({
     productsizemetricid: {
         type: DataTypes.UUID,
         primaryKey: true,
-        allowNull: false,
+        defaultValue: DataTypes.UUIDV4,
     },
     productid: {
         type: DataTypes.UUID,

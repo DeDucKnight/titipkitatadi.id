@@ -6,7 +6,7 @@ exports.create_size_metric = async (req, res) => {
     
     const t = await sequelize.transaction();
     try {
-        // Create Size MEtric
+        // Create Size Metric
         const sizeMetric = await SizeMetric.create({
             sizemetricname
         }, { transaction: t });

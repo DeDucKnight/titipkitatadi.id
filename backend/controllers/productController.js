@@ -221,15 +221,18 @@ exports.create_product = async (req, res) => {
         //Bulk Create Product Size Metrics
         if (ProductSizeMetrics && ProductSizeMetrics.length > 0) {
             const metricsToInsert = ProductSizeMetrics.map(metric => ({
-                productid: product.productId,
+                productid: product.productid,
                 sizeattributeid: metric.sizeattributeid,
                 measurements: metric.measurements
             }));
 
-            await ProductSizeMetrics.bulkCreate(metricsToInsert, { transaction: t });
+            await ProductSizeMetric.bulkCreate(metricsToInsert, { transaction: t });
         }
 
         await t.commit();
+        product.ProductImages = ProductImages;
+        product.ProductCategories = ProductCategories;
+        product.ProductSizeMetrics = ProductSizeMetrics;
         res.status(201).json({ message: 'Product created successfully', product });
     } catch (err) {
         // Rollback transaction in case of an error
@@ -296,34 +299,42 @@ exports.update_product = async (req, res) => {
         // Handle Product Size Metrics
         if (updates.ProductSizeMetrics) {
             // Fetch existing Product Size Metric
-            const existingProductSizeMetric = await ProductSizeMetric.findAll({
+            const existingProductSizeMetrics = await ProductSizeMetric.findAll({
                 where: { productid: productId },
                 transaction: t
             });
-
-            // Map existing size attru=ibute IDs and new size attribute IDs
-            const existingMetricIds = existingProductSizeMetric.map(metric => metric.sizeattributeidid);
-            const newMetricIds = updates.ProductSizeMetrics.map(metric => metric.sizeattributeidid);
-
-            // Add new size metric
+        
+            // Map existing size attribute IDs and new size attribute IDs
+            const newMetricIds = updates.ProductSizeMetrics.map(metric => metric.sizeattributeid);
+        
+            // Add new size metrics or update existing ones
             for (const metric of updates.ProductSizeMetrics) {
-                const metricId = metric.sizeattributeidid;
-                const exists = existingMetricIds.includes(metricId);
-
-                if (!exists) {
+                const metricId = metric.sizeattributeid;
+                const existingMetric = existingProductSizeMetrics.find(m => m.sizeattributeid === metricId);
+        
+                if (!existingMetric) {
+                    // Add new size metric if it doesn't exist
                     await ProductSizeMetric.create({
                         productid: productId,
-                        sizeattributeidid: metricId,
+                        sizeattributeid: metricId,
                         measurements: metric.measurements
                     }, { transaction: t });
+                } else if (JSON.stringify(existingMetric.measurements) !== JSON.stringify(metric.measurements)) {
+                    // Update existing size metric if measurements have changed
+                    await ProductSizeMetric.update({
+                        measurements: metric.measurements
+                    }, {
+                        where: { sizeattributeid: metricId, productid: productId },
+                        transaction: t
+                    });
                 }
             }
-
-            // Remove size metric that are no longer present
-            for (const existingMetric of existingProductSizeMetric) {
-                if (!newMetricIds.includes(existingProductSizeMetric.sizeattributeidid)) {
+        
+            // Remove size metrics that are no longer present
+            for (const existingMetric of existingProductSizeMetrics) {
+                if (!newMetricIds.includes(existingMetric.sizeattributeid)) {
                     await ProductSizeMetric.destroy({
-                        where: { sizeattributeidid: existingMetric.sizeattributeidid },
+                        where: { sizeattributeid: existingMetric.sizeattributeid },
                         transaction: t
                     });
                 }
@@ -331,7 +342,8 @@ exports.update_product = async (req, res) => {
         }
 
         await t.commit();
-        res.status(200).json({ message: 'Product updated successfully', product });
+        updates.productid = productId
+        res.status(200).json({ message: 'Product updated successfully', product:  updates });
     } catch (err) {
         await t.rollback();
         console.error('Error updating product:', err);
