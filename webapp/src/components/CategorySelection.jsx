@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import Icon from './Icons'
 
-const CategorySelection = ({ category, formData, handleCategorySelect }) => {
+const CategorySelection = ({
+    category,
+    formData,
+    handleCategorySelect,
+    titleClassName,
+    listClassName,
+    inputClassName,
+    iconWidth,
+}) => {
     const [selectedCategory, setSelectedCategory] = useState('')
     const [selectedCategoryParent, setSelectedCategoryParent] = useState('')
     useEffect(() => {
@@ -21,7 +29,9 @@ const CategorySelection = ({ category, formData, handleCategorySelect }) => {
 
     return (
         <>
-            <p className="mx-4 text-nowrap border-b border-gray-300 py-2 font-semibold">
+            <p
+                className={`${titleClassName} mx-4 text-nowrap border-b border-gray-300 py-2 font-semibold`}
+            >
                 {category.categoryname}
             </p>
             <ul>
@@ -33,7 +43,7 @@ const CategorySelection = ({ category, formData, handleCategorySelect }) => {
                         >
                             <div className="inline-flex items-center">
                                 <label
-                                    className="relative flex cursor-pointer items-center"
+                                    className={`${listClassName} relative flex cursor-pointer items-center`}
                                     htmlFor={categoryDetail.categorydetailid}
                                 >
                                     <input
@@ -79,10 +89,13 @@ const CategorySelection = ({ category, formData, handleCategorySelect }) => {
                                                 )
                                             }
                                         }}
-                                        className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-slate-300 shadow transition-all checked:border-slate-800 checked:bg-slate-800 hover:shadow-md"
+                                        className={`${inputClassName} peer h-5 w-5 cursor-pointer appearance-none rounded border border-slate-300 shadow transition-all checked:border-slate-800 checked:bg-slate-800 hover:shadow-md`}
                                     />
                                     <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform text-white opacity-0 peer-checked:opacity-100">
-                                        <Icon name="checkbox" />
+                                        <Icon
+                                            name="checkbox"
+                                            width={iconWidth}
+                                        />
                                     </span>
                                 </label>
                                 <label

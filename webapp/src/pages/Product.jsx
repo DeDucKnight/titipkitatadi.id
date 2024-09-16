@@ -17,6 +17,7 @@ const Product = () => {
     const [isLoading, setIsLoading] = useState(true)
     const [sizeValue, setSizeValue] = useState('')
     const [selectedSizeMetricId, setselectedSizeMetricId] = useState('')
+    const [error, setError] = useState(null)
     const { guid } = useParams()
     const location = useLocation()
     const pathnames = location.pathname.split('/').filter((el) => el)
@@ -32,12 +33,11 @@ const Product = () => {
             { onlineStore: 'Tokopedia', link: 'https://www.tokopedia.com' },
             { onlineStore: 'Shopee', link: 'https://www.shopee.com' },
         ],
-        shipping: '',
         status: 'Active',
         ProductImages: [],
         ProductCategories: [],
         ProductSizeMetrics: [],
-        sizemetricid: ''
+        sizemetricid: '',
     })
     const [formData, setFormData] = useState({
         productname: '',
@@ -51,12 +51,11 @@ const Product = () => {
             { onlineStore: 'Tokopedia', link: 'https://www.tokopedia.com' },
             { onlineStore: 'Shopee', link: 'https://www.shopee.com' },
         ],
-        shipping: '',
         status: 'Active',
         ProductImages: [],
         ProductCategories: [],
         ProductSizeMetrics: [],
-        sizemetricid: ''
+        sizemetricid: '',
     })
     const [categoriesData, setCategoriesData] = useState([])
     const [imgData, setImgData] = useState([])
@@ -81,16 +80,16 @@ const Product = () => {
                 const response = await axios.get(
                     `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/images`
                 )
-                const { images, message } = response.data;
+                const { images, message } = response.data
 
                 if (images && images.length > 0) {
                     // If images are present, update the state with images
-                    setImgData(images);
+                    setImgData(images)
                 } else {
                     // If no images found, handle the message
-                    console.warn(message || "No images found");
+                    console.warn(message || 'No images found')
                     // Set image data to an empty array or take further actions
-                    setImgData([]);
+                    setImgData([])
                 }
             } catch (error) {
                 console.error('Error fetching images:', error)
@@ -115,17 +114,28 @@ const Product = () => {
                         : response.data[0].sizemetricid,
                     ProductSizeMetrics:
                         prevFormData.ProductSizeMetrics?.length > 0
-                            ? prevFormData.ProductSizeMetrics.map((metric) => ({
-                                ...metric,
-                                measurements:
-                                    prevFormData.sizes.length > 0 && (!metric.measurements || metric.measurements.length === 0)
-                                        ? prevFormData.sizes.map((size) => ({
-                                              [size]: '', // Initialize with empty values if sizes exist and measurements are null/empty
-                                          }))
-                                        : metric.measurements === null
-                                        ? [] // Return empty array if measurements are null
-                                        : metric.measurements, // Return the existing measurements
-                            }))
+                            ? // ? prevFormData.ProductSizeMetrics.map((metric) => ({
+                              //       ...metric,
+                              //       measurements:
+                              //           prevFormData.sizes.length > 0
+                              //               ? prevFormData.sizes.map((size) => ({
+                              //                     [size]: '',
+                              //                 }))
+                              //               : [],
+                              //   }))
+                              prevFormData.ProductSizeMetrics.map((metric) => ({
+                                  ...metric,
+                                  measurements:
+                                      prevFormData.sizes.length > 0 &&
+                                      (!metric.measurements ||
+                                          metric.measurements.length === 0)
+                                          ? prevFormData.sizes.map((size) => ({
+                                                [size]: '', // Initialize with empty values if sizes exist and measurements are null/empty
+                                            }))
+                                          : metric.measurements === null
+                                            ? [] // Return empty array if measurements are null
+                                            : metric.measurements, // Return the existing measurements
+                              }))
                             : response.data[0].SizeAttributes.map(
                                   (attribute) => ({
                                       productsizemetricid:
@@ -168,17 +178,36 @@ const Product = () => {
                         : response.data[0].sizemetricid,
                     ProductSizeMetrics:
                         prevInitialData.ProductSizeMetrics?.length > 0
-                            ? prevInitialData.ProductSizeMetrics.map((metric) => ({
-                                ...metric,
-                                measurements:
-                                prevInitialData.sizes.length > 0 && (!metric.measurements || metric.measurements.length === 0)
-                                        ? prevInitialData.sizes.map((size) => ({
-                                              [size]: '', // Initialize with empty values if sizes exist and measurements are null/empty
-                                          }))
-                                        : metric.measurements === null
-                                        ? [] // Return empty array if measurements are null
-                                        : metric.measurements, // Return the existing measurements
-                            }))
+                            ? // ? prevInitialData.ProductSizeMetrics.map(
+                              //       (metric) => ({
+                              //           ...metric,
+                              //           measurements:
+                              //               prevInitialData.sizes.length > 0
+                              //                   ? prevInitialData.sizes.map(
+                              //                         (size) => ({
+                              //                             [size]: '',
+                              //                         })
+                              //                     )
+                              //                   : [],
+                              //       })
+                              //   )
+                              prevInitialData.ProductSizeMetrics.map(
+                                  (metric) => ({
+                                      ...metric,
+                                      measurements:
+                                          prevInitialData.sizes.length > 0 &&
+                                          (!metric.measurements ||
+                                              metric.measurements.length === 0)
+                                              ? prevInitialData.sizes.map(
+                                                    (size) => ({
+                                                        [size]: '', // Initialize with empty values if sizes exist and measurements are null/empty
+                                                    })
+                                                )
+                                              : metric.measurements === null
+                                                ? [] // Return empty array if measurements are null
+                                                : metric.measurements, // Return the existing measurements
+                                  })
+                              )
                             : response.data[0].SizeAttributes.map(
                                   (attribute) => ({
                                       productsizemetricid:
@@ -497,6 +526,21 @@ const Product = () => {
     const handleSubmit = async (e) => {
         e.preventDefault()
         setIsSubmitting(true)
+        if (formData.colors.length < 1) {
+            setError({ color: 'Please add at least 1 color' })
+            setIsSubmitting(false)
+            return
+        }
+        if (formData.sizes.length < 1) {
+            setError({ size: 'Please add at least 1 size' })
+            setIsSubmitting(false)
+            return
+        }
+        if (formData.ProductCategories.length < 1) {
+            setError({ category: 'Please select at least 1 category' })
+            setIsSubmitting(false)
+            return
+        }
         try {
             if (guid !== 'product') {
                 const response = await axios.put(
@@ -518,6 +562,7 @@ const Product = () => {
                 }
             }
         } catch (error) {
+            // debugger
             console.error(error)
         } finally {
             setIsSubmitting(false)
@@ -640,13 +685,20 @@ const Product = () => {
                                 labelText="Brand"
                                 value={formData.brand}
                             />
-                            <Input
-                                id="colors"
-                                labelText="Colors"
-                                isColorPicker={true}
-                                btnText={'Add'}
-                                btnOnClick={handleAddColor}
-                            />
+                            <div>
+                                <Input
+                                    id="colors"
+                                    labelText="Colors"
+                                    isColorPicker={true}
+                                    btnText={'Add'}
+                                    btnOnClick={handleAddColor}
+                                />
+                                {error?.color && (
+                                    <p className="mt-2 text-xs text-red-700">
+                                        {error?.color}
+                                    </p>
+                                )}
+                            </div>
                             {formData.colors.length > 0 && (
                                 <table className="min-w-full bg-white">
                                     <thead className="whitespace-nowrap bg-gray-100">
@@ -776,16 +828,23 @@ const Product = () => {
                                     />
                                 )}
                             </div>
-                            <Input
-                                id="size"
-                                labelText="Sizes"
-                                btnText={'Add'}
-                                btnOnClick={handleAddSize}
-                                value={sizeValue}
-                                handleChange={(e) =>
-                                    setSizeValue(e.target.value)
-                                }
-                            />
+                            <div>
+                                <Input
+                                    id="size"
+                                    labelText="Sizes"
+                                    btnText={'Add'}
+                                    btnOnClick={handleAddSize}
+                                    value={sizeValue}
+                                    handleChange={(e) =>
+                                        setSizeValue(e.target.value)
+                                    }
+                                />
+                                {error?.size && (
+                                    <p className="mt-2 text-xs text-red-700">
+                                        {error?.size}
+                                    </p>
+                                )}
+                            </div>
                             <div className="overflow-x-auto">
                                 {formData.sizes.length > 0 && (
                                     <table className="min-w-full bg-white">
@@ -886,6 +945,7 @@ const Product = () => {
                                 handleChange={handleChange}
                                 id="material"
                                 labelText="Material"
+                                required={true}
                                 value={formData.material}
                             />
                             <div className="flex flex-col gap-2">
@@ -930,6 +990,14 @@ const Product = () => {
                                 </table>
                             </div>
                             <div>
+                                <p className="block text-sm font-medium text-gray-900">
+                                    Categories
+                                </p>
+                                {error?.category && (
+                                    <p className="mt-2 text-xs text-red-700">
+                                        {error?.category}
+                                    </p>
+                                )}
                                 <ul className="grid grid-cols-2 gap-4 lg:flex lg:flex-wrap">
                                     {categoriesData.map((category, index) => (
                                         <li
@@ -944,17 +1012,17 @@ const Product = () => {
                                                 handleCategorySelect={
                                                     handleCategorySelect
                                                 }
+                                                titleClassName={
+                                                    'text-sm !font-medium'
+                                                }
+                                                listClassName={'text-xs'}
+                                                inputClassName={'!w-4 !h-4'}
+                                                iconWidth={'12'}
                                             />
                                         </li>
                                     ))}
                                 </ul>
                             </div>
-                            <Input
-                                handleChange={handleChange}
-                                id="shipping"
-                                labelText="Shipping"
-                                value={formData.shipping}
-                            />
                         </form>
                     </div>
                 </>
