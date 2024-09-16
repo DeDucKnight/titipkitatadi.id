@@ -175,7 +175,7 @@ exports.get_products_by_category_detail = async (req, res) => {
 // Create a New Product
 exports.create_product = async (req, res) => {
     const { 
-        productname, price, discountprice, brand, colors, sizes, material, onlinestores, shipping, status, 
+        productname, price, discountprice, brand, colors, sizes, material, onlinestores, shipping, status, sizemetricid,
         ProductImages, ProductCategories, ProductSizeMetrics 
     } = req.body;
 
@@ -193,7 +193,8 @@ exports.create_product = async (req, res) => {
             material,
             onlinestores,
             shipping,
-            status
+            status,
+            sizemetricid
         }, { transaction: t });
 
         // Bulk Create Product Images

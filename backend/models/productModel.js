@@ -23,7 +23,8 @@ const Product = sequelize.define('Product', {
         type: DataTypes.STRING,
     },
     colors: {
-        type: DataTypes.ARRAY(DataTypes.STRING),
+        type: DataTypes.ARRAY(DataTypes.JSONB),
+        defaultValue: []
     },
     sizes: {
         type: DataTypes.ARRAY(DataTypes.STRING),

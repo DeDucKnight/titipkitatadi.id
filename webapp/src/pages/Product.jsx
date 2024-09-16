@@ -115,15 +115,6 @@ const Product = () => {
                         : response.data[0].sizemetricid,
                     ProductSizeMetrics:
                         prevFormData.ProductSizeMetrics?.length > 0
-                            // ? prevFormData.ProductSizeMetrics.map((metric) => ({
-                            //       ...metric,
-                            //       measurements:
-                            //           prevFormData.sizes.length > 0
-                            //               ? prevFormData.sizes.map((size) => ({
-                            //                     [size]: '',
-                            //                 }))
-                            //               : [],
-                            //   }))
                             ? prevFormData.ProductSizeMetrics.map((metric) => ({
                                 ...metric,
                                 measurements:
@@ -177,19 +168,6 @@ const Product = () => {
                         : response.data[0].sizemetricid,
                     ProductSizeMetrics:
                         prevInitialData.ProductSizeMetrics?.length > 0
-                            // ? prevInitialData.ProductSizeMetrics.map(
-                            //       (metric) => ({
-                            //           ...metric,
-                            //           measurements:
-                            //               prevInitialData.sizes.length > 0
-                            //                   ? prevInitialData.sizes.map(
-                            //                         (size) => ({
-                            //                             [size]: '',
-                            //                         })
-                            //                     )
-                            //                   : [],
-                            //       })
-                            //   )
                             ? prevInitialData.ProductSizeMetrics.map((metric) => ({
                                 ...metric,
                                 measurements:
@@ -252,8 +230,12 @@ const Product = () => {
                     `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/products/${guid}`
                 )
 
-                setFormData(response.data)
-                setInitialData(response.data)
+                // Handle the case where colors might be null or undefined
+                const productData = response.data;
+                productData.colors = productData.colors || []; // Fallback to an empty array if colors is null or undefined
+
+                setFormData(productData)
+                setInitialData(productData)
                 fetchCategories()
                 fetchSizeMetrics()
                 fetchImages()
@@ -318,15 +300,16 @@ const Product = () => {
     }, [formData, initialData])
 
     const handleAddColor = (e) => {
-        e.preventDefault()
-        const { value } = document.querySelector('#colors')
-        if (value) {
+        e.preventDefault();
+        const hex = document.querySelector('#colors').value;
+    
+        if (hex) {
             setFormData((prevFormData) => ({
                 ...prevFormData,
-                colors: [...prevFormData.colors, value],
-            }))
+                colors: [...prevFormData.colors, { hex, name: "" }],
+            }));
         }
-    }
+    };
 
     const handleAddSize = (e) => {
         e.preventDefault()
@@ -456,9 +439,18 @@ const Product = () => {
     const handleDeleteColor = (color) => {
         setFormData((prevData) => ({
             ...prevData,
-            colors: prevData.colors.filter((item) => item !== color),
+            colors: prevData.colors.filter((item) => item.hex !== color),
         }))
     }
+
+    const handleChangeColorName = (color, newName) => {
+        setFormData((prevData) => ({
+            ...prevData,
+            colors: prevData.colors.map((item) => 
+                item.hex === color.hex ? { ...item, name: newName } : item // Update the name only for the matching color
+            ),
+        }));
+    };
 
     const handleCategorySelect = (
         category,
@@ -685,17 +677,22 @@ const Product = () => {
                                                             className="size-6"
                                                             style={{
                                                                 backgroundColor:
-                                                                    color,
+                                                                    color.hex,
                                                             }}
                                                         ></span>
-                                                        <span>{color}</span>
+                                                        <span>{color.hex}</span>
                                                     </div>
                                                 </td>
                                                 <td className="p-4 align-top text-sm text-gray-800">
-                                                    {/* <Input
-                                                        id={`label_${color}`}
+                                                    <Input
+                                                        handleChange={(e) => 
+                                                            handleChangeColorName(color, e.target.value)
+                                                        }
+                                                        id={`label_${color.hex}`}
+                                                        required={false}
+                                                        value={color.name}
                                                         inputClassName="!text-xs"
-                                                    /> */}
+                                                    />
                                                 </td>
                                                 <td className="p-4 align-top text-sm text-gray-800">
                                                     <div className="flex w-full flex-wrap gap-3">
