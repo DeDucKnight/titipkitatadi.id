@@ -65,7 +65,17 @@ const Category = () => {
             const response = await axios.get(
                 `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/images`
             )
-            setImgData(response.data)
+            const { images, message } = response.data;
+
+            if (images && images.length > 0) {
+                // If images are present, update the state with images
+                setImgData(images);
+            } else {
+                // If no images found, handle the message
+                console.warn(message || "No images found");
+                // Set image data to an empty array or take further actions
+                setImgData([]);
+            }
         } catch (error) {
             console.error('Error fetching images:', error)
         } finally {

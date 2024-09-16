@@ -45,13 +45,15 @@ const Images = () => {
                 const response = await axios.get(
                     `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/images`
                 )
-                const images = response.data.filter(
+                const images = response.data.images?.length > 0
+                ? response.data.images.filter(
                     (el) =>
                         el.imagetype.includes('header_desktop') ||
                         el.imagetype.includes('header_mobile') ||
                         el.imagetype.includes('footer_mobile') ||
                         el.imagetype.includes('footer_desktop')
                 )
+                : [];
                 setImgData(images)
                 setInitialData(images)
             } catch (error) {
