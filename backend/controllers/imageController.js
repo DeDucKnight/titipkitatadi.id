@@ -204,7 +204,7 @@ exports.get_images = async (req, res) => {
             where: {
                 imagetype: { [Op.ne]: 'product' }
             },
-            attributes: ['cdnid', 'imagepath', 'imagetype'],
+            attributes: ['cdnid', 'imagepath', 'imagetype', 'properties'],
             order: [['createddate', 'DESC']]
         });
 
