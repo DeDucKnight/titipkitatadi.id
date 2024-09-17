@@ -227,7 +227,7 @@ exports.get_images_by_productid = async (req, res) => {
             where: {
                 productid: productId
             },
-            attributes: ['cdnid', 'imagepath', 'imagetype'],
+            attributes: ['cdnid', 'imagepath', 'imagetype', 'properties'],
             order: [['createddate', 'DESC']]
         });
 
