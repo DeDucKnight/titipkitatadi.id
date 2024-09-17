@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Link, useLocation, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import Icon from '../components/Icons'
 import Input from '../components/Input'
 import Button from '../components/Button'
@@ -20,6 +20,7 @@ const Product = () => {
     const [error, setError] = useState(null)
     const { guid } = useParams()
     const location = useLocation()
+    const navigate = useNavigate()
     const pathnames = location.pathname.split('/').filter((el) => el)
     const [initialData, setInitialData] = useState({
         productname: '',
@@ -260,8 +261,8 @@ const Product = () => {
                 )
 
                 // Handle the case where colors might be null or undefined
-                const productData = response.data;
-                productData.colors = productData.colors || []; // Fallback to an empty array if colors is null or undefined
+                const productData = response.data
+                productData.colors = productData.colors || [] // Fallback to an empty array if colors is null or undefined
 
                 setFormData(productData)
                 setInitialData(productData)
@@ -329,16 +330,16 @@ const Product = () => {
     }, [formData, initialData])
 
     const handleAddColor = (e) => {
-        e.preventDefault();
-        const hex = document.querySelector('#colors').value;
-    
+        e.preventDefault()
+        const hex = document.querySelector('#colors').value
+
         if (hex) {
             setFormData((prevFormData) => ({
                 ...prevFormData,
-                colors: [...prevFormData.colors, { hex, name: "" }],
-            }));
+                colors: [...prevFormData.colors, { hex, name: '' }],
+            }))
         }
-    };
+    }
 
     const handleAddSize = (e) => {
         e.preventDefault()
@@ -475,11 +476,12 @@ const Product = () => {
     const handleChangeColorName = (color, newName) => {
         setFormData((prevData) => ({
             ...prevData,
-            colors: prevData.colors.map((item) => 
-                item.hex === color.hex ? { ...item, name: newName } : item // Update the name only for the matching color
+            colors: prevData.colors.map(
+                (item) =>
+                    item.hex === color.hex ? { ...item, name: newName } : item // Update the name only for the matching color
             ),
-        }));
-    };
+        }))
+    }
 
     const handleCategorySelect = (
         category,
@@ -541,6 +543,7 @@ const Product = () => {
             setIsSubmitting(false)
             return
         }
+        setError('')
         try {
             if (guid !== 'product') {
                 const response = await axios.put(
@@ -559,10 +562,10 @@ const Product = () => {
                 if (response.status >= 200 && response.status < 300) {
                     setInitialData(response.data.product)
                     setFormData(response.data.product)
+                    navigate(`/products/${response.data.product.productid}`)
                 }
             }
         } catch (error) {
-            // debugger
             console.error(error)
         } finally {
             setIsSubmitting(false)
@@ -737,8 +740,11 @@ const Product = () => {
                                                 </td>
                                                 <td className="p-4 align-top text-sm text-gray-800">
                                                     <Input
-                                                        handleChange={(e) => 
-                                                            handleChangeColorName(color, e.target.value)
+                                                        handleChange={(e) =>
+                                                            handleChangeColorName(
+                                                                color,
+                                                                e.target.value
+                                                            )
                                                         }
                                                         id={`label_${color.hex}`}
                                                         required={false}
