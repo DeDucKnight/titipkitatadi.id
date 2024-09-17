@@ -157,6 +157,7 @@ const App = () => {
                 ></div>
             )}
             <div
+                id="container"
                 className={`${isAuthenticated ? 'flex h-screen justify-center' : ''} container mx-auto w-full lg:overflow-x-hidden`}
                 style={{
                     maxWidth: `calc(100vw - ${navbarWidth}px)`,

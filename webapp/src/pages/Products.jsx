@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import placeholderImg from '../assets/images/placeholder-image.jpg'
 import Switch from '../components/Switch'
 import Button from '../components/Button'
@@ -8,22 +8,45 @@ import Skeleton from '../components/Skeleton'
 
 const Products = () => {
     const [isLoading, setIsLoading] = useState(true)
+    const [isLoadMore, setIsLoadMore] = useState(false)
+    const [isLoadedAll, setIsLoadedAll] = useState(false)
     const [products, setProducts] = useState([])
     const [imgData, setImgData] = useState([])
-    const handleOnChange = () => {}
+    const [currentPage, setCurrentPage] = useState(1)
+    const scrollRef = useRef(null)
+    const tableRef = useRef(null)
+    const isMounted = useRef(false)
 
-    const fetchProducts = async () => {
+    const handleOnChange = () => {}
+    const tableElement = tableRef.current
+
+    const fetchProducts = async (page = 1) => {
         try {
             setIsLoading(true)
             const response = await axios.get(
-                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/products`
+                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/products?page=${page}`
             )
-            setProducts(response.data.products)
-            fetchImages()
+            if (!isLoadMore && page == 1) {
+                setProducts(response.data.products)
+                fetchImages()
+            }
+
+            // debugger
+            if (!isMounted.current && isLoadMore && page > 1) {
+                setProducts((prevData) => [
+                    ...prevData,
+                    ...response.data.products,
+                ])
+                isMounted.current = true
+            }
+
+            setIsLoadedAll(response.data.nextPage)
+            if (response.data.nextPage) setCurrentPage((prev) => page + 1)
         } catch (error) {
             console.error('Error fetching products:', error)
         } finally {
             setIsLoading(false)
+            setIsLoadMore(false)
         }
     }
 
@@ -33,16 +56,13 @@ const Products = () => {
             const response = await axios.get(
                 `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/images`
             )
-            const { images, message } = response.data;
+            const { images, message } = response.data
 
             if (images && images.length > 0) {
-                // If images are present, update the state with images
-                setImgData(images);
+                setImgData(images)
             } else {
-                // If no images found, handle the message
-                console.warn(message || "No images found");
-                // Set image data to an empty array or take further actions
-                setImgData([]);
+                console.warn(message || 'No images found')
+                setImgData([])
             }
         } catch (error) {
             console.error('Error fetching images:', error)
@@ -50,9 +70,37 @@ const Products = () => {
             setIsLoading(false)
         }
     }
+
     useEffect(() => {
         fetchProducts()
     }, [])
+
+    useEffect(() => {
+        if (isMounted.current) {
+            // debugger
+            const element = scrollRef.current
+            const containerEl = document.querySelector('#container')
+            if (!element && !containerEl) return
+
+            containerEl.addEventListener('scroll', handleScroll)
+            return () => containerEl.removeEventListener('scroll', handleScroll) // Cleanup
+        } else {
+            // Avoid running on the initial mount in strict mode
+            // isMounted.current = true
+        }
+    }, [isLoadMore])
+
+    useEffect(() => {
+        const tableEl = document.querySelector('#table_products')
+        if (tableEl) {
+            setIsLoadMore(scrollRef.current.offsetHeight > tableEl.offsetHeight)
+        }
+    }, [products])
+
+    useEffect(() => {
+        if (!isLoadMore) return
+        fetchProducts(currentPage)
+    }, [isLoadMore, currentPage])
 
     const handleDelete = async (product) => {
         const productId = product.productid
@@ -75,8 +123,29 @@ const Products = () => {
         }
     }
 
+    const handleScroll = () => {
+        if (setIsLoadedAll) return
+        const element = scrollRef.current
+        const containerEl = document.querySelector('#container')
+        const headerEl = document.querySelector('#sticky_header')
+        if (headerEl && tableRef.current) {
+            const tableRowEl = tableRef.current.querySelector('td')
+            if (
+                containerEl.scrollHeight -
+                    containerEl.scrollTop -
+                    headerEl.offsetHeight -
+                    12 <=
+                    containerEl.clientHeight &&
+                !isLoadMore
+            ) {
+                debugger
+                setIsLoadMore(true)
+            }
+        }
+    }
+
     return (
-        <div className="relative mx-4 w-full py-3">
+        <div className="relative mx-4 w-full py-3" ref={scrollRef}>
             {isLoading ? (
                 <div>
                     <Skeleton className="mb-4 h-9 w-4/12 lg:w-3/12" />
@@ -103,7 +172,10 @@ const Products = () => {
                 </div>
             ) : (
                 <>
-                    <div className="sticky top-[60px] z-20 flex items-center justify-between bg-white py-4 lg:top-0">
+                    <div
+                        className="sticky top-[60px] z-20 flex items-center justify-between bg-white py-4 lg:top-0"
+                        id="sticky_header"
+                    >
                         <h1 className="mx-4 mb-4 text-3xl font-bold">
                             Products
                         </h1>
@@ -114,7 +186,11 @@ const Products = () => {
                             urlTarget={'./product'}
                         />
                     </div>
-                    <table className="top-0 z-10 min-w-full bg-white">
+                    <table
+                        className="top-0 z-10 min-w-full bg-white"
+                        id="table_products"
+                        ref={tableRef}
+                    >
                         <thead className="sticky top-0 z-10 whitespace-nowrap bg-gray-100">
                             <tr className="top-0 z-10">
                                 <th className="top-0 z-10 w-24 p-4 text-left text-xs font-semibold text-gray-800">
