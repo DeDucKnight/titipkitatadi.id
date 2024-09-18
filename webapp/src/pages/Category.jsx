@@ -65,16 +65,15 @@ const Category = () => {
             const response = await axios.get(
                 `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/images`
             )
-            const { images, message } = response.data;
 
-            if (images && images.length > 0) {
+            if (response.data.length > 0) {
                 // If images are present, update the state with images
-                setImgData(images);
+                setImgData(response.data)
             } else {
                 // If no images found, handle the message
-                console.warn(message || "No images found");
+                console.warn('No images found')
                 // Set image data to an empty array or take further actions
-                setImgData([]);
+                setImgData([])
             }
         } catch (error) {
             console.error('Error fetching images:', error)
@@ -195,20 +194,11 @@ const Category = () => {
                     }
                 )
                 setImgData((prevData) => [...prevData, response.data.image])
-                setFormData((prevData) => ({
-                    ...prevData,
-                    CategoryDetails: prevData.CategoryDetails.map((detail) =>
-                        detail.categorydetailname ===
-                        response.data.image.imagetype.split('_')[1]
-                            ? { ...detail, image: response.data.image }
-                            : detail
-                    ),
-                }))
-
                 // append imageId to ProductImages
             } catch (error) {
                 console.error('Error uploading image:', error)
             } finally {
+                setIsChanged(true)
                 setIsLoadingImage(false)
             }
         }
@@ -259,6 +249,7 @@ const Category = () => {
             console.error('Error delete category:', error)
         } finally {
             setIsLoading(false)
+            setIsChanged(true)
         }
     }
     const updateCategoryDetails = (categorydetailid) => {
