@@ -66,7 +66,7 @@ const Category = () => {
                 `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/images`
             )
 
-            if (response.data.length > 0) {
+            if (response.data?.length > 0) {
                 // If images are present, update the state with images
                 setImgData(response.data)
             } else {
