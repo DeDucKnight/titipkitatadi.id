@@ -81,14 +81,12 @@ const Product = () => {
                 const response = await axios.get(
                     `${import.meta.env.VITE_API_URL}/api/images`
                 )
-                const { images, message } = response.data
-
-                if (images && images.length > 0) {
+                if (response.data?.length > 0) {
                     // If images are present, update the state with images
-                    setImgData(images)
+                    setImgData(response.data)
                 } else {
                     // If no images found, handle the message
-                    console.warn(message || 'No images found')
+                    console.warn('No images found')
                     // Set image data to an empty array or take further actions
                     setImgData([])
                 }
