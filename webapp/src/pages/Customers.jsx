@@ -12,7 +12,7 @@ const Customers = () => {
         try {
             setIsLoading(true)
             const response = await axios.get(
-                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/customers`
+                `${import.meta.env.VITE_API_URL}/api/customers`
             )
             setCustomers(response.data)
         } catch (error) {
@@ -25,7 +25,7 @@ const Customers = () => {
         try {
             setIsLoading(true)
             const response = await axios.delete(
-                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/customer/${customer.customerid}`
+                `${import.meta.env.VITE_API_URL}/api/customer/${customer.customerid}`
             )
             if (response.status >= 200 && response.status < 300) {
                 fetchCustomers()
