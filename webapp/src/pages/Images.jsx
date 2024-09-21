@@ -23,7 +23,7 @@ const Images = () => {
         setIsDeletingImage(true)
         try {
             const response = await axios.delete(
-                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/delete-image/${imageId}`
+                `${import.meta.env.VITE_API_URL}/api/delete-image/${imageId}`
             )
 
             if (response.status === 200) {
@@ -43,7 +43,7 @@ const Images = () => {
             try {
                 setIsLoading(true)
                 const response = await axios.get(
-                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/images`
+                    `${import.meta.env.VITE_API_URL}/api/images`
                 )
                 const images =
                     response.data?.length > 0
@@ -80,7 +80,7 @@ const Images = () => {
 
             try {
                 const response = await axios.post(
-                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/upload-image`,
+                    `${import.meta.env.VITE_API_URL}/api/upload-image`,
                     formData,
                     {
                         headers: {
@@ -120,7 +120,7 @@ const Images = () => {
         setIsSubmitting(true)
         try {
             const response = await axios.put(
-                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/update-image-properties`,
+                `${import.meta.env.VITE_API_URL}/api/update-image-properties`,
                 imgData
             )
             setIsChanged(false)

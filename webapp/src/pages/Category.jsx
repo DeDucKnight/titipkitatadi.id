@@ -47,7 +47,7 @@ const Category = () => {
         try {
             setIsLoading(true)
             const response = await axios.get(
-                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/categories/${guid}`
+                `${import.meta.env.VITE_API_URL}/api/categories/${guid}`
             )
             setFormData(response.data)
             setInitialData(response.data)
@@ -63,7 +63,7 @@ const Category = () => {
         try {
             setIsLoading(true)
             const response = await axios.get(
-                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/images`
+                `${import.meta.env.VITE_API_URL}/api/images`
             )
 
             if (response.data?.length > 0) {
@@ -125,7 +125,7 @@ const Category = () => {
         try {
             if (guid !== 'category') {
                 const response = await axios.put(
-                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/categories/${guid}`,
+                    `${import.meta.env.VITE_API_URL}/api/categories/${guid}`,
                     formData
                 )
                 if (response.status >= 200 && response.status < 300) {
@@ -133,7 +133,7 @@ const Category = () => {
                 }
             } else {
                 const response = await axios.post(
-                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/categories`,
+                    `${import.meta.env.VITE_API_URL}/api/categories`,
                     formData
                 )
                 if (response.status >= 200 && response.status < 300) {
@@ -185,7 +185,7 @@ const Category = () => {
 
             try {
                 const response = await axios.post(
-                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/upload-image/`,
+                    `${import.meta.env.VITE_API_URL}/api/upload-image/`,
                     formData,
                     {
                         headers: {
@@ -209,7 +209,7 @@ const Category = () => {
         setIsDeletingImage(true)
         try {
             const response = await axios.delete(
-                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/delete-image/${imageId}`
+                `${import.meta.env.VITE_API_URL}/api/delete-image/${imageId}`
             )
 
             if (response.status === 200) {

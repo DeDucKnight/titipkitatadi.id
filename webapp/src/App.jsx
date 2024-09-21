@@ -60,7 +60,7 @@ const App = () => {
     const handleLogin = async (user) => {
         try {
             const response = await axios.post(
-                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/admin-login`,
+                `${import.meta.env.VITE_API_URL}/api/admin-login`,
                 user
             )
 

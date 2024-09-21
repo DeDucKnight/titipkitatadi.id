@@ -24,7 +24,7 @@ const Products = () => {
         try {
             setIsLoading(true)
             const response = await axios.get(
-                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/products?page=${page}`
+                `${import.meta.env.VITE_API_URL}/api/products?page=${page}`
             )
             if (!isLoadMore && page == 1) {
                 setProducts(response.data.products)
@@ -54,7 +54,7 @@ const Products = () => {
         try {
             setIsLoading(true)
             const response = await axios.get(
-                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/images`
+                `${import.meta.env.VITE_API_URL}/api/images`
             )
             if (response.data?.length > 0) {
                 // If images are present, update the state with images
@@ -108,7 +108,7 @@ const Products = () => {
         try {
             setIsLoading(true)
             const response = await axios.delete(
-                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/products/${productId}`
+                `${import.meta.env.VITE_API_URL}/api/products/${productId}`
             )
             if (response.status === 200) {
                 setProducts((prevData) =>

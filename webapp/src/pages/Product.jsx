@@ -66,7 +66,7 @@ const Product = () => {
             try {
                 setIsLoading(true)
                 const response = await axios.get(
-                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/categories`
+                    `${import.meta.env.VITE_API_URL}/api/categories`
                 )
                 setCategoriesData(response.data)
             } catch (error) {
@@ -79,7 +79,7 @@ const Product = () => {
             try {
                 setIsLoading(true)
                 const response = await axios.get(
-                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/images`
+                    `${import.meta.env.VITE_API_URL}/api/images`
                 )
                 if (response.data?.length > 0) {
                     // If images are present, update the state with images
@@ -100,7 +100,7 @@ const Product = () => {
             try {
                 setIsLoading(true)
                 const response = await axios.get(
-                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/size-metrics`
+                    `${import.meta.env.VITE_API_URL}/api/size-metrics`
                 )
 
                 const sizeArray = response.data
@@ -255,7 +255,7 @@ const Product = () => {
             try {
                 setIsLoading(true)
                 const response = await axios.get(
-                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/products/${guid}`
+                    `${import.meta.env.VITE_API_URL}/api/products/${guid}`
                 )
 
                 // Handle the case where colors might be null or undefined
@@ -416,7 +416,7 @@ const Product = () => {
             formData.append('imagetype', `${guid}_${e.target.id}`) // hardcoded
             try {
                 const response = await axios.post(
-                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/upload-image/${guid}`,
+                    `${import.meta.env.VITE_API_URL}/api/upload-image/${guid}`,
                     formData,
                     {
                         headers: {
@@ -449,7 +449,7 @@ const Product = () => {
         setIsDeletingImage(true)
         try {
             const response = await axios.delete(
-                `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/delete-image/${imageId}`
+                `${import.meta.env.VITE_API_URL}/api/delete-image/${imageId}`
             )
 
             if (response.status === 200) {
@@ -545,7 +545,7 @@ const Product = () => {
         try {
             if (guid !== 'product') {
                 const response = await axios.put(
-                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/products/${guid}`,
+                    `${import.meta.env.VITE_API_URL}/api/products/${guid}`,
                     formData
                 )
                 if (response.status >= 200 && response.status < 300) {
@@ -554,7 +554,7 @@ const Product = () => {
                 }
             } else {
                 const response = await axios.post(
-                    `${import.meta.env.VITE_ENV === 'development' ? import.meta.env.VITE_API_LOCAL : import.meta.env.VITE_API_URL}/api/products`,
+                    `${import.meta.env.VITE_API_URL}/api/products`,
                     formData
                 )
                 if (response.status >= 200 && response.status < 300) {
