@@ -207,7 +207,8 @@ const Images = () => {
                                                             }
                                                             value={
                                                                 img.properties
-                                                                    ?.url
+                                                                    ? JSON.parse(img.properties)?.url // Parse and extract the 'url' from the JSON
+                                                                    : '' // Fallback if url is not present
                                                             }
                                                         />
                                                     </div>
@@ -271,7 +272,8 @@ const Images = () => {
                                                             }
                                                             value={
                                                                 img.properties
-                                                                    ?.url
+                                                                    ? JSON.parse(img.properties)?.url // Parse and extract the 'url' from the JSON
+                                                                    : '' // Fallback if url is not present
                                                             }
                                                         />
                                                     </div>
@@ -336,7 +338,8 @@ const Images = () => {
                                                             }
                                                             value={
                                                                 img.properties
-                                                                    ?.url
+                                                                    ? JSON.parse(img.properties)?.url // Parse and extract the 'url' from the JSON
+                                                                    : '' // Fallback if url is not present
                                                             }
                                                         />
                                                     </div>
@@ -408,7 +411,8 @@ const Images = () => {
                                                             }
                                                             value={
                                                                 img.properties
-                                                                    ?.url
+                                                                    ? JSON.parse(img.properties)?.url // Parse and extract the 'url' from the JSON
+                                                                    : '' // Fallback if url is not present
                                                             }
                                                         />
                                                     </div>
