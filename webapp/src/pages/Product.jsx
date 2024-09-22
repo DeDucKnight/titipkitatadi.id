@@ -756,7 +756,7 @@ const Product = () => {
                                                             .filter(
                                                                 (img) =>
                                                                     img.imagetype ===
-                                                                    `${guid}_${color}`
+                                                                    `${guid}_${color.hex}`
                                                             )
                                                             .map((img) => (
                                                                 <Image
@@ -786,7 +786,7 @@ const Product = () => {
                                                             handleChange={
                                                                 handleImgChange
                                                             }
-                                                            id={color}
+                                                            id={color.hex}
                                                             ratio="aspect-card"
                                                             className="h-48"
                                                             isUploadImage={true}

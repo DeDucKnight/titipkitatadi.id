@@ -8,6 +8,7 @@ import Skeleton from '../components/Skeleton'
 
 const Products = () => {
     const [isLoading, setIsLoading] = useState(true)
+    const [isLoadingMore, setIsLoadingMore] = useState(false)
     const [isLoadMore, setIsLoadMore] = useState(false)
     const [isLoadedAll, setIsLoadedAll] = useState(false)
     const [products, setProducts] = useState([])
@@ -16,39 +17,11 @@ const Products = () => {
     const scrollRef = useRef(null)
     const tableRef = useRef(null)
     const isMounted = useRef(false)
+    const isFirstLoad = useRef(true)
+    const isFetchingMore = useRef(false)
 
     const handleOnChange = () => {}
     const tableElement = tableRef.current
-
-    const fetchProducts = async (page = 1) => {
-        try {
-            setIsLoading(true)
-            const response = await axios.get(
-                `${import.meta.env.VITE_API_URL}/api/products?page=${page}`
-            )
-            if (!isLoadMore && page == 1) {
-                setProducts(response.data.products)
-                fetchImages()
-            }
-
-            // debugger
-            if (!isMounted.current && isLoadMore && page > 1) {
-                setProducts((prevData) => [
-                    ...prevData,
-                    ...response.data.products,
-                ])
-                isMounted.current = true
-            }
-
-            setIsLoadedAll(response.data.nextPage)
-            if (response.data.nextPage) setCurrentPage((prev) => page + 1)
-        } catch (error) {
-            console.error('Error fetching products:', error)
-        } finally {
-            setIsLoading(false)
-            setIsLoadMore(false)
-        }
-    }
 
     const fetchImages = async () => {
         try {
@@ -73,23 +46,56 @@ const Products = () => {
     }
 
     useEffect(() => {
+        const fetchProducts = async (page = 1) => {
+            if (isFirstLoad.current) {
+                try {
+                    setIsLoading(true)
+                    isFirstLoad.current = false
+                    const response = await axios.get(
+                        `${import.meta.env.VITE_API_URL}/api/products?page=${page}`
+                    )
+                    setProducts(response.data.products)
+                    fetchImages()
+                    setCurrentPage(response.data.nextPage)
+                    setIsLoadedAll(!response.data.nextPage)
+                } catch (error) {
+                    console.error('Error fetching products:', error)
+                } finally {
+                    setIsLoading(false)
+                    setIsLoadMore(false)
+                }
+            }
+        }
+
         fetchProducts()
-    }, [])
+    }, [isFirstLoad])
 
     useEffect(() => {
-        if (isMounted.current) {
-            // debugger
+        const element = scrollRef.current
+        const containerEl = document.querySelector('#container')
+        if (!element && !containerEl) return
+        const handleScroll = () => {
+            if (isLoadedAll) return
             const element = scrollRef.current
             const containerEl = document.querySelector('#container')
-            if (!element && !containerEl) return
-
-            containerEl.addEventListener('scroll', handleScroll)
-            return () => containerEl.removeEventListener('scroll', handleScroll) // Cleanup
-        } else {
-            // Avoid running on the initial mount in strict mode
-            // isMounted.current = true
+            const headerEl = document.querySelector('#sticky_header')
+            if (headerEl && tableRef.current) {
+                const tableRowEl = tableRef.current.querySelector('td')
+                if (
+                    containerEl.scrollHeight -
+                        containerEl.scrollTop -
+                        headerEl.offsetHeight -
+                        12 <=
+                        containerEl.clientHeight &&
+                    !isLoadMore
+                ) {
+                    setIsLoadMore(true)
+                }
+            }
         }
-    }, [isLoadMore])
+        containerEl.addEventListener('scroll', handleScroll)
+        return () => containerEl.removeEventListener('scroll', handleScroll) // Cleanup
+    }, [isLoadMore, isLoadedAll])
 
     useEffect(() => {
         const tableEl = document.querySelector('#table_products')
@@ -100,7 +106,29 @@ const Products = () => {
 
     useEffect(() => {
         if (!isLoadMore) return
-        fetchProducts(currentPage)
+        const fetchProductsMore = async (page) => {
+            try {
+                setIsLoadingMore(true)
+                isFetchingMore.current = false
+                const response = await axios.get(
+                    `${import.meta.env.VITE_API_URL}/api/products?page=${page}`
+                )
+
+                setProducts((prevData) => [
+                    ...prevData,
+                    ...response.data.products,
+                ])
+                setCurrentPage(response.data.nextPage)
+                setIsLoadedAll(!response.data.nextPage)
+                setIsLoadMore(false)
+            } catch (error) {
+                console.error('Error fetching products:', error)
+            } finally {
+                setIsLoadingMore(false)
+            }
+        }
+
+        fetchProductsMore(currentPage)
     }, [isLoadMore, currentPage])
 
     const handleDelete = async (product) => {
@@ -121,27 +149,6 @@ const Products = () => {
             console.error('Error fetching products:', error)
         } finally {
             setIsLoading(false)
-        }
-    }
-
-    const handleScroll = () => {
-        if (setIsLoadedAll) return
-        const element = scrollRef.current
-        const containerEl = document.querySelector('#container')
-        const headerEl = document.querySelector('#sticky_header')
-        if (headerEl && tableRef.current) {
-            const tableRowEl = tableRef.current.querySelector('td')
-            if (
-                containerEl.scrollHeight -
-                    containerEl.scrollTop -
-                    headerEl.offsetHeight -
-                    12 <=
-                    containerEl.clientHeight &&
-                !isLoadMore
-            ) {
-                debugger
-                setIsLoadMore(true)
-            }
         }
     }
 
@@ -280,6 +287,23 @@ const Products = () => {
                             ))}
                         </tbody>
                     </table>
+                    {isLoadingMore && (
+                        <div>
+                            {Array(8)
+                                .fill()
+                                .map((_, index) => (
+                                    <div key={index}>
+                                        <div className="border-b py-4">
+                                            <Skeleton
+                                                items="5"
+                                                classContainer="flex gap-3 justify-between "
+                                                className="h-7 w-4/12 lg:w-2/12"
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+                        </div>
+                    )}
                 </>
             )}
         </div>
