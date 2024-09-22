@@ -154,12 +154,80 @@ exports.get_products_by_category_detail = async (req, res) => {
             offset: offset
         });
 
+        // If no products found
+        if (!products || products.length === 0) {
+            return res.status(200).json({
+                message: 'No products found',
+                products: [],
+                currentPage: parseInt(page, 10),
+                nextPage: null,
+            });
+        }
+
         const hasNextPage = products.length > limit; // Check if there's a next page
         const results = hasNextPage ? products.slice(0, limit) : products; // Return only limit results
 
-        if (!results.length) {
-            return res.status(404).json({ message: 'No products found for this category detail' });
+        res.status(200).json({
+            products: results,
+            currentPage: parseInt(page, 10),
+            nextPage: hasNextPage ? parseInt(page, 10) + 1 : null,
+        });
+    } catch (err) {
+        console.error('Error fetching products by category detail:', err);
+        res.status(500).json({ error: 'Failed to fetch products' });
+    }
+};
+
+// Get Products by CategoryID
+exports.get_products_by_category = async (req, res) => {
+    const { categoryid } = req.params;
+    const { page = 1 } = req.query;
+    const limit = 8;
+    const offset = (parseInt(page, 10) - 1) * limit;
+
+    // Validate categoryid
+    if (!categoryid) {
+        return res.status(400).json({ error: 'Category ID is required' });
+    }
+
+    try {
+        // Fetch products with an extra limit to check if there's a next page
+        const products = await Product.findAll({
+            include: [
+                {
+                    model: ProductCategory,
+                    include: [
+                        {
+                            model: CategoryDetail,
+                            attributes: ['categorydetailname', 'categoryid'],
+                            where: { categoryid },
+                            include: [
+                                {
+                                    model: Category,
+                                    attributes: ['categoryname'],                                    
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            order: [['createddate', 'DESC']],
+            limit: limit + 1,
+            offset: offset
+        });
+
+        // If no products found
+        if (!products || products.length === 0) {
+            return res.status(200).json({
+                message: 'No products found',
+                products: [],
+                currentPage: parseInt(page, 10),
+                nextPage: null,
+            });
         }
+
+        const hasNextPage = products.length > limit; // Check if there's a next page
+        const results = hasNextPage ? products.slice(0, limit) : products; // Return only limit results
 
         res.status(200).json({
             products: results,
