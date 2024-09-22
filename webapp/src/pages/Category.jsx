@@ -438,12 +438,12 @@ const Category = () => {
                                                     <th className="p-4 text-left text-sm font-semibold text-gray-800">
                                                         Categories
                                                     </th>
-                                                    <th className="p-4 text-left text-sm font-semibold text-gray-800">
+                                                    {/* <th className="p-4 text-left text-sm font-semibold text-gray-800">
                                                         Images - Desktop
                                                     </th>
                                                     <th className="p-4 text-left text-sm font-semibold text-gray-800">
                                                         Images - Mobile
-                                                    </th>
+                                                    </th> */}
                                                     <th className="w-[1%] p-4 text-end text-sm font-semibold text-gray-800">
                                                         Actions
                                                     </th>
@@ -461,7 +461,7 @@ const Category = () => {
                                                                     data.categorydetailname
                                                                 }
                                                             </td>
-                                                            <td className="p-4 align-top text-sm text-gray-800">
+                                                            {/* <td className="p-4 align-top text-sm text-gray-800">
                                                                 <div className="flex w-full flex-wrap gap-3">
                                                                     {imgData
                                                                         .filter(
@@ -612,7 +612,7 @@ const Category = () => {
                                                                         />
                                                                     )}
                                                                 </div>
-                                                            </td>
+                                                            </td> */}
                                                             <td className="w-[1%] p-4 align-top">
                                                                 <div className="inline-flex w-full items-center justify-end gap-4">
                                                                     <Button
