@@ -18,6 +18,7 @@ import Customers from './pages/Customers'
 import Customer from './pages/Customer'
 import Users from './pages/Users'
 import axios from 'axios'
+import Widgets from './pages/Widgets'
 
 const App = () => {
     const navigate = useNavigate()
@@ -234,6 +235,16 @@ const App = () => {
                         element={
                             isAuthenticated ? (
                                 <Images />
+                            ) : (
+                                <Navigate to="/login" />
+                            )
+                        }
+                    />
+                    <Route
+                        path="/widgets"
+                        element={
+                            isAuthenticated ? (
+                                <Widgets />
                             ) : (
                                 <Navigate to="/login" />
                             )

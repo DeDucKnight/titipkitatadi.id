@@ -49,6 +49,13 @@ const Navbar = forwardRef(
                                 <Icon name="customer" />
                                 <span>Customers</span>
                             </Link>
+                            <Link
+                                to={'/widgets'}
+                                className="flex items-center gap-4 rounded px-4 py-3 text-sm text-primary-500 transition-all hover:bg-primary-50 hover:text-primary-600"
+                            >
+                                <Icon name="widgets" />
+                                <span>Widgets</span>
+                            </Link>
                             <button
                                 className="flex w-full items-center gap-4 rounded px-4 py-3 text-sm text-primary-500 transition-all hover:bg-primary-50 hover:text-primary-600"
                                 onClick={handleLogout}
