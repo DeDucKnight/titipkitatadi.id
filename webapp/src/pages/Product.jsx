@@ -353,6 +353,7 @@ const Product = () => {
                     })
                 ),
             }))
+            setSizeValue('')
         }
     }
 

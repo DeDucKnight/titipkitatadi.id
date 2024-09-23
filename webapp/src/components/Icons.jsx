@@ -13,6 +13,7 @@ import Trash from './Icons/icon-trash.jsx'
 import Checkbox from './Icons/icon-checkbox.jsx'
 import Customer from './Icons/icon-customer.jsx'
 import Logout from './Icons/icon-logout.jsx'
+import Widgets from './Icons/icon-widgets.jsx'
 
 const Icon = (props) => {
     switch (props.name) {
@@ -42,6 +43,8 @@ const Icon = (props) => {
             return <Checkbox {...props} />
         case 'customer':
             return <Customer {...props} />
+        case 'widgets':
+            return <Widgets {...props} />
         case 'logout':
             return <Logout {...props} />
         default:

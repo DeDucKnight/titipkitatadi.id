@@ -23,6 +23,7 @@ const Input = ({
     isLoading = false,
     isDeleting = false,
     error,
+    btnDisabled = false,
 }) => {
     const [showPassword, setShowPassword] = useState(false)
     const [showColorPicker, setShowColorPicker] = useState(false)
@@ -108,7 +109,11 @@ const Input = ({
                                     </button>
                                 )}
                             {btnText && (
-                                <Button text={btnText} onClick={btnOnClick} />
+                                <Button
+                                    text={btnText}
+                                    onClick={btnOnClick}
+                                    disabled={btnDisabled}
+                                />
                             )}
                             {isColorPicker && showColorPicker ? (
                                 <Chrome
