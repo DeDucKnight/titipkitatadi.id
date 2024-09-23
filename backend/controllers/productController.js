@@ -1,4 +1,4 @@
-const { Product, ProductImage, ProductCategory, Category, CategoryDetail, Image, SizeMetric, SizeAttribute, ProductSizeMetric, sequelize } = require('../models');
+const { Product, ProductImage, ProductCategory, Category, CategoryDetail, Image, SizeMetric, SizeAttribute, ProductSizeMetric, ProductRecommendation, sequelize } = require('../models');
 
 // Get Product List with Pagination
 exports.get_product_list = async (req, res) => {
@@ -69,39 +69,10 @@ exports.get_product_detail = async (req, res) => {
                     model: ProductImage,
                     include: {
                         model: Image,
+                        as: 'Image',
                         attributes: ['imagepath']
                     }
                 },
-                {
-                    model: ProductCategory,
-                    include: [
-                        {
-                            model: CategoryDetail,
-                            attributes: ['categorydetailid', 'categorydetailname'],
-                            include: [
-                                {
-                                    model: Category,
-                                    attributes: ['categoryid', 'categoryname']
-                                }
-                            ]
-                        }                        
-                    ]
-                },
-                {
-                    model: ProductSizeMetric,
-                    include: [
-                        {
-                            model: SizeAttribute,
-                            attributes: ['sizeattributeid', 'sizeattributename'],
-                            include: [
-                                {
-                                    model: SizeMetric,
-                                    attributes: ['sizemetricid', 'sizemetricname']
-                                }
-                            ]
-                        }
-                    ]
-                }
             ]
         });
 
@@ -109,7 +80,35 @@ exports.get_product_detail = async (req, res) => {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        res.status(200).json(product);
+        const recommendedProducts = await ProductRecommendation.findAll({
+            where: { productid: productId },
+            include: [
+                {
+                    model: Product,
+                    as: 'RecommendedProduct',
+                    attributes: ['productname', 'price', 'discountprice', 'colors'],
+                    include: [
+                        {
+                            model: ProductImage,
+                            attributes: ['imageid'],
+                            include: {
+                                model: Image,
+                                as: 'Image',
+                                attributes: ['imagepath', 'cdnid']
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        const productData = product.toJSON();
+
+        if (recommendedProducts && recommendedProducts.length > 0) {
+            productData.ProductRecommendations = recommendedProducts.map((x) => x.toJSON());
+        }
+
+        res.status(200).json(productData);
     } catch (err) {
         console.error('Error fetching product details:', err);
         res.status(500).json({ error: 'Failed to fetch product details' });
@@ -244,7 +243,7 @@ exports.get_products_by_category = async (req, res) => {
 exports.create_product = async (req, res) => {
     const { 
         productname, price, discountprice, brand, colors, sizes, material, onlinestores, shipping, status, sizemetricid,
-        ProductImages, ProductCategories, ProductSizeMetrics 
+        ProductImages, ProductCategories, ProductSizeMetrics, ProductRecommendations 
     } = req.body;
 
     const t = await sequelize.transaction();
@@ -298,10 +297,21 @@ exports.create_product = async (req, res) => {
             await ProductSizeMetric.bulkCreate(metricsToInsert, { transaction: t });
         }
 
+        //Bulk Create Product Recommendations
+        if (ProductRecommendations && ProductRecommendations.length > 0) {
+            const recommendationToInsert = ProductRecommendations.map(item => ({
+                productid: product.productid,
+                recommendationproductid: item.recommendationproductid,
+            }));
+
+            await ProductRecommendation.bulkCreate(recommendationToInsert, { transaction: t });
+        }
+
         await t.commit();
         product.ProductImages = ProductImages;
         product.ProductCategories = ProductCategories;
         product.ProductSizeMetrics = ProductSizeMetrics;
+        product.ProductRecommendations = ProductRecommendations;
         res.status(201).json({ message: 'Product created successfully', product });
     } catch (err) {
         // Rollback transaction in case of an error
@@ -404,6 +414,42 @@ exports.update_product = async (req, res) => {
                 if (!newMetricIds.includes(existingMetric.sizeattributeid)) {
                     await ProductSizeMetric.destroy({
                         where: { sizeattributeid: existingMetric.sizeattributeid },
+                        transaction: t
+                    });
+                }
+            }
+        }
+
+        // Handle Product Recommendations
+        if (updates.ProductRecommendations) {
+            // Fetch existing Product Recommendations for the product
+            const existingProductRecommendations = await ProductRecommendation.findAll({
+                where: { productid: productId },
+                transaction: t
+            });
+
+            // Map existing recommended product IDs and new recommended product IDs
+            const newRecommendationIds = updates.ProductRecommendations.map(rec => rec.recommendedproductid);
+
+            // Add new recommendations or update existing ones
+            for (const rec of updates.ProductRecommendations) {
+                const recommendedProductId = rec.recommendedproductid;
+                const existingRecommendation = existingProductRecommendations.find(r => r.recommendedproductid === recommendedProductId);
+
+                if (!existingRecommendation) {
+                    // Add new recommendation if it doesn't exist
+                    await ProductRecommendation.create({
+                        productid: productId,
+                        recommendedproductid: recommendedProductId
+                    }, { transaction: t });
+                }
+            }
+
+            // Remove recommendations that are no longer present
+            for (const existingRec of existingProductRecommendations) {
+                if (!newRecommendationIds.includes(existingRec.recommendedproductid)) {
+                    await ProductRecommendation.destroy({
+                        where: { productrecommendationid: existingRec.productrecommendationid },
                         transaction: t
                     });
                 }
