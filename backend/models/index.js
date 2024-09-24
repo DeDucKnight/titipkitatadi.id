@@ -14,6 +14,7 @@ const SizeMetric = require('./sizeMetricModel');
 const SizeAttribute = require('./sizeAttributeModel');
 const ProductSizeMetric = require('./productSizeMetricModel');
 const ProductRecommendation = require('./productRecommendationModel');
+const Announcement = require('./announcementModel');
 
 // Export models
 module.exports = {
@@ -30,5 +31,6 @@ module.exports = {
     SizeAttribute,
     ProductSizeMetric,
     ProductRecommendation,
+    Announcement,
     sequelize
 };
