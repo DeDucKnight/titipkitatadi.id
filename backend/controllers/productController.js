@@ -15,6 +15,7 @@ exports.get_product_list = async (req, res) => {
                     attributes: ['productimageid', 'imageid', 'color', 'isdefault'],
                     include: {
                         model: Image,
+                        as: 'Image',
                         attributes: ['imagepath']
                     },
                     required: false
