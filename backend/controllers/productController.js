@@ -1,4 +1,5 @@
 const { Product, ProductImage, ProductCategory, Category, CategoryDetail, Image, SizeMetric, SizeAttribute, ProductSizeMetric, ProductRecommendation, sequelize } = require('../models');
+const { Op } = require('sequelize');
 
 // Get Product List with Pagination
 exports.get_product_list = async (req, res) => {
@@ -74,6 +75,36 @@ exports.get_product_detail = async (req, res) => {
                         attributes: ['imagepath']
                     }
                 },
+                {
+                    model: ProductCategory,
+                    include: [
+                        {
+                            model: CategoryDetail,
+                            attributes: ['categorydetailid', 'categorydetailname'],
+                            include: [
+                                {
+                                    model: Category,
+                                    attributes: ['categoryid', 'categoryname']
+                                }
+                            ]
+                        }                        
+                    ]
+                },
+                {
+                    model: ProductSizeMetric,
+                    include: [
+                        {
+                            model: SizeAttribute,
+                            attributes: ['sizeattributeid', 'sizeattributename'],
+                            include: [
+                                {
+                                    model: SizeMetric,
+                                    attributes: ['sizemetricid', 'sizemetricname']
+                                }
+                            ]
+                        }
+                    ]
+                }
             ]
         });
 
@@ -115,6 +146,59 @@ exports.get_product_detail = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch product details' });
     }
 };
+
+// Search products by name
+exports.get_product_by_name = async (req, res) => {
+    
+    try {
+        const { query } = req.query;
+
+        if (!query || query.trim() === "") {
+            return res.status(400).json({ message: 'Search query is required.' });
+        }
+
+        // Perform search using Sequelize's LIKE operator for case-insensitive search
+        const products = await Product.findAll({
+            where: {
+                productname: {
+                    [Op.like]: `%${query}%`
+                }
+            },
+            // where: { productname: query},
+            attributes: ['productid', 'productname', 'price', 'discountprice', 'colors'],
+            include: [
+                {
+                    model: ProductCategory,
+                    attributes: ['categorydetailid'],
+                    include: [
+                        {
+                            model: CategoryDetail,
+                            attributes: ['categorydetailname'],
+                            include: [
+                                {
+                                    model: Category,
+                                    attributes: ['categoryname']
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }, {
+            logging: console.log
+        });
+
+        if (products.length === 0) {
+            return res.status(404).json({ message: 'No products found matching your search.' });
+        }
+
+        // Return the found products
+        res.status(200).json(products);
+    } catch (error) {
+        console.error('Error searching products:', error);
+        res.status(500).json({ message: 'An error occurred while searching for products.' });
+    }
+}
 
 // Get Products by CategoryDetailID
 exports.get_products_by_category_detail = async (req, res) => {
