@@ -9,6 +9,8 @@ import CategorySelection from '../components/CategorySelection'
 import Dropdown from '../components/Dropdown'
 import Skeleton from '../components/Skeleton'
 import axios from 'axios'
+import RichTextEditor from '../components/RichTextEditor'
+
 const Product = () => {
     const [isChanged, setIsChanged] = useState(false)
     const [isLoadingImage, setIsLoadingImage] = useState(false)
@@ -16,6 +18,7 @@ const Product = () => {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [sizeValue, setSizeValue] = useState('')
+    const [materialValue, setMaterialValue] = useState('')
     const [selectedSizeMetricId, setselectedSizeMetricId] = useState('')
     const [error, setError] = useState(null)
     const { guid } = useParams()
@@ -177,20 +180,7 @@ const Product = () => {
                         : response.data[0].sizemetricid,
                     ProductSizeMetrics:
                         prevInitialData.ProductSizeMetrics?.length > 0
-                            ? // ? prevInitialData.ProductSizeMetrics.map(
-                              //       (metric) => ({
-                              //           ...metric,
-                              //           measurements:
-                              //               prevInitialData.sizes.length > 0
-                              //                   ? prevInitialData.sizes.map(
-                              //                         (size) => ({
-                              //                             [size]: '',
-                              //                         })
-                              //                     )
-                              //                   : [],
-                              //       })
-                              //   )
-                              prevInitialData.ProductSizeMetrics.map(
+                            ? prevInitialData.ProductSizeMetrics.map(
                                   (metric) => ({
                                       ...metric,
                                       measurements:
@@ -264,6 +254,7 @@ const Product = () => {
 
                 setFormData(productData)
                 setInitialData(productData)
+                setMaterialValue(productData.material)
                 fetchCategories()
                 fetchSizeMetrics()
                 fetchImages()
@@ -326,6 +317,13 @@ const Product = () => {
             JSON.stringify(formData) !== JSON.stringify(initialData)
         setIsChanged(isFormChanged)
     }, [formData, initialData])
+
+    useEffect(() => {
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            material: materialValue,
+        }))
+    }, [materialValue])
 
     const handleAddColor = (e) => {
         e.preventDefault()
@@ -946,12 +944,13 @@ const Product = () => {
                                     </table>
                                 )}
                             </div>
-                            <Input
-                                handleChange={handleChange}
+                            <RichTextEditor
                                 id="material"
                                 labelText="Material"
-                                required={true}
                                 value={formData.material}
+                                handleChange={handleChange}
+                                materialValue={materialValue}
+                                setMaterialValue={setMaterialValue}
                             />
                             <div className="flex flex-col gap-2">
                                 <p className="block text-sm font-medium text-gray-900">
