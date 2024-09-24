@@ -61,6 +61,61 @@ const Product = () => {
     const [categoriesData, setCategoriesData] = useState([])
     const [imgData, setImgData] = useState([])
     const [sizeMetrics, setSizeMetrics] = useState([])
+
+    const updateFormData = (prevFormData, response) => {
+        const sizemetricid =
+            prevFormData.sizemetricid || response.data[0].sizemetricid
+
+        const hasOwnProperty = (obj, prop) =>
+            Object.prototype.hasOwnProperty.call(obj, prop)
+
+        const createMeasurements = (sizes, existingMeasurements = []) =>
+            sizes.map((size) => {
+                const existingMeasurement = existingMeasurements.find((m) =>
+                    hasOwnProperty(m, size)
+                )
+                return {
+                    [size]: existingMeasurement
+                        ? existingMeasurement[size]
+                        : '',
+                }
+            })
+
+        const updateMetric = (metric) => ({
+            ...metric,
+            measurements: createMeasurements(
+                prevFormData.sizes,
+                metric.measurements
+            ),
+        })
+
+        const createNewMetric = (attribute) => ({
+            productsizemetricid: attribute.productsizemetricid || '',
+            productid: prevFormData.productid || '',
+            sizeattributeid: attribute.sizeattributeid,
+            measurements: createMeasurements(prevFormData.sizes),
+            SizeAttribute: {
+                sizeattributeid: attribute.sizeattributeid,
+                sizeattributename: attribute.sizeattributename,
+                SizeMetric: {
+                    sizemetricid: response.data[0].sizemetricid,
+                    sizemetricname: response.data[0].sizemetricname,
+                },
+            },
+        })
+
+        const ProductSizeMetrics =
+            prevFormData.ProductSizeMetrics?.length > 0
+                ? prevFormData.ProductSizeMetrics.map(updateMetric)
+                : response.data[0].SizeAttributes.map(createNewMetric)
+
+        return {
+            ...prevFormData,
+            sizemetricid,
+            ProductSizeMetrics,
+        }
+    }
+
     useEffect(() => {
         const fetchCategories = async () => {
             try {
@@ -106,70 +161,10 @@ const Product = () => {
                 const sizeArray = response.data
                 setSizeMetrics(sizeArray)
 
-                setFormData((prevFormData) => ({
-                    ...prevFormData,
-                    sizemetricid: prevFormData.sizemetricid
-                        ? prevFormData.sizemetricid
-                        : response.data[0].sizemetricid,
-                    ProductSizeMetrics:
-                        prevFormData.ProductSizeMetrics?.length > 0
-                            ? // ? prevFormData.ProductSizeMetrics.map((metric) => ({
-                              //       ...metric,
-                              //       measurements:
-                              //           prevFormData.sizes.length > 0
-                              //               ? prevFormData.sizes.map((size) => ({
-                              //                     [size]: '',
-                              //                 }))
-                              //               : [],
-                              //   }))
-                              prevFormData.ProductSizeMetrics.map((metric) => ({
-                                  ...metric,
-                                  measurements:
-                                      prevFormData.sizes.length > 0 &&
-                                      (!metric.measurements ||
-                                          metric.measurements.length === 0)
-                                          ? prevFormData.sizes.map((size) => ({
-                                                [size]: '', // Initialize with empty values if sizes exist and measurements are null/empty
-                                            }))
-                                          : metric.measurements === null
-                                            ? [] // Return empty array if measurements are null
-                                            : metric.measurements, // Return the existing measurements
-                              }))
-                            : response.data[0].SizeAttributes.map(
-                                  (attribute) => ({
-                                      productsizemetricid:
-                                          attribute.productsizemetricid
-                                              ? attribute.productsizemetricid
-                                              : '',
-                                      productid: prevFormData.productid
-                                          ? prevFormData.productid
-                                          : '',
-                                      sizeattributeid:
-                                          attribute.sizeattributeid,
-                                      measurements:
-                                          prevFormData.sizes.length > 0
-                                              ? prevFormData.sizes.map(
-                                                    (size) => ({
-                                                        [size]: '',
-                                                    })
-                                                )
-                                              : [],
-                                      SizeAttribute: {
-                                          sizeattributeid:
-                                              attribute.sizeattributeid,
-                                          sizeattributename:
-                                              attribute.sizeattributename,
-                                          SizeMetric: {
-                                              sizemetricid:
-                                                  response.data[0].sizemetricid,
-                                              sizemetricname:
-                                                  response.data[0]
-                                                      .sizemetricname,
-                                          },
-                                      },
-                                  })
-                              ),
-                }))
+                setFormData((prevFormData) =>
+                    updateFormData(prevFormData, response)
+                )
+
                 setInitialData((prevInitialData) => ({
                     ...prevInitialData,
                     sizemetricid: prevInitialData.sizemetricid
@@ -516,11 +511,28 @@ const Product = () => {
         })
     }
 
-    const handleDeleteSize = (size) => {
-        setFormData((prevData) => ({
-            ...prevData,
-            sizes: prevData.sizes.filter((item) => item !== size),
-        }))
+    const handleDeleteSize = (sizeToDelete) => {
+        setFormData((prevData) => {
+            const updatedSizes = prevData.sizes.filter(
+                (size) => size !== sizeToDelete
+            )
+
+            const updatedProductSizeMetrics = prevData.ProductSizeMetrics.map(
+                (metric) => ({
+                    ...metric,
+                    measurements: metric.measurements.filter(
+                        (measurement) =>
+                            !Object.keys(measurement).includes(sizeToDelete)
+                    ),
+                })
+            )
+
+            return {
+                ...prevData,
+                sizes: updatedSizes,
+                ProductSizeMetrics: updatedProductSizeMetrics,
+            }
+        })
     }
 
     const handleSubmit = async (e) => {
