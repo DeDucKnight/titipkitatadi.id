@@ -135,11 +135,8 @@ exports.get_product_detail = async (req, res) => {
         });
 
         const productData = product.toJSON();
-
-        if (recommendedProducts && recommendedProducts.length > 0) {
-            productData.ProductRecommendations = recommendedProducts.map((x) => x.toJSON());
-        }
-
+        productData.ProductRecommendations = recommendedProducts?.length ? recommendedProducts.map((x) => x.toJSON()) : [];
+        
         res.status(200).json(productData);
     } catch (err) {
         console.error('Error fetching product details:', err);
