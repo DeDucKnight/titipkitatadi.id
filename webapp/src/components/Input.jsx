@@ -24,15 +24,13 @@ const Input = ({
     isDeleting = false,
     error,
     btnDisabled = false,
+    showColorPicker,
+    handleOnFocus,
 }) => {
     const [showPassword, setShowPassword] = useState(false)
-    const [showColorPicker, setShowColorPicker] = useState(false)
     const [inputvalue, setInputValue] = useState('')
 
     useEffect(() => setInputValue(value), [value])
-    const handleOnFocus = () => {
-        setShowColorPicker(!showColorPicker)
-    }
 
     return (
         <>

@@ -17,10 +17,16 @@ const Product = () => {
     const [isDeletingImage, setIsDeletingImage] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
+    const [isLoadingSearch, setIsLoadingSearch] = useState(false)
+    const [showColorPicker, setShowColorPicker] = useState(false)
+    const [showDropdown, setShowDropdown] = useState(false)
     const [sizeValue, setSizeValue] = useState('')
     const [materialValue, setMaterialValue] = useState('')
+    const [searchProductValue, setSearchProductValue] = useState('')
     const [selectedSizeMetricId, setselectedSizeMetricId] = useState('')
+    const [selectedRelatedProduct, setSelectedRelatedProduct] = useState('')
     const [error, setError] = useState(null)
+    const [recommendedProduct, setRecommendedProduct] = useState(null)
     const { guid } = useParams()
     const location = useLocation()
     const navigate = useNavigate()
@@ -41,6 +47,7 @@ const Product = () => {
         ProductImages: [],
         ProductCategories: [],
         ProductSizeMetrics: [],
+        ProductRecommendations: [],
         sizemetricid: '',
     })
     const [formData, setFormData] = useState({
@@ -59,11 +66,15 @@ const Product = () => {
         ProductImages: [],
         ProductCategories: [],
         ProductSizeMetrics: [],
+        ProductRecommendations: [],
         sizemetricid: '',
     })
     const [categoriesData, setCategoriesData] = useState([])
     const [imgData, setImgData] = useState([])
     const [sizeMetrics, setSizeMetrics] = useState([])
+    const [productSearchResult, setProductSearchResult] = useState([])
+    const timeoutRef = useRef(null)
+
     useEffect(() => {
         const fetchCategories = async () => {
             try {
@@ -116,27 +127,18 @@ const Product = () => {
                         : response.data[0].sizemetricid,
                     ProductSizeMetrics:
                         prevFormData.ProductSizeMetrics?.length > 0
-                            ? // ? prevFormData.ProductSizeMetrics.map((metric) => ({
-                              //       ...metric,
-                              //       measurements:
-                              //           prevFormData.sizes.length > 0
-                              //               ? prevFormData.sizes.map((size) => ({
-                              //                     [size]: '',
-                              //                 }))
-                              //               : [],
-                              //   }))
-                              prevFormData.ProductSizeMetrics.map((metric) => ({
+                            ? prevFormData.ProductSizeMetrics.map((metric) => ({
                                   ...metric,
                                   measurements:
                                       prevFormData.sizes.length > 0 &&
                                       (!metric.measurements ||
                                           metric.measurements.length === 0)
                                           ? prevFormData.sizes.map((size) => ({
-                                                [size]: '', // Initialize with empty values if sizes exist and measurements are null/empty
+                                                [size]: '',
                                             }))
                                           : metric.measurements === null
-                                            ? [] // Return empty array if measurements are null
-                                            : metric.measurements, // Return the existing measurements
+                                            ? []
+                                            : metric.measurements,
                               }))
                             : response.data[0].SizeAttributes.map(
                                   (attribute) => ({
@@ -189,12 +191,12 @@ const Product = () => {
                                               metric.measurements.length === 0)
                                               ? prevInitialData.sizes.map(
                                                     (size) => ({
-                                                        [size]: '', // Initialize with empty values if sizes exist and measurements are null/empty
+                                                        [size]: '',
                                                     })
                                                 )
                                               : metric.measurements === null
-                                                ? [] // Return empty array if measurements are null
-                                                : metric.measurements, // Return the existing measurements
+                                                ? []
+                                                : metric.measurements,
                                   })
                               )
                             : response.data[0].SizeAttributes.map(
@@ -324,6 +326,12 @@ const Product = () => {
             material: materialValue,
         }))
     }, [materialValue])
+
+    useEffect(() => {
+        return () => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current)
+        }
+    }, [])
 
     const handleAddColor = (e) => {
         e.preventDefault()
@@ -480,6 +488,10 @@ const Product = () => {
         }))
     }
 
+    const handleOnFocusColor = () => {
+        setShowColorPicker(!showColorPicker)
+    }
+
     const handleCategorySelect = (
         category,
         categoryDetail,
@@ -521,6 +533,61 @@ const Product = () => {
             sizes: prevData.sizes.filter((item) => item !== size),
         }))
     }
+
+    const handleOnFocusRelatedProduct = (e) => {
+        setShowDropdown(true)
+    }
+    const handleOnBlurRelatedProduct = (e) => {
+        timeoutRef.current = setTimeout(() => {
+            setShowDropdown(false)
+        }, 200)
+    }
+
+    const handleSearchProduct = (e) => {
+        setSearchProductValue(e.target.value)
+        const value = e.target.value
+        const fetchSearchProduct = async (value) => {
+            try {
+                setIsLoadingSearch(true)
+                const response = await axios.get(
+                    `${import.meta.env.VITE_API_URL}/api/products-search?query=${value}`
+                )
+                setProductSearchResult(response.data)
+            } catch (error) {
+                console.error('Error searching Product:', error)
+            } finally {
+                setIsLoadingSearch(false)
+            }
+        }
+
+        if (value) {
+            fetchSearchProduct(value)
+        } else {
+            setProductSearchResult([])
+        }
+    }
+
+    const handleSelectRelatedProduct = (e, product) => {
+        e.preventDefault()
+        setShowDropdown(false)
+        setSearchProductValue(product.productname)
+        setRecommendedProduct(product)
+        if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+
+    const handleAddRelatedProduct = (e) => {
+        e.preventDefault()
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            ProductRecommendations: [
+                ...prevFormData.ProductRecommendations,
+                recommendedProduct,
+            ],
+        }))
+        setRecommendedProduct(null)
+    }
+
+    const handleDeleteRelatedProduct = (product) => {}
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -692,6 +759,8 @@ const Product = () => {
                                     isColorPicker={true}
                                     btnText={'Add'}
                                     btnOnClick={handleAddColor}
+                                    handleOnFocus={handleOnFocusColor}
+                                    showColorPicker={showColorPicker}
                                 />
                                 {error?.color && (
                                     <p className="mt-2 text-xs text-red-700">
@@ -968,7 +1037,7 @@ const Product = () => {
                                         </tr>
                                     </thead>
                                     <tbody className="max-h-40 overflow-auto whitespace-nowrap">
-                                        {formData.onlinestores.map(
+                                        {formData.onlinestores?.map(
                                             (store, index) => (
                                                 <tr
                                                     className="hover:bg-gray-50"
@@ -990,6 +1059,135 @@ const Product = () => {
                                                 </tr>
                                             )
                                         )}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div className="relative">
+                                <Input
+                                    id="relatedProduct"
+                                    labelText="Related Products"
+                                    btnText={'Add'}
+                                    btnOnClick={handleAddRelatedProduct}
+                                    handleOnFocus={handleOnFocusRelatedProduct}
+                                    handleChange={handleSearchProduct}
+                                    handleOnBlur={handleOnBlurRelatedProduct}
+                                    value={searchProductValue}
+                                    btnDisabled={!recommendedProduct}
+                                />
+                                {showDropdown && (
+                                    <ul className="absolute bottom-0 z-50 max-h-80 w-full translate-y-full overflow-auto bg-white shadow-md">
+                                        {isLoadingSearch && (
+                                            <div className="px-4 py-2">
+                                                <div className="spinner-loader !w-6 !p-1"></div>
+                                            </div>
+                                        )}
+                                        {!isLoadingSearch &&
+                                            productSearchResult.length <= 0 && (
+                                                <p className="px-4 py-2 hover:bg-primary-50">
+                                                    No Products Found
+                                                </p>
+                                            )}
+                                        {!isLoadingSearch &&
+                                            productSearchResult.length > 0 &&
+                                            productSearchResult.map(
+                                                (product) => (
+                                                    <li
+                                                        className="px-4 py-2 hover:bg-primary-50"
+                                                        key={product.productid}
+                                                    >
+                                                        <button
+                                                            className="w-full text-start"
+                                                            onClick={(e) =>
+                                                                handleSelectRelatedProduct(
+                                                                    e,
+                                                                    product
+                                                                )
+                                                            }
+                                                            id={
+                                                                product.productid
+                                                            }
+                                                        >
+                                                            {
+                                                                product.productname
+                                                            }{' '}
+                                                            -{' '}
+                                                            {product.ProductCategories.map(
+                                                                (el) =>
+                                                                    el
+                                                                        .CategoryDetail
+                                                                        .categorydetailname
+                                                            ).join('/')}
+                                                        </button>
+                                                    </li>
+                                                )
+                                            )}
+                                    </ul>
+                                )}
+                            </div>
+                            <div>
+                                <table className="min-w-full bg-white">
+                                    <thead className="whitespace-nowrap bg-gray-100">
+                                        <tr className="">
+                                            <th className="p-4 text-left text-sm font-semibold text-gray-800">
+                                                Colors
+                                            </th>
+                                            <th className="p-4 text-left text-sm font-semibold text-gray-800">
+                                                Images
+                                            </th>
+                                            <th className="w-[1%] p-4 text-end text-sm font-semibold text-gray-800">
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="max-h-40 overflow-auto whitespace-nowrap">
+                                        {formData.colors.map((color, index) => (
+                                            <tr
+                                                className="hover:bg-gray-50"
+                                                key={index}
+                                            >
+                                                <td className="p-4 align-top text-sm text-gray-800">
+                                                    Product name - category name
+                                                </td>
+                                                <td className="p-4 align-top text-sm text-gray-800">
+                                                    <div className="flex w-full flex-wrap gap-3">
+                                                        {imgData
+                                                            .filter(
+                                                                (img) =>
+                                                                    img.imagetype ===
+                                                                    `${guid}_${color}`
+                                                            )
+                                                            .map((img) => (
+                                                                <Image
+                                                                    key={
+                                                                        img.cdnid
+                                                                    }
+                                                                    imgSrc={
+                                                                        img.imagepath
+                                                                    }
+                                                                    ratio="aspect-card"
+                                                                    className="h-48"
+                                                                    imgCdnId={
+                                                                        img.cdnid
+                                                                    }
+                                                                />
+                                                            ))}
+                                                    </div>
+                                                </td>
+                                                <td className="w-[1%] p-4 align-top text-sm">
+                                                    <div className="inline-flex w-full items-center justify-end gap-4 text-sm">
+                                                        <Button
+                                                            iconName={'trash'}
+                                                            type={'link'}
+                                                            onClick={() =>
+                                                                handleDeleteRelatedProduct(
+                                                                    color
+                                                                )
+                                                            }
+                                                        />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
                                     </tbody>
                                 </table>
                             </div>
