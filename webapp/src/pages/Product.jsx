@@ -584,10 +584,18 @@ const Product = () => {
                 recommendedProduct,
             ],
         }))
+        setSearchProductValue('')
         setRecommendedProduct(null)
     }
 
-    const handleDeleteRelatedProduct = (product) => {}
+    const handleDeleteRelatedProduct = (product) => {
+        setFormData((prevData) => ({
+            ...prevData,
+            ProductRecommendations: prevData.ProductRecommendations.filter(
+                (item) => item.productid !== product.productid
+            ),
+        }))
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -1124,73 +1132,98 @@ const Product = () => {
                                     </ul>
                                 )}
                             </div>
-                            <div>
-                                <table className="min-w-full bg-white">
-                                    <thead className="whitespace-nowrap bg-gray-100">
-                                        <tr className="">
-                                            <th className="p-4 text-left text-sm font-semibold text-gray-800">
-                                                Colors
-                                            </th>
-                                            <th className="p-4 text-left text-sm font-semibold text-gray-800">
-                                                Images
-                                            </th>
-                                            <th className="w-[1%] p-4 text-end text-sm font-semibold text-gray-800">
-                                                Actions
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="max-h-40 overflow-auto whitespace-nowrap">
-                                        {formData.colors.map((color, index) => (
-                                            <tr
-                                                className="hover:bg-gray-50"
-                                                key={index}
-                                            >
-                                                <td className="p-4 align-top text-sm text-gray-800">
-                                                    Product name - category name
-                                                </td>
-                                                <td className="p-4 align-top text-sm text-gray-800">
-                                                    <div className="flex w-full flex-wrap gap-3">
-                                                        {imgData
-                                                            .filter(
-                                                                (img) =>
-                                                                    img.imagetype ===
-                                                                    `${guid}_${color}`
-                                                            )
-                                                            .map((img) => (
-                                                                <Image
-                                                                    key={
-                                                                        img.cdnid
+                            {formData.ProductRecommendations.length > 0 && (
+                                <div>
+                                    <table className="min-w-full bg-white">
+                                        <thead className="whitespace-nowrap bg-gray-100">
+                                            <tr className="">
+                                                <th className="p-4 text-left text-sm font-semibold text-gray-800">
+                                                    Products
+                                                </th>
+                                                <th className="p-4 text-left text-sm font-semibold text-gray-800">
+                                                    Images
+                                                </th>
+                                                <th className="w-[1%] p-4 text-end text-sm font-semibold text-gray-800">
+                                                    Actions
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="max-h-40 overflow-auto whitespace-nowrap">
+                                            {formData.ProductRecommendations.map(
+                                                (product, index) => (
+                                                    <tr
+                                                        className="hover:bg-gray-50"
+                                                        key={index}
+                                                    >
+                                                        <td className="p-4 align-top text-sm text-gray-800">
+                                                            {
+                                                                product.productname
+                                                            }{' '}
+                                                            -{' '}
+                                                            {product
+                                                                .ProductCategories
+                                                                .length > 0 &&
+                                                                product.ProductCategories.map(
+                                                                    (el) =>
+                                                                        el
+                                                                            .CategoryDetail
+                                                                            .categorydetailname
+                                                                ).join('/')}
+                                                        </td>
+                                                        <td className="p-4 align-top text-sm text-gray-800">
+                                                            <div className="flex w-full flex-wrap gap-3">
+                                                                {imgData
+                                                                    .filter(
+                                                                        (img) =>
+                                                                            img.imagetype.includes(
+                                                                                `${product.productid}`
+                                                                            )
+                                                                    )
+                                                                    .map(
+                                                                        (
+                                                                            img
+                                                                        ) => (
+                                                                            <Image
+                                                                                key={
+                                                                                    img.cdnid
+                                                                                }
+                                                                                imgSrc={
+                                                                                    img.imagepath
+                                                                                }
+                                                                                ratio="aspect-card"
+                                                                                className="h-48"
+                                                                                imgCdnId={
+                                                                                    img.cdnid
+                                                                                }
+                                                                            />
+                                                                        )
+                                                                    )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="w-[1%] p-4 align-top text-sm">
+                                                            <div className="inline-flex w-full items-center justify-end gap-4 text-sm">
+                                                                <Button
+                                                                    iconName={
+                                                                        'trash'
                                                                     }
-                                                                    imgSrc={
-                                                                        img.imagepath
+                                                                    type={
+                                                                        'link'
                                                                     }
-                                                                    ratio="aspect-card"
-                                                                    className="h-48"
-                                                                    imgCdnId={
-                                                                        img.cdnid
+                                                                    onClick={() =>
+                                                                        handleDeleteRelatedProduct(
+                                                                            product
+                                                                        )
                                                                     }
                                                                 />
-                                                            ))}
-                                                    </div>
-                                                </td>
-                                                <td className="w-[1%] p-4 align-top text-sm">
-                                                    <div className="inline-flex w-full items-center justify-end gap-4 text-sm">
-                                                        <Button
-                                                            iconName={'trash'}
-                                                            type={'link'}
-                                                            onClick={() =>
-                                                                handleDeleteRelatedProduct(
-                                                                    color
-                                                                )
-                                                            }
-                                                        />
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
                             <div>
                                 <p className="block text-sm font-medium text-gray-900">
                                     Categories
