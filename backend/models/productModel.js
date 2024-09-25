@@ -30,7 +30,7 @@ const Product = sequelize.define('Product', {
         type: DataTypes.ARRAY(DataTypes.STRING),
     },
     material: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
     },
     onlinestores: {
         type: DataTypes.JSONB,
