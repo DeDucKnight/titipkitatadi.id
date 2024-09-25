@@ -1,10 +1,17 @@
 import { useEffect, useState } from 'react'
 import { LexicalComposer } from '@lexical/react/LexicalComposer'
-import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin'
+import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin'
 import { ContentEditable } from '@lexical/react/LexicalContentEditable'
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin'
+import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import HTMLExportPlugin from './HTMLExportPlugin'
 import HTMLImportPlugin from './HTMLImportPlugin'
+import { ParagraphNode } from 'lexical'
+
+function Placeholder() {
+    return <div className="editor-placeholder">Enter some text...</div>
+}
 
 function RichTextEditor({ labelText, id, materialValue, setMaterialValue }) {
     const [html, setHtml] = useState('')
@@ -12,6 +19,10 @@ function RichTextEditor({ labelText, id, materialValue, setMaterialValue }) {
     const initialConfig = {
         namespace: 'MyEditor',
         onError: (error) => console.error(error),
+        nodes: [ParagraphNode],
+        theme: {
+            paragraph: 'mb-1',
+        },
     }
 
     return (
@@ -22,15 +33,15 @@ function RichTextEditor({ labelText, id, materialValue, setMaterialValue }) {
                     className={`mb-2 block text-sm font-medium text-gray-900`}
                 >
                     {labelText}
-                    <span></span>
                 </label>
             )}
             <div className="w-full border border-gray-300 p-2.5 text-sm text-gray-900">
-                <LexicalComposer initialConfig={initialConfig} id={id}>
-                    <PlainTextPlugin
+                <LexicalComposer initialConfig={initialConfig}>
+                    <RichTextPlugin
                         contentEditable={
                             <ContentEditable className="editor-input" />
                         }
+                        placeholder={<Placeholder />}
                     />
                     <HistoryPlugin />
                     <HTMLExportPlugin
@@ -39,9 +50,17 @@ function RichTextEditor({ labelText, id, materialValue, setMaterialValue }) {
                         setMaterialValue={setMaterialValue}
                     />
                     <HTMLImportPlugin initialHTML={materialValue} />
+                    <OnChangePlugin
+                        onChange={(editorState) => {
+                            editorState.read(() => {
+                                // You can perform additional actions here when the editor state changes
+                            })
+                        }}
+                    />
                 </LexicalComposer>
             </div>
         </div>
     )
 }
+
 export default RichTextEditor

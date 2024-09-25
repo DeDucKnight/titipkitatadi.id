@@ -74,9 +74,10 @@ input[type='number'] {
 }
 
 .editor-input {
-    min-height: 40px;
+    min-height: 60px;
     resize: vertical;
     overflow-y: auto;
+    white-space: pre-wrap;
 }
 
 .editor-placeholder {
