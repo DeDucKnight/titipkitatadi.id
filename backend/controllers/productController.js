@@ -383,17 +383,13 @@ exports.create_product = async (req, res) => {
         if (ProductRecommendations && ProductRecommendations.length > 0) {
             const recommendationToInsert = ProductRecommendations.map(item => ({
                 productid: product.productid,
-                recommendationproductid: item.recommendationproductid,
+                recommendedproductid: item.recommendedproductid,
             }));
 
             await ProductRecommendation.bulkCreate(recommendationToInsert, { transaction: t });
         }
 
         await t.commit();
-        product.ProductImages = ProductImages;
-        product.ProductCategories = ProductCategories;
-        product.ProductSizeMetrics = ProductSizeMetrics;
-        product.ProductRecommendations = ProductRecommendations;
         res.status(201).json({ message: 'Product created successfully', product });
     } catch (err) {
         // Rollback transaction in case of an error

@@ -571,7 +571,11 @@ const Product = () => {
         e.preventDefault()
         setShowDropdown(false)
         setSearchProductValue(product.productname)
-        setRecommendedProduct(product)
+        setRecommendedProduct({
+            recommendedproductid: product.productid,
+            productid: guid !== 'product' ? guid : '',
+            RecommendedProduct: product
+        });
         if (timeoutRef.current) clearTimeout(timeoutRef.current)
     }
 
@@ -580,7 +584,7 @@ const Product = () => {
         setFormData((prevFormData) => ({
             ...prevFormData,
             ProductRecommendations: [
-                ...prevFormData.ProductRecommendations,
+                ...prevFormData.ProductRecommendations || [],
                 recommendedProduct,
             ],
         }))
@@ -588,11 +592,11 @@ const Product = () => {
         setRecommendedProduct(null)
     }
 
-    const handleDeleteRelatedProduct = (product) => {
+    const handleDeleteRelatedProduct = (recommendedProductId) => {
         setFormData((prevData) => ({
             ...prevData,
             ProductRecommendations: prevData.ProductRecommendations.filter(
-                (item) => item.productid !== product.productid
+                (item) => item.recommendedproductid !== recommendedProductId
             ),
         }))
     }
@@ -632,8 +636,6 @@ const Product = () => {
                     formData
                 )
                 if (response.status >= 200 && response.status < 300) {
-                    setInitialData(response.data.product)
-                    setFormData(response.data.product)
                     navigate(`/products/${response.data.product.productid}`)
                 }
             }
@@ -1132,7 +1134,7 @@ const Product = () => {
                                     </ul>
                                 )}
                             </div>
-                            {formData.ProductRecommendations.length > 0 && (
+                            {formData.ProductRecommendations?.length > 0 && (
                                 <div>
                                     <table className="min-w-full bg-white">
                                         <thead className="whitespace-nowrap bg-gray-100">
@@ -1157,47 +1159,23 @@ const Product = () => {
                                                     >
                                                         <td className="p-4 align-top text-sm text-gray-800">
                                                             {
-                                                                product.productname
-                                                            }{' '}
-                                                            -{' '}
-                                                            {product
-                                                                .ProductCategories
-                                                                .length > 0 &&
-                                                                product.ProductCategories.map(
-                                                                    (el) =>
-                                                                        el
-                                                                            .CategoryDetail
-                                                                            .categorydetailname
-                                                                ).join('/')}
+                                                                product.RecommendedProduct.productname
+                                                            }
                                                         </td>
                                                         <td className="p-4 align-top text-sm text-gray-800">
                                                             <div className="flex w-full flex-wrap gap-3">
-                                                                {imgData
-                                                                    .filter(
-                                                                        (img) =>
-                                                                            img.imagetype.includes(
-                                                                                `${product.productid}`
-                                                                            )
-                                                                    )
-                                                                    .map(
-                                                                        (
-                                                                            img
-                                                                        ) => (
-                                                                            <Image
-                                                                                key={
-                                                                                    img.cdnid
-                                                                                }
-                                                                                imgSrc={
-                                                                                    img.imagepath
-                                                                                }
-                                                                                ratio="aspect-card"
-                                                                                className="h-48"
-                                                                                imgCdnId={
-                                                                                    img.cdnid
-                                                                                }
-                                                                            />
-                                                                        )
-                                                                    )}
+                                                                {product.RecommendedProduct.ProductImages?.length > 0 && (
+                                                                    <Image
+                                                                        key={product.RecommendedProduct.ProductImages[0].Image.cdnid}
+                                                                        imgSrc={product.RecommendedProduct.ProductImages[0].Image.imagepath}
+                                                                        ratio="aspect-card"
+                                                                        className="h-48"
+                                                                        imgCdnId={product.RecommendedProduct.ProductImages[0].Image.cdnid}
+                                                                    />
+                                                                )}
+                                                                {product.RecommendedProduct.ProductImages?.length === 0 && (
+                                                                    <p>No images available</p>  
+                                                                )}
                                                             </div>
                                                         </td>
                                                         <td className="w-[1%] p-4 align-top text-sm">
@@ -1211,7 +1189,7 @@ const Product = () => {
                                                                     }
                                                                     onClick={() =>
                                                                         handleDeleteRelatedProduct(
-                                                                            product
+                                                                            product.recommendedproductid
                                                                         )
                                                                     }
                                                                 />
