@@ -12,23 +12,30 @@ const Widgets = () => {
     const [isChanged, setIsChanged] = useState(false)
     const [announcementBarValue, setAnnouncementBarValue] = useState('')
     const [initialData, setInitialData] = useState({
-        announcementBarItems: [],
+        announcements: [],
     })
     const [formData, setFormData] = useState({
-        announcementBarItems: [],
+        announcements: [],
     })
 
     const handleSubmit = async (e) => {
         e.preventDefault()
         setIsSubmitting(true)
         try {
+
             const response = await axios.post(
-                `${import.meta.env.VITE_API_URL}/api/announcements`,
+                `${import.meta.env.VITE_API_URL}/api/announcements-bulk`,
                 formData
             )
             if (response.status >= 200 && response.status < 300) {
-                setInitialData(response.data)
-                setFormData(response.data)
+                setInitialData((prevInitData) => ({
+                    ...prevInitData,
+                    announcements: response.data,
+                }))
+                setFormData((prevFormData) => ({
+                    ...prevFormData,
+                    announcements: response.data,
+                }))
             }
         } catch (error) {
             console.error(error)
@@ -51,9 +58,9 @@ const Widgets = () => {
         if (value) {
             setFormData((prevFormData) => ({
                 ...prevFormData,
-                announcementBarItems: [
-                    ...prevFormData.announcementBarItems,
-                    value,
+                announcements: [
+                    ...prevFormData.announcements,
+                    { announcementtext: value },
                 ],
             }))
             setAnnouncementBarValue('')
@@ -62,10 +69,10 @@ const Widgets = () => {
     const handleDeleteAnnouncementBarItem = (announcementBarItem, index) => {
         setFormData((prevData) => ({
             ...prevData,
-            announcementBarItems: prevData.announcementBarItems.filter(
-                (item, i) => item !== announcementBarItem && i === index
+            announcements: prevData.announcements.filter(
+                (item, i) => i !== index
             ),
-        }))
+        }));
     }
 
     useEffect(() => {
@@ -75,9 +82,13 @@ const Widgets = () => {
                 const response = await axios.get(
                     `${import.meta.env.VITE_API_URL}/api/announcements`
                 )
+                setInitialData((prevInitData) => ({
+                    ...prevInitData,
+                    announcements: response.data,
+                }))
                 setFormData((prevFormData) => ({
                     ...prevFormData,
-                    announcementBarItems: response.data,
+                    announcements: response.data,
                 }))
             } catch (error) {
                 console.error('Error fetching Announcement Bar:', error)
@@ -153,11 +164,11 @@ const Widgets = () => {
                                 btnOnClick={handleAddAnnouncementBarItems}
                                 btnText={'Add'}
                                 btnDisabled={
-                                    formData.announcementBarItems.length === 3
+                                    formData.announcements.length === 3
                                 }
                             />
                             <div className="overflow-x-auto">
-                                {formData.announcementBarItems.length > 0 && (
+                                {formData.announcements.length > 0 && (
                                     <table className="min-w-full bg-white">
                                         <thead className="whitespace-nowrap bg-gray-100">
                                             <tr className="">
@@ -170,7 +181,7 @@ const Widgets = () => {
                                             </tr>
                                         </thead>
                                         <tbody className="max-h-40 overflow-auto whitespace-nowrap">
-                                            {formData.announcementBarItems.map(
+                                            {formData.announcements.map(
                                                 (
                                                     announcementBarItem,
                                                     index
@@ -181,7 +192,7 @@ const Widgets = () => {
                                                     >
                                                         <td className="p-4 text-xs text-gray-800">
                                                             {
-                                                                announcementBarItem
+                                                                announcementBarItem.announcementtext
                                                             }
                                                         </td>
                                                         <td className="w-[1%] p-4 text-xs">
