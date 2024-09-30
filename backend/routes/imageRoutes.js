@@ -17,4 +17,6 @@ router.get('/get-image-test', imageController.get_image_test);
 router.delete('/delete-image/:imageId', imageController.delete_image);
 router.put('/update-image-properties/', imageController.update_image_by_cdnid);
 
+router.post('/bulk-upload-images', imageController.bulk_create_images);
+
 module.exports = router;

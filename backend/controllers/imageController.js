@@ -2,6 +2,7 @@ const { Product, ProductImage, ProductCategory, Category, CategoryDetail, Image,
 
 const axios = require('axios');
 const fs = require('fs');
+const csv = require('csv-parser');
 const path = require('path');
 const FormData = require('form-data');
 const { log } = require('console');
@@ -338,3 +339,72 @@ exports.update_image_by_cdnid = async (req, res) => {
         res.status(500).json({ error: 'Failed to update images.' });
     }
 };
+
+// Bulk Create images
+exports.bulk_create_images = async (req, res) => {
+    const newImages = [];
+    const productImages = [];
+  
+    fs.createReadStream('../sample-data/images_input.csv')  // Replace with the actual CSV file path
+      .pipe(csv(['productid', 'color', 'cdnid', 'imagepath']))
+      .on('data', (row) => {
+        // Create a new object for each row with the modified properties for Image
+        const processedImage = {
+          cdnid: row.cdnid.trim(),
+          imagepath: row.imagepath.trim(),
+          imagetype: `${row.productid.trim()}_${row.color.trim()}`,  // Combine productid and color for imagetype
+          productid: row.productid.trim(),
+          color: row.color.trim()
+        };
+  
+        // Push the processed data into the array for Image bulk insert
+        // newImages.push({
+        //   productid: row.productid,  // Store productid for mapping later
+        //   color: row.color,
+        //   imageData: processedImage,  // Store the actual image data to insert
+        // });
+        newImages.push(processedImage);
+      })
+      .on('end', async () => {
+        // Start a transaction to ensure both bulkCreate operations are atomic
+        const transaction = await sequelize.transaction();
+        
+        try {
+          // Bulk insert images and get the result with inserted imageids
+          const createdImages = await Image.bulkCreate(newImages, { returning: true, transaction });
+  
+          // Safely map the created images to the original newImages array based on cdnid
+          createdImages.forEach((image) => {
+            // Find the original entry by matching the cdnid
+            const originalImageData = newImages.find(img => img.cdnid === image.cdnid);
+  
+            // Push the productImage data for bulk creation
+            productImages.push({
+              productid: originalImageData.productid,  // Associated productid from the CSV
+              imageid: image.imageid,  // The newly created imageid
+              color: originalImageData.color,  // Optional color field if applicable
+              isdefault: false,  // Default value
+              status: true,  // Default value
+            });
+          });
+  
+          // Bulk insert ProductImage entries
+          await ProductImage.bulkCreate(productImages, { transaction });
+  
+          // Commit the transaction after both operations are successful
+          await transaction.commit();
+          console.log('Data has been inserted successfully');
+  
+          res.status(200).send({ message: 'Images and ProductImages created successfully' });
+        } catch (err) {
+          // Rollback the transaction in case of error
+          if (transaction) await transaction.rollback();
+          console.error('Error while inserting data into the database', err);
+          res.status(500).send({ error: 'Error inserting data' });
+        }
+      })
+      .on('error', (err) => {
+        console.error('Error while reading the CSV file', err);
+        res.status(500).send({ error: 'Error reading CSV file' });
+      });
+  };
