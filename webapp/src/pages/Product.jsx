@@ -10,6 +10,7 @@ import Dropdown from '../components/Dropdown'
 import Skeleton from '../components/Skeleton'
 import axios from 'axios'
 import RichTextEditor from '../components/RichTextEditor'
+import placeholderImg from '../assets/images/placeholder-image.jpg'
 
 const Product = () => {
     const [isChanged, setIsChanged] = useState(false)
@@ -574,8 +575,8 @@ const Product = () => {
         setRecommendedProduct({
             recommendedproductid: product.productid,
             productid: guid !== 'product' ? guid : '',
-            RecommendedProduct: product
-        });
+            RecommendedProduct: product,
+        })
         if (timeoutRef.current) clearTimeout(timeoutRef.current)
     }
 
@@ -584,7 +585,7 @@ const Product = () => {
         setFormData((prevFormData) => ({
             ...prevFormData,
             ProductRecommendations: [
-                ...prevFormData.ProductRecommendations || [],
+                ...(prevFormData.ProductRecommendations || []),
                 recommendedProduct,
             ],
         }))
@@ -1159,22 +1160,80 @@ const Product = () => {
                                                     >
                                                         <td className="p-4 align-top text-sm text-gray-800">
                                                             {
-                                                                product.RecommendedProduct.productname
+                                                                product
+                                                                    .RecommendedProduct
+                                                                    .productname
                                                             }
                                                         </td>
                                                         <td className="p-4 align-top text-sm text-gray-800">
                                                             <div className="flex w-full flex-wrap gap-3">
-                                                                {product.RecommendedProduct.ProductImages?.length > 0 && (
+                                                                {imgData.filter(
+                                                                    (img) =>
+                                                                        img.imagetype.split(
+                                                                            '_'
+                                                                        )[0] ===
+                                                                        product.recommendedproductid
+                                                                ).length >
+                                                                    0 && (
                                                                     <Image
-                                                                        key={product.RecommendedProduct.ProductImages[0].Image.cdnid}
-                                                                        imgSrc={product.RecommendedProduct.ProductImages[0].Image.imagepath}
+                                                                        key={
+                                                                            imgData.filter(
+                                                                                (
+                                                                                    img
+                                                                                ) =>
+                                                                                    img.imagetype.split(
+                                                                                        '_'
+                                                                                    )[0] ===
+                                                                                    product.recommendedproductid
+                                                                            )[0]
+                                                                                .cdnid
+                                                                        }
+                                                                        imgSrc={
+                                                                            imgData.filter(
+                                                                                (
+                                                                                    img
+                                                                                ) =>
+                                                                                    img.imagetype.split(
+                                                                                        '_'
+                                                                                    )[0] ===
+                                                                                    product.recommendedproductid
+                                                                            )[0]
+                                                                                .imagepath
+                                                                        }
                                                                         ratio="aspect-card"
                                                                         className="h-48"
-                                                                        imgCdnId={product.RecommendedProduct.ProductImages[0].Image.cdnid}
+                                                                        imgCdnId={
+                                                                            imgData.filter(
+                                                                                (
+                                                                                    img
+                                                                                ) =>
+                                                                                    img.imagetype.split(
+                                                                                        '_'
+                                                                                    )[0] ===
+                                                                                    product.recommendedproductid
+                                                                            )[0]
+                                                                                .cdnid
+                                                                        }
                                                                     />
                                                                 )}
-                                                                {product.RecommendedProduct.ProductImages?.length === 0 && (
-                                                                    <p>No images available</p>  
+                                                                {imgData.filter(
+                                                                    (img) =>
+                                                                        img.imagetype.split(
+                                                                            '_'
+                                                                        )[0] ===
+                                                                        product.recommendedproductid
+                                                                ).length ===
+                                                                    0 && (
+                                                                    <Image
+                                                                        imgSrc={
+                                                                            placeholderImg
+                                                                        }
+                                                                        isPlaceholder={
+                                                                            true
+                                                                        }
+                                                                        ratio="aspect-card"
+                                                                        className="h-48"
+                                                                    />
                                                                 )}
                                                             </div>
                                                         </td>

@@ -10,6 +10,7 @@ const Image = ({
     imgCdnId,
     isLoading = false,
     isDeleting = false,
+    isPlaceholder,
 }) => {
     return (
         <div className="group relative">
@@ -17,16 +18,18 @@ const Image = ({
                 className={`relative ${objectFit} ${ratio} ${className}`}
                 src={imgSrc}
             />
-            <div
-                className={`absolute inset-0 flex items-end justify-center gap-4 bg-black bg-opacity-50 pb-7 opacity-0 transition-opacity group-hover:opacity-100 ${objectFit} ${ratio} ${className}`}
-            >
-                <Button
-                    iconName={'trash'}
-                    className="!bg-white !text-primary-500"
-                    onClick={(e) => handleClickDelete(e, imgCdnId)}
-                    iconWidth={'20'}
-                />
-            </div>
+            {!isPlaceholder && (
+                <div
+                    className={`absolute inset-0 flex items-end justify-center gap-4 bg-black bg-opacity-50 pb-7 opacity-0 transition-opacity group-hover:opacity-100 ${objectFit} ${ratio} ${className}`}
+                >
+                    <Button
+                        iconName={'trash'}
+                        className="!bg-white !text-primary-500"
+                        onClick={(e) => handleClickDelete(e, imgCdnId)}
+                        iconWidth={'20'}
+                    />
+                </div>
+            )}
             {(isLoading || isDeleting) && (
                 <div className="pointer-events-none absolute inset-0 top-0 flex items-center justify-center bg-black bg-opacity-30">
                     {' '}
