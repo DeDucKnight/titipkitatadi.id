@@ -9,15 +9,25 @@ import CategorySelection from '../components/CategorySelection'
 import Dropdown from '../components/Dropdown'
 import Skeleton from '../components/Skeleton'
 import axios from 'axios'
+import RichTextEditor from '../components/RichTextEditor'
+import placeholderImg from '../assets/images/placeholder-image.jpg'
+
 const Product = () => {
     const [isChanged, setIsChanged] = useState(false)
     const [isLoadingImage, setIsLoadingImage] = useState(false)
     const [isDeletingImage, setIsDeletingImage] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
+    const [isLoadingSearch, setIsLoadingSearch] = useState(false)
+    const [showColorPicker, setShowColorPicker] = useState(false)
+    const [showDropdown, setShowDropdown] = useState(false)
     const [sizeValue, setSizeValue] = useState('')
+    const [materialValue, setMaterialValue] = useState('')
+    const [searchProductValue, setSearchProductValue] = useState('')
     const [selectedSizeMetricId, setselectedSizeMetricId] = useState('')
+    const [selectedRelatedProduct, setSelectedRelatedProduct] = useState('')
     const [error, setError] = useState(null)
+    const [recommendedProduct, setRecommendedProduct] = useState(null)
     const { guid } = useParams()
     const location = useLocation()
     const navigate = useNavigate()
@@ -38,6 +48,7 @@ const Product = () => {
         ProductImages: [],
         ProductCategories: [],
         ProductSizeMetrics: [],
+        ProductRecommendations: [],
         sizemetricid: '',
     })
     const [formData, setFormData] = useState({
@@ -56,11 +67,15 @@ const Product = () => {
         ProductImages: [],
         ProductCategories: [],
         ProductSizeMetrics: [],
+        ProductRecommendations: [],
         sizemetricid: '',
     })
     const [categoriesData, setCategoriesData] = useState([])
     const [imgData, setImgData] = useState([])
     const [sizeMetrics, setSizeMetrics] = useState([])
+    const [productSearchResult, setProductSearchResult] = useState([])
+    const timeoutRef = useRef(null)
+
 
     const updateFormData = (prevFormData, response) => {
         const sizemetricid =
@@ -172,20 +187,7 @@ const Product = () => {
                         : response.data[0].sizemetricid,
                     ProductSizeMetrics:
                         prevInitialData.ProductSizeMetrics?.length > 0
-                            ? // ? prevInitialData.ProductSizeMetrics.map(
-                              //       (metric) => ({
-                              //           ...metric,
-                              //           measurements:
-                              //               prevInitialData.sizes.length > 0
-                              //                   ? prevInitialData.sizes.map(
-                              //                         (size) => ({
-                              //                             [size]: '',
-                              //                         })
-                              //                     )
-                              //                   : [],
-                              //       })
-                              //   )
-                              prevInitialData.ProductSizeMetrics.map(
+                            ? prevInitialData.ProductSizeMetrics.map(
                                   (metric) => ({
                                       ...metric,
                                       measurements:
@@ -194,12 +196,12 @@ const Product = () => {
                                               metric.measurements.length === 0)
                                               ? prevInitialData.sizes.map(
                                                     (size) => ({
-                                                        [size]: '', // Initialize with empty values if sizes exist and measurements are null/empty
+                                                        [size]: '',
                                                     })
                                                 )
                                               : metric.measurements === null
-                                                ? [] // Return empty array if measurements are null
-                                                : metric.measurements, // Return the existing measurements
+                                                ? []
+                                                : metric.measurements,
                                   })
                               )
                             : response.data[0].SizeAttributes.map(
@@ -259,6 +261,7 @@ const Product = () => {
 
                 setFormData(productData)
                 setInitialData(productData)
+                setMaterialValue(productData.material)
                 fetchCategories()
                 fetchSizeMetrics()
                 fetchImages()
@@ -322,6 +325,19 @@ const Product = () => {
         setIsChanged(isFormChanged)
     }, [formData, initialData])
 
+    useEffect(() => {
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            material: materialValue,
+        }))
+    }, [materialValue])
+
+    useEffect(() => {
+        return () => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current)
+        }
+    }, [])
+
     const handleAddColor = (e) => {
         e.preventDefault()
         const hex = document.querySelector('#colors').value
@@ -348,6 +364,7 @@ const Product = () => {
                     })
                 ),
             }))
+            setSizeValue('')
         }
     }
 
@@ -476,6 +493,10 @@ const Product = () => {
         }))
     }
 
+    const handleOnFocusColor = () => {
+        setShowColorPicker(!showColorPicker)
+    }
+
     const handleCategorySelect = (
         category,
         categoryDetail,
@@ -535,6 +556,73 @@ const Product = () => {
         })
     }
 
+    const handleOnFocusRelatedProduct = (e) => {
+        setShowDropdown(true)
+    }
+    const handleOnBlurRelatedProduct = (e) => {
+        timeoutRef.current = setTimeout(() => {
+            setShowDropdown(false)
+        }, 200)
+    }
+
+    const handleSearchProduct = (e) => {
+        setSearchProductValue(e.target.value)
+        const value = e.target.value
+        const fetchSearchProduct = async (value) => {
+            try {
+                setIsLoadingSearch(true)
+                const response = await axios.get(
+                    `${import.meta.env.VITE_API_URL}/api/products-search?query=${value}`
+                )
+                setProductSearchResult(response.data)
+            } catch (error) {
+                console.error('Error searching Product:', error)
+            } finally {
+                setIsLoadingSearch(false)
+            }
+        }
+
+        if (value) {
+            fetchSearchProduct(value)
+        } else {
+            setProductSearchResult([])
+        }
+    }
+
+    const handleSelectRelatedProduct = (e, product) => {
+        e.preventDefault()
+        setShowDropdown(false)
+        setSearchProductValue(product.productname)
+        setRecommendedProduct({
+            recommendedproductid: product.productid,
+            productid: guid !== 'product' ? guid : '',
+            RecommendedProduct: product,
+        })
+        if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+
+    const handleAddRelatedProduct = (e) => {
+        e.preventDefault()
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            ProductRecommendations: [
+                ...(prevFormData.ProductRecommendations || []),
+                recommendedProduct,
+            ],
+        }))
+        setSearchProductValue('')
+        setRecommendedProduct(null)
+    }
+
+    const handleDeleteRelatedProduct = (recommendedProductId) => {
+        setFormData((prevData) => ({
+            ...prevData,
+            ProductRecommendations: prevData.ProductRecommendations.filter(
+                (item) => item.recommendedproductid !== recommendedProductId
+            ),
+        }))
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault()
         setIsSubmitting(true)
@@ -570,8 +658,6 @@ const Product = () => {
                     formData
                 )
                 if (response.status >= 200 && response.status < 300) {
-                    setInitialData(response.data.product)
-                    setFormData(response.data.product)
                     navigate(`/products/${response.data.product.productid}`)
                 }
             }
@@ -705,6 +791,8 @@ const Product = () => {
                                     isColorPicker={true}
                                     btnText={'Add'}
                                     btnOnClick={handleAddColor}
+                                    handleOnFocus={handleOnFocusColor}
+                                    showColorPicker={showColorPicker}
                                 />
                                 {error?.color && (
                                     <p className="mt-2 text-xs text-red-700">
@@ -957,12 +1045,13 @@ const Product = () => {
                                     </table>
                                 )}
                             </div>
-                            <Input
-                                handleChange={handleChange}
+                            <RichTextEditor
                                 id="material"
                                 labelText="Material"
-                                required={true}
                                 value={formData.material}
+                                handleChange={handleChange}
+                                materialValue={materialValue}
+                                setMaterialValue={setMaterialValue}
                             />
                             <div className="flex flex-col gap-2">
                                 <p className="block text-sm font-medium text-gray-900">
@@ -980,7 +1069,7 @@ const Product = () => {
                                         </tr>
                                     </thead>
                                     <tbody className="max-h-40 overflow-auto whitespace-nowrap">
-                                        {formData.onlinestores.map(
+                                        {formData.onlinestores?.map(
                                             (store, index) => (
                                                 <tr
                                                     className="hover:bg-gray-50"
@@ -1005,6 +1094,194 @@ const Product = () => {
                                     </tbody>
                                 </table>
                             </div>
+                            <div className="relative">
+                                <Input
+                                    id="relatedProduct"
+                                    labelText="Related Products"
+                                    btnText={'Add'}
+                                    btnOnClick={handleAddRelatedProduct}
+                                    handleOnFocus={handleOnFocusRelatedProduct}
+                                    handleChange={handleSearchProduct}
+                                    handleOnBlur={handleOnBlurRelatedProduct}
+                                    value={searchProductValue}
+                                    btnDisabled={!recommendedProduct}
+                                />
+                                {showDropdown && (
+                                    <ul className="absolute bottom-0 z-50 max-h-80 w-full translate-y-full overflow-auto bg-white shadow-md">
+                                        {isLoadingSearch && (
+                                            <div className="px-4 py-2">
+                                                <div className="spinner-loader !w-6 !p-1"></div>
+                                            </div>
+                                        )}
+                                        {!isLoadingSearch &&
+                                            productSearchResult.length <= 0 && (
+                                                <p className="px-4 py-2 hover:bg-primary-50">
+                                                    No Products Found
+                                                </p>
+                                            )}
+                                        {!isLoadingSearch &&
+                                            productSearchResult.length > 0 &&
+                                            productSearchResult.map(
+                                                (product) => (
+                                                    <li
+                                                        className="px-4 py-2 hover:bg-primary-50"
+                                                        key={product.productid}
+                                                    >
+                                                        <button
+                                                            className="w-full text-start"
+                                                            onClick={(e) =>
+                                                                handleSelectRelatedProduct(
+                                                                    e,
+                                                                    product
+                                                                )
+                                                            }
+                                                            id={
+                                                                product.productid
+                                                            }
+                                                        >
+                                                            {
+                                                                product.productname
+                                                            }{' '}
+                                                            -{' '}
+                                                            {product.ProductCategories.map(
+                                                                (el) =>
+                                                                    el
+                                                                        .CategoryDetail
+                                                                        .categorydetailname
+                                                            ).join('/')}
+                                                        </button>
+                                                    </li>
+                                                )
+                                            )}
+                                    </ul>
+                                )}
+                            </div>
+                            {formData.ProductRecommendations?.length > 0 && (
+                                <div>
+                                    <table className="min-w-full bg-white">
+                                        <thead className="whitespace-nowrap bg-gray-100">
+                                            <tr className="">
+                                                <th className="p-4 text-left text-sm font-semibold text-gray-800">
+                                                    Products
+                                                </th>
+                                                <th className="p-4 text-left text-sm font-semibold text-gray-800">
+                                                    Images
+                                                </th>
+                                                <th className="w-[1%] p-4 text-end text-sm font-semibold text-gray-800">
+                                                    Actions
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="max-h-40 overflow-auto whitespace-nowrap">
+                                            {formData.ProductRecommendations.map(
+                                                (product, index) => (
+                                                    <tr
+                                                        className="hover:bg-gray-50"
+                                                        key={index}
+                                                    >
+                                                        <td className="p-4 align-top text-sm text-gray-800">
+                                                            {
+                                                                product
+                                                                    .RecommendedProduct
+                                                                    .productname
+                                                            }
+                                                        </td>
+                                                        <td className="p-4 align-top text-sm text-gray-800">
+                                                            <div className="flex w-full flex-wrap gap-3">
+                                                                {imgData.filter(
+                                                                    (img) =>
+                                                                        img.imagetype.split(
+                                                                            '_'
+                                                                        )[0] ===
+                                                                        product.recommendedproductid
+                                                                ).length >
+                                                                    0 && (
+                                                                    <Image
+                                                                        key={
+                                                                            imgData.filter(
+                                                                                (
+                                                                                    img
+                                                                                ) =>
+                                                                                    img.imagetype.split(
+                                                                                        '_'
+                                                                                    )[0] ===
+                                                                                    product.recommendedproductid
+                                                                            )[0]
+                                                                                .cdnid
+                                                                        }
+                                                                        imgSrc={
+                                                                            imgData.filter(
+                                                                                (
+                                                                                    img
+                                                                                ) =>
+                                                                                    img.imagetype.split(
+                                                                                        '_'
+                                                                                    )[0] ===
+                                                                                    product.recommendedproductid
+                                                                            )[0]
+                                                                                .imagepath
+                                                                        }
+                                                                        ratio="aspect-card"
+                                                                        className="h-48"
+                                                                        imgCdnId={
+                                                                            imgData.filter(
+                                                                                (
+                                                                                    img
+                                                                                ) =>
+                                                                                    img.imagetype.split(
+                                                                                        '_'
+                                                                                    )[0] ===
+                                                                                    product.recommendedproductid
+                                                                            )[0]
+                                                                                .cdnid
+                                                                        }
+                                                                    />
+                                                                )}
+                                                                {imgData.filter(
+                                                                    (img) =>
+                                                                        img.imagetype.split(
+                                                                            '_'
+                                                                        )[0] ===
+                                                                        product.recommendedproductid
+                                                                ).length ===
+                                                                    0 && (
+                                                                    <Image
+                                                                        imgSrc={
+                                                                            placeholderImg
+                                                                        }
+                                                                        isPlaceholder={
+                                                                            true
+                                                                        }
+                                                                        ratio="aspect-card"
+                                                                        className="h-48"
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="w-[1%] p-4 align-top text-sm">
+                                                            <div className="inline-flex w-full items-center justify-end gap-4 text-sm">
+                                                                <Button
+                                                                    iconName={
+                                                                        'trash'
+                                                                    }
+                                                                    type={
+                                                                        'link'
+                                                                    }
+                                                                    onClick={() =>
+                                                                        handleDeleteRelatedProduct(
+                                                                            product.recommendedproductid
+                                                                        )
+                                                                    }
+                                                                />
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
                             <div>
                                 <p className="block text-sm font-medium text-gray-900">
                                     Categories

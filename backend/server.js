@@ -6,6 +6,7 @@ const imageRoutes = require('./routes/imageRoutes');
 const identityRoutes = require('./routes/identityRoutes');
 const wishlistRoutes = require('./routes/wishlistRoutes');
 const sizeMetricRoutes = require('./routes/sizeMetricRoutes');
+const announcementRoutes = require('./routes/announcementRoutes');
 const errorHandler = require('./middlewares/errorHandler.js');
 
 const app = express();
@@ -22,8 +23,9 @@ app.use('/api', productRoutes);
 app.use('/api', categoryRoutes);
 app.use('/api', imageRoutes);
 app.use('/api', identityRoutes);
-app.use('/api', wishlistRoutes)
-app.use('/api', sizeMetricRoutes)
+app.use('/api', wishlistRoutes);
+app.use('/api', sizeMetricRoutes);
+app.use('/api', announcementRoutes);
 
 // Error handling middleware
 app.use(errorHandler);

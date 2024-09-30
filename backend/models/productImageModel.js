@@ -61,6 +61,6 @@ Image.hasOne(ProductImage, {
     foreignKey: 'imageid',
     onDelete: 'CASCADE'
 });
-ProductImage.belongsTo(Image, { foreignKey: 'imageid' });
+ProductImage.belongsTo(Image, { foreignKey: 'imageid', as: 'Image' });
 
 module.exports = ProductImage;
