@@ -8,8 +8,5 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
-  },
-  "dependencies": {
-    "csv-parser": "^3.0.0"
   }
 }
